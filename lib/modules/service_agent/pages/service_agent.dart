@@ -292,13 +292,48 @@ class ServiceAgentScreen extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            if (appState.currentToken != null) _buildCurrentTokenInfo(appState),
+            if (appState.currentToken != null)
+              _buildCurrentTokenInfo(appState)
+            else
+              _buildEmptyState(context, appState),
             const SizedBox(height: 28),
             _buildActionButtons(context, appState),
             const SizedBox(height: 28),
             _buildHistoryPanel(appState),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, ServiceAgent appState) {
+    return Container(
+      padding: const EdgeInsets.all(48),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.playlist_add_check_circle_outlined,
+            size: 80,
+            color: Colors.grey[300],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            appState.queue.isEmpty
+                ? 'No tokens in queue'
+                : 'Click "Call Next" to serve the next visitor',
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -429,18 +464,17 @@ class ServiceAgentScreen extends StatelessWidget {
             Icons.play_arrow_rounded,
             const Color(0xFF10B981),
             () => context.read<ServiceAgentCubit>().callNext(),
-            enabled: appState.queue.isNotEmpty || appState.currentToken != null,
+            enabled: appState.queue.isNotEmpty && appState.currentToken == null,
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: _buildActionButton(
-            appState.isPaused ? 'Resume' : 'Pause',
-            appState.isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
-            appState.isPaused
-                ? const Color(0xFFF59E0B)
-                : const Color(0xFF6B7280),
-            () => context.read<ServiceAgentCubit>().togglePause(),
+            'Complete',
+            Icons.check_circle_outline_rounded,
+            const Color(0xFF2563EB),
+            () => context.read<ServiceAgentCubit>().completeService(),
+            enabled: appState.currentToken != null,
           ),
         ),
         const SizedBox(width: 16),

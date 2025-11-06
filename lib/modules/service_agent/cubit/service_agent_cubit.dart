@@ -51,7 +51,17 @@ class ServiceAgentCubit extends Cubit<ServiceAgent> {
       );
 
   void callNext() {
-    // Complete current token if exists
+    // Only call next if there's a token in queue and no current token
+    if (state.queue.isNotEmpty && state.currentToken == null) {
+      final nextToken = state.queue.first;
+      final updatedQueue = List<Token>.from(state.queue)..removeAt(0);
+
+      emit(state.copyWith(currentToken: nextToken, queue: updatedQueue));
+    }
+  }
+
+  void completeService() {
+    // Complete current token and return to initial state
     if (state.currentToken != null) {
       final completedHistory = ServiceHistory(
         token: state.currentToken!.id,
@@ -66,34 +76,8 @@ class ServiceAgentCubit extends Cubit<ServiceAgent> {
         updatedHistory.removeLast();
       }
 
-      // Call next token
-      if (state.queue.isNotEmpty) {
-        final nextToken = state.queue.first;
-        final updatedQueue = List<Token>.from(state.queue)..removeAt(0);
-
-        emit(
-          state.copyWith(
-            currentToken: nextToken,
-            queue: updatedQueue,
-            history: updatedHistory,
-          ),
-        );
-      } else {
-        // No more tokens in queue
-        emit(state.copyWith(currentToken: null, history: updatedHistory));
-      }
-    } else {
-      // No current token, just get the next one
-      if (state.queue.isNotEmpty) {
-        final nextToken = state.queue.first;
-        final updatedQueue = List<Token>.from(state.queue)..removeAt(0);
-
-        emit(state.copyWith(currentToken: nextToken, queue: updatedQueue));
-      }
+      // Clear current token (return to initial state)
+      emit(state.copyWith(currentToken: null, history: updatedHistory));
     }
-  }
-
-  void togglePause() {
-    emit(state.copyWith(isPaused: !state.isPaused));
   }
 }
