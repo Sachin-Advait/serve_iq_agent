@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:servelq_agent/cubit/localization_cubit.dart';
+import 'package:servelq_agent/configs/lang/cubit/localization_cubit.dart';
 import 'package:servelq_agent/models/display_token.dart';
 import 'package:servelq_agent/modules/tv_display/cubit/tv_display_cubit.dart';
 
