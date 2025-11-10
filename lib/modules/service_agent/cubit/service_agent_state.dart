@@ -1,21 +1,31 @@
 part of 'service_agent_cubit.dart';
 
-class ServiceAgent {
-  final Token? currentToken;
-  final List<Token> queue;
-  final List<ServiceHistory> history;
+abstract class ServiceAgentState {
+  const ServiceAgentState();
+}
 
-  ServiceAgent({this.currentToken, required this.queue, required this.history});
+class ServiceAgentInitial extends ServiceAgentState {}
 
-  ServiceAgent copyWith({
-    Token? currentToken,
-    List<Token>? queue,
-    List<ServiceHistory>? history,
-  }) {
-    return ServiceAgent(
-      currentToken: currentToken,
-      queue: queue ?? this.queue,
-      history: history ?? this.history,
-    );
-  }
+class ServiceAgentLoading extends ServiceAgentState {}
+
+class ServiceAgentLoaded extends ServiceAgentState {
+  final List<TokenModel> queue;
+  final List<ServiceHistory> recentServices;
+  final TokenModel? currentToken;
+  final CounterModel counter;
+  final List<CounterModel> allCounter;
+
+  const ServiceAgentLoaded({
+    required this.queue,
+    required this.recentServices,
+    this.currentToken,
+    required this.counter,
+    required this.allCounter,
+  });
+}
+
+class ServiceAgentError extends ServiceAgentState {
+  final String message;
+
+  const ServiceAgentError(this.message);
 }

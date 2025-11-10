@@ -25,6 +25,8 @@ class AuthRepository {
           UserModel user = UserModel.fromJson(userData);
           SessionManager.saveUsername(user.name);
           SessionManager.saveToken(user.id);
+          SessionManager.savebranch(user.branchId);
+          SessionManager.saveCounter(user.counterId);
           return user;
         }
       }

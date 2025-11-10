@@ -1,15 +1,22 @@
 class ServiceHistory {
   final String token;
-  final String visitor;
+  final String civilId;
   final String service;
-  final String time;
-  final int rating;
+  final int time;
 
   ServiceHistory({
     required this.token,
-    required this.visitor,
+    required this.civilId,
     required this.service,
     required this.time,
-    required this.rating,
   });
+
+  factory ServiceHistory.fromJson(Map<String, dynamic> json) {
+    return ServiceHistory(
+      token: json['token'] ?? '',
+      civilId: json['civilId'] ?? '',
+      service: json['serviceName'] ?? '',
+      time: json['timeTakenInMinutes'] ?? 0,
+    );
+  }
 }

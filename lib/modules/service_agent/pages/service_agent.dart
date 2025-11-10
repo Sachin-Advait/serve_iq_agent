@@ -1,39 +1,143 @@
-// Service Agent Screen
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:servelq_agent/configs/flutter_toast.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
+import 'package:servelq_agent/modules/service_agent/pages/transfer_dialog.dart';
+import 'package:servelq_agent/services/session_manager.dart';
 
-class ServiceAgentScreen extends StatelessWidget {
+class ServiceAgentScreen extends StatefulWidget {
   const ServiceAgentScreen({super.key});
 
   @override
+  State<ServiceAgentScreen> createState() => _ServiceAgentScreenState();
+}
+
+class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load initial data when screen starts
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ServiceAgentCubit>().loadInitialData();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ServiceAgentCubit, ServiceAgent>(
-      builder: (context, appState) {
-        return Scaffold(
-          backgroundColor: const Color(0xFFF8F9FA),
-          body: Column(
-            children: [
-              _buildHeader(context),
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(width: 320, child: _buildLeftPane(appState)),
-                    Expanded(child: _buildMainPanel(context, appState)),
-                  ],
-                ),
-              ),
-              _buildBottomBar(context),
-            ],
-          ),
-        );
+    return BlocListener<ServiceAgentCubit, ServiceAgentState>(
+      listener: (context, state) {
+        if (state is ServiceAgentError) {
+          flutterToast(message: state.message);
+        }
       },
+      child: BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
+        builder: (context, state) {
+          if (state is ServiceAgentInitial || state is ServiceAgentLoading) {
+            return _buildLoadingScreen();
+          }
+
+          if (state is ServiceAgentLoaded) {
+            return _buildLoadedScreen(context, state);
+          }
+
+          if (state is ServiceAgentError) {
+            return _buildErrorScreen(context, state);
+          }
+
+          return _buildLoadingScreen();
+        },
+      ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildLoadingScreen() {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(color: Color(0xFF2563EB)),
+            const SizedBox(height: 20),
+            Text(
+              'Loading Agent Dashboard...',
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorScreen(BuildContext context, ServiceAgentError state) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+            const SizedBox(height: 20),
+            Text(
+              'Failed to load data',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey[800],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              state.message,
+              style: TextStyle(color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                context.read<ServiceAgentCubit>().loadInitialData();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2563EB),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+              ),
+              child: const Text('Retry', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadedScreen(BuildContext context, ServiceAgentLoaded state) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      body: Column(
+        children: [
+          _buildHeader(context, state),
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(width: 320, child: _buildLeftPane(state)),
+                Expanded(child: _buildMainPanel(context, state)),
+              ],
+            ),
+          ),
+          _buildBottomBar(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, ServiceAgentLoaded state) {
+    final branch = state.counter;
+    final displayText = '${branch.name} - ${branch.code}';
+
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -57,9 +161,9 @@ class ServiceAgentScreen extends StatelessWidget {
                 child: Image.asset("assets/images/logo.png"),
               ),
               const SizedBox(width: 16),
-              const Text(
-                'Muscat Branch - 5',
-                style: TextStyle(
+              Text(
+                displayText,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
@@ -79,10 +183,10 @@ class ServiceAgentScreen extends StatelessWidget {
                   color: Colors.white.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     Text(
-                      'Agent: Ahmed',
+                      'Agent: ${SessionManager.getUsername()}',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
@@ -101,6 +205,13 @@ class ServiceAgentScreen extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                onPressed: () {
+                  context.read<ServiceAgentCubit>().refreshData();
+                },
+                iconSize: 24,
+              ),
+              IconButton(
                 icon: const Icon(
                   Icons.notifications_outlined,
                   color: Colors.white,
@@ -115,7 +226,7 @@ class ServiceAgentScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLeftPane(ServiceAgent appState) {
+  Widget _buildLeftPane(ServiceAgentLoaded state) {
     return Container(
       color: Colors.white,
       child: Column(
@@ -128,19 +239,20 @@ class ServiceAgentScreen extends StatelessWidget {
                 children: [
                   _buildQueueCard(
                     'Total Waiting',
-                    appState.queue.length.toString(),
+                    state.queue.length.toString(),
                     Colors.blue,
                     Icons.people_outline,
                   ),
                   const SizedBox(height: 16),
                   _buildQueueCard(
                     'Avg Wait Time',
-                    '03:45',
+                    // _calculateAverageWaitTime(state.queue), ""
+                    "5",
                     Colors.teal,
                     Icons.access_time,
                   ),
                   const SizedBox(height: 24),
-                  if (appState.currentToken != null)
+                  if (state.currentToken != null)
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
@@ -171,7 +283,7 @@ class ServiceAgentScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            appState.currentToken!.id,
+                            state.currentToken!.token,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 40,
@@ -193,7 +305,7 @@ class ServiceAgentScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  ...appState.queue
+                  ...state.queue
                       .take(3)
                       .map(
                         (token) => Container(
@@ -211,7 +323,7 @@ class ServiceAgentScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                token.id,
+                                token.token,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
@@ -220,7 +332,7 @@ class ServiceAgentScreen extends StatelessWidget {
                               ),
                               Flexible(
                                 child: Text(
-                                  token.service,
+                                  token.serviceName,
                                   style: const TextStyle(
                                     fontSize: 11,
                                     color: Color(0xFF6B7280),
@@ -241,6 +353,23 @@ class ServiceAgentScreen extends StatelessWidget {
       ),
     );
   }
+
+  // String _calculateAverageWaitTime(List<TokenModel> queue) {
+  //   if (queue.isEmpty) return '00:00';
+
+  //   final totalWaitTime = queue.fold(
+  //     0,
+  //     (sum, token) => sum + int.parse(token.formattedWaitTime),
+  //   );
+  //   final averageMinutes = totalWaitTime ~/ queue.length;
+
+  //   final hours = averageMinutes ~/ 60;
+  //   final minutes = averageMinutes % 60;
+
+  //   return hours > 0
+  //       ? '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}'
+  //       : '${minutes.toString().padLeft(2, '0')} min';
+  // }
 
   Widget _buildQueueCard(
     String label,
@@ -285,28 +414,28 @@ class ServiceAgentScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMainPanel(BuildContext context, ServiceAgent appState) {
+  Widget _buildMainPanel(BuildContext context, ServiceAgentLoaded state) {
     return Container(
       color: const Color(0xFFF8F9FA),
       padding: const EdgeInsets.all(28),
       child: SingleChildScrollView(
         child: Column(
           children: [
-            if (appState.currentToken != null)
-              _buildCurrentTokenInfo(appState)
+            if (state.currentToken != null)
+              _buildCurrentTokenInfo(state)
             else
-              _buildEmptyState(context, appState),
+              _buildEmptyState(context, state),
             const SizedBox(height: 28),
-            _buildActionButtons(context, appState),
+            _buildActionButtons(context, state),
             const SizedBox(height: 28),
-            _buildHistoryPanel(appState),
+            _buildHistoryPanel(state),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, ServiceAgent appState) {
+  Widget _buildEmptyState(BuildContext context, ServiceAgentLoaded state) {
     return Container(
       padding: const EdgeInsets.all(48),
       decoration: BoxDecoration(
@@ -324,7 +453,7 @@ class ServiceAgentScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            appState.queue.isEmpty
+            state.queue.isEmpty
                 ? 'No tokens in queue'
                 : 'Click "Call Next" to serve the next visitor',
             style: TextStyle(
@@ -338,8 +467,8 @@ class ServiceAgentScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCurrentTokenInfo(ServiceAgent appState) {
-    final token = appState.currentToken!;
+  Widget _buildCurrentTokenInfo(ServiceAgentLoaded state) {
+    final token = state.currentToken!;
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
@@ -370,8 +499,8 @@ class ServiceAgentScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildInfoField(
-                  'Visitor Name',
-                  token.visitor,
+                  'Civil Id',
+                  token.civilId,
                   Icons.person_outline,
                 ),
               ),
@@ -379,7 +508,7 @@ class ServiceAgentScreen extends StatelessWidget {
               Expanded(
                 child: _buildInfoField(
                   'Service Type',
-                  token.service,
+                  token.serviceName,
                   Icons.medical_services_outlined,
                 ),
               ),
@@ -455,7 +584,7 @@ class ServiceAgentScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, ServiceAgent appState) {
+  Widget _buildActionButtons(BuildContext context, ServiceAgentLoaded state) {
     return Row(
       children: [
         Expanded(
@@ -464,7 +593,7 @@ class ServiceAgentScreen extends StatelessWidget {
             Icons.play_arrow_rounded,
             const Color(0xFF10B981),
             () => context.read<ServiceAgentCubit>().callNext(),
-            enabled: appState.queue.isNotEmpty && appState.currentToken == null,
+            enabled: state.queue.isNotEmpty && state.currentToken == null,
           ),
         ),
         const SizedBox(width: 16),
@@ -474,7 +603,7 @@ class ServiceAgentScreen extends StatelessWidget {
             Icons.check_circle_outline_rounded,
             const Color(0xFF2563EB),
             () => context.read<ServiceAgentCubit>().completeService(),
-            enabled: appState.currentToken != null,
+            enabled: state.currentToken != null,
           ),
         ),
         const SizedBox(width: 16),
@@ -483,8 +612,8 @@ class ServiceAgentScreen extends StatelessWidget {
             'Recall',
             Icons.refresh_rounded,
             const Color(0xFFF59E0B),
-            () {},
-            enabled: appState.currentToken != null,
+            () => context.read<ServiceAgentCubit>().callNext(),
+            enabled: state.currentToken != null,
           ),
         ),
         const SizedBox(width: 16),
@@ -493,8 +622,19 @@ class ServiceAgentScreen extends StatelessWidget {
             'Transfer',
             Icons.arrow_forward_rounded,
             const Color(0xFF8B5CF6),
-            () {},
-            enabled: appState.currentToken != null,
+            () {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext dialogContext) {
+                  return BlocProvider.value(
+                    value: context.read<ServiceAgentCubit>(),
+                    child: TransferDialog(state: state),
+                  );
+                },
+              );
+            },
+            enabled: state.currentToken != null,
           ),
         ),
       ],
@@ -540,7 +680,7 @@ class ServiceAgentScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHistoryPanel(ServiceAgent appState) {
+  Widget _buildHistoryPanel(ServiceAgentLoaded state) {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
@@ -567,8 +707,8 @@ class ServiceAgentScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          ...appState.history.map(
-            (h) => Container(
+          ...state.recentServices.map(
+            (history) => Container(
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
@@ -592,7 +732,7 @@ class ServiceAgentScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            h.token,
+                            history.token,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF2563EB),
@@ -606,7 +746,7 @@ class ServiceAgentScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                h.visitor,
+                                history.civilId,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
@@ -615,7 +755,7 @@ class ServiceAgentScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                h.service,
+                                history.service,
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: Color(0xFF6B7280),
@@ -637,7 +777,7 @@ class ServiceAgentScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      '${h.time} mins',
+                      '${history.time} mins',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF10B981),

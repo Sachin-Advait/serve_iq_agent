@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servelq_agent/configs/get_it.dart';
 import 'package:servelq_agent/configs/lang/cubit/localization_cubit.dart';
-import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/modules/tv_display/cubit/tv_display_cubit.dart';
 import 'package:servelq_agent/routes/routes.dart';
 
@@ -15,6 +15,7 @@ Future<void> main() async {
 
   setUrlStrategy(PathUrlStrategy());
   GoRouter.optionURLReflectsImperativeAPIs = true;
+  GetStorage.init();
 
   getItSetup();
   runApp(const MyApp());
@@ -28,7 +29,6 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => LocalizationCubit()),
-        BlocProvider(create: (_) => ServiceAgentCubit()),
         BlocProvider(create: (_) => TVDisplayCubit()),
       ],
       child: BlocBuilder<LocalizationCubit, LocalizationState>(

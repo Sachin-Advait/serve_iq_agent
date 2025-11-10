@@ -5,6 +5,7 @@ import 'package:servelq_agent/configs/get_it.dart';
 import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
 import 'package:servelq_agent/modules/login/pages/login.dart';
 import 'package:servelq_agent/modules/login/repository/auth_repo.dart';
+import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/modules/service_agent/pages/service_agent.dart';
 import 'package:servelq_agent/modules/tv_display/pages/tv_display.dart';
 
@@ -21,7 +22,10 @@ class AppRoutes {
       ),
       GoRoute(
         path: '/agent',
-        builder: (context, state) => const ServiceAgentScreen(),
+        builder: (_, state) => BlocProvider(
+          create: (context) => getIt<ServiceAgentCubit>(),
+          child: const ServiceAgentScreen(),
+        ),
       ),
       GoRoute(
         path: '/display',

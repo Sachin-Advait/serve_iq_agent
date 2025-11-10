@@ -1,83 +1,112 @@
 import 'package:bloc/bloc.dart';
+import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
-import 'package:servelq_agent/models/token.dart';
+import 'package:servelq_agent/models/token_model.dart';
+import 'package:servelq_agent/modules/service_agent/repository/agent_repo.dart';
 
 part 'service_agent_state.dart';
 
-class ServiceAgentCubit extends Cubit<ServiceAgent> {
-  ServiceAgentCubit()
-    : super(
-        ServiceAgent(
-          queue: [
-            Token(
-              id: 'A106',
-              visitor: 'Ahmed Al Balushi',
-              service: 'Pension Inquiry',
-              waitTime: '05:20',
-              type: 'appointment',
-            ),
-            Token(
-              id: 'A107',
-              visitor: 'Sara Al Rashdi',
-              service: 'Contribution Update',
-              waitTime: '06:45',
-              type: 'walkin',
-            ),
-            Token(
-              id: 'B201',
-              visitor: 'Mohammed Al Habsi',
-              service: 'Disability Pension',
-              waitTime: '08:10',
-              type: 'walkin',
-            ),
-          ],
-          history: [
-            ServiceHistory(
-              token: 'A104',
-              visitor: 'Khalid Ahmed',
-              service: 'Pension Renewal',
-              time: '04:30',
-              rating: 5,
-            ),
-            ServiceHistory(
-              token: 'A103',
-              visitor: 'Aisha Said',
-              service: 'Certificate Request',
-              time: '03:15',
-              rating: 4,
-            ),
-          ],
+class ServiceAgentCubit extends Cubit<ServiceAgentState> {
+  final AgentRepository agentRepository;
+
+  ServiceAgentCubit(this.agentRepository) : super(ServiceAgentInitial());
+
+  Future<void> loadInitialData() async {
+    try {
+      emit(ServiceAgentLoading());
+
+      final counterFuture = agentRepository.getCounter();
+      final queueFuture = agentRepository.getQueue();
+      final recentServicesFuture = agentRepository.getRecentServices();
+      final allCounterFuture = agentRepository.getAllCounters();
+
+      final results = await Future.wait([
+        counterFuture,
+        queueFuture,
+        recentServicesFuture,
+        allCounterFuture,
+      ]);
+
+      final counter = results[0] as CounterModel;
+      final queue = results[1] as List<TokenModel>;
+      final recentServices = results[2] as List<ServiceHistory>;
+      final allCounter = results[3] as List<CounterModel>;
+
+      emit(
+        ServiceAgentLoaded(
+          counter: counter,
+          queue: queue,
+          recentServices: recentServices,
+          currentToken: null,
+          allCounter: allCounter,
         ),
       );
-
-  void callNext() {
-    // Only call next if there's a token in queue and no current token
-    if (state.queue.isNotEmpty && state.currentToken == null) {
-      final nextToken = state.queue.first;
-      final updatedQueue = List<Token>.from(state.queue)..removeAt(0);
-
-      emit(state.copyWith(currentToken: nextToken, queue: updatedQueue));
+    } catch (e) {
+      emit(ServiceAgentError(e.toString()));
     }
   }
 
-  void completeService() {
-    // Complete current token and return to initial state
-    if (state.currentToken != null) {
-      final completedHistory = ServiceHistory(
-        token: state.currentToken!.id,
-        visitor: state.currentToken!.visitor,
-        service: state.currentToken!.service,
-        time: state.currentToken!.waitTime,
-        rating: 5, // Default rating
-      );
+  Future<void> callNext() async {
+    try {
+      final currentState = state;
+      if (currentState is! ServiceAgentLoaded) return;
 
-      final updatedHistory = [completedHistory, ...state.history];
-      if (updatedHistory.length > 10) {
-        updatedHistory.removeLast();
+      // Call next token
+      final nextToken = await agentRepository.callNext();
+
+      // Reload queue after calling next
+      final updatedQueue = await agentRepository.getQueue();
+
+      emit(
+        ServiceAgentLoaded(
+          counter: currentState.counter,
+          queue: updatedQueue,
+          recentServices: currentState.recentServices,
+          currentToken: nextToken,
+          allCounter: currentState.allCounter,
+        ),
+      );
+    } catch (e) {
+      emit(ServiceAgentError(e.toString()));
+      // Reload to recover state
+      loadInitialData();
+    }
+  }
+
+  Future<void> completeService() async {
+    try {
+      final currentState = state;
+      if (currentState is! ServiceAgentLoaded ||
+          currentState.currentToken == null) {
+        return;
       }
 
-      // Clear current token (return to initial state)
-      emit(state.copyWith(currentToken: null, history: updatedHistory));
+      final tokenId = currentState.currentToken!.id;
+
+      // Complete the current service
+      await agentRepository.completeService(tokenId);
+
+      // Reload queue and recent services
+      final updatedQueue = await agentRepository.getQueue();
+      final updatedRecentServices = await agentRepository.getRecentServices();
+
+      emit(
+        ServiceAgentLoaded(
+          counter: currentState.counter,
+          queue: updatedQueue,
+          recentServices: updatedRecentServices,
+          currentToken: null,
+          allCounter: currentState.allCounter,
+        ),
+      );
+    } catch (e) {
+      emit(ServiceAgentError(e.toString()));
+      // Reload to recover state
+      loadInitialData();
     }
+  }
+
+  Future<void> refreshData() async {
+    await loadInitialData();
   }
 }

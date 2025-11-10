@@ -4,6 +4,8 @@ import 'package:get_it/get_it.dart';
 import 'package:servelq_agent/configs/api_constants.dart';
 import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
 import 'package:servelq_agent/modules/login/repository/auth_repo.dart';
+import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
+import 'package:servelq_agent/modules/service_agent/repository/agent_repo.dart';
 import 'package:servelq_agent/services/api_client.dart';
 
 final getIt = GetIt.instance;
@@ -56,6 +58,15 @@ void getItSetup() {
   );
 
   getIt.registerFactory<LoginBloc>(() => LoginBloc(getIt<AuthRepository>()));
+
+  // Add these registrations
+  getIt.registerLazySingleton<AgentRepository>(
+    () => AgentRepository(getIt<ApiClient>()),
+  );
+
+  getIt.registerFactory<ServiceAgentCubit>(
+    () => ServiceAgentCubit(getIt<AgentRepository>()),
+  );
 }
 
 void resetGetIt() {
