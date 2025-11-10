@@ -8,5 +8,7 @@
   "counter": "Counter",
   "now_serving": "Now Serving",
   "service": "Service",
-  "upcoming_tokens": "Upcoming Tokens"
+  "upcoming_tokens": "Upcoming Tokens",
+  "no_active_services": "No active services",
+  "no_upcoming_tokens": "No upcoming tokens"
 }

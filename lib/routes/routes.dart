@@ -7,6 +7,7 @@ import 'package:servelq_agent/modules/login/pages/login.dart';
 import 'package:servelq_agent/modules/login/repository/auth_repo.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/modules/service_agent/pages/service_agent.dart';
+import 'package:servelq_agent/modules/tv_display/cubit/tv_display_cubit.dart';
 import 'package:servelq_agent/modules/tv_display/pages/tv_display.dart';
 
 class AppRoutes {
@@ -29,7 +30,10 @@ class AppRoutes {
       ),
       GoRoute(
         path: '/display',
-        builder: (context, state) => const TVDisplayScreen(),
+        builder: (context, state) => BlocProvider(
+          create: (context) => getIt<TVDisplayCubit>(),
+          child: const TVDisplayScreen(),
+        ),
       ),
     ],
   );

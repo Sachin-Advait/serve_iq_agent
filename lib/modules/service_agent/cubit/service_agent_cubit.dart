@@ -46,6 +46,22 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
     }
   }
 
+  Future<void> queueAPI() async {
+    final queue = await agentRepository.getQueue();
+    final currentState = state;
+    if (currentState is! ServiceAgentLoaded) return;
+
+    emit(
+      ServiceAgentLoaded(
+        counter: currentState.counter,
+        queue: queue,
+        recentServices: currentState.recentServices,
+        currentToken: currentState.currentToken,
+        allCounter: currentState.allCounter,
+      ),
+    );
+  }
+
   Future<void> callNext() async {
     try {
       final currentState = state;
@@ -96,6 +112,39 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
           queue: updatedQueue,
           recentServices: updatedRecentServices,
           currentToken: null,
+          allCounter: currentState.allCounter,
+        ),
+      );
+    } catch (e) {
+      emit(ServiceAgentError(e.toString()));
+      // Reload to recover state
+      loadInitialData();
+    }
+  }
+
+  Future<void> recallCurrentToken() async {
+    try {
+      final currentState = state;
+      if (currentState is! ServiceAgentLoaded ||
+          currentState.currentToken == null) {
+        return;
+      }
+
+      final tokenId = currentState.currentToken!.id;
+
+      // Call the recall API from repository
+      final recalledToken = await agentRepository.recallToken(tokenId);
+
+      // Reload queue and recent services
+      final updatedQueue = await agentRepository.getQueue();
+      final updatedRecentServices = await agentRepository.getRecentServices();
+
+      emit(
+        ServiceAgentLoaded(
+          counter: currentState.counter,
+          queue: updatedQueue,
+          recentServices: updatedRecentServices,
+          currentToken: recalledToken,
           allCounter: currentState.allCounter,
         ),
       );

@@ -1,29 +1,29 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 part of 'tv_display_cubit.dart';
 
-class TVDisplayState extends Equatable {
-  final List<DisplayToken> displayedTokens;
-  final List<DisplayToken> latestCall;
-  final List<Token> queue;
+abstract class TVDisplayState {
+  const TVDisplayState();
+}
 
-  const TVDisplayState({
-    required this.displayedTokens,
-    required this.latestCall,
-    required this.queue,
+class TVDisplayInitial extends TVDisplayState {}
+
+class TVDisplayLoading extends TVDisplayState {}
+
+class TVDisplayLoaded extends TVDisplayState {
+  final List<DisplayToken> latestCalls;
+  final List<DisplayToken> nowServing;
+  final List<String> upcomingTokens;
+  final String? branchName;
+
+  const TVDisplayLoaded({
+    required this.latestCalls,
+    required this.nowServing,
+    required this.upcomingTokens,
+    this.branchName,
   });
+}
 
-  TVDisplayState copyWith({
-    List<DisplayToken>? displayedTokens,
-    List<DisplayToken>? latestCall,
-    List<Token>? queue,
-  }) {
-    return TVDisplayState(
-      displayedTokens: displayedTokens ?? this.displayedTokens,
-      latestCall: latestCall ?? this.latestCall,
-      queue: queue ?? this.queue,
-    );
-  }
+class TVDisplayError extends TVDisplayState {
+  final String message;
 
-  @override
-  List<Object?> get props => [displayedTokens, latestCall, queue];
+  const TVDisplayError(this.message);
 }

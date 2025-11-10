@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -14,13 +16,34 @@ class ServiceAgentScreen extends StatefulWidget {
 }
 
 class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
+  Timer? _callNextTimer;
+
   @override
   void initState() {
     super.initState();
     // Load initial data when screen starts
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ServiceAgentCubit>().loadInitialData();
+      final cubit = context.read<ServiceAgentCubit>();
+
+      _startAutoCallNext(cubit);
     });
+  }
+
+  void _startAutoCallNext(ServiceAgentCubit cubit) {
+    _callNextTimer?.cancel();
+    _callNextTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      final currentState = cubit.state;
+      if (currentState is ServiceAgentLoaded) {
+        await cubit.queueAPI();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _callNextTimer?.cancel(); // Cancel timer when widget is disposed
+    super.dispose();
   }
 
   @override
@@ -612,7 +635,7 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
             'Recall',
             Icons.refresh_rounded,
             const Color(0xFFF59E0B),
-            () => context.read<ServiceAgentCubit>().callNext(),
+            () => context.read<ServiceAgentCubit>().recallCurrentToken(),
             enabled: state.currentToken != null,
           ),
         ),

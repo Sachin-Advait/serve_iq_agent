@@ -40,7 +40,7 @@ class SessionManager {
     debugPrint("Branch saved ==> $branch.");
   }
 
-  static String getbranch() {
+  static String getBranch() {
     String branch = _userStorage.read<String?>(_branch) ?? '';
     debugPrint("Branch Id ==> $branch.");
     return branch;

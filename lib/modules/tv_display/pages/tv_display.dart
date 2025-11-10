@@ -1,10 +1,12 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:servelq_agent/configs/lang/cubit/localization_cubit.dart';
 import 'package:servelq_agent/models/display_token.dart';
 import 'package:servelq_agent/modules/tv_display/cubit/tv_display_cubit.dart';
+import 'package:servelq_agent/services/session_manager.dart';
 
 class TVDisplayScreen extends StatefulWidget {
   const TVDisplayScreen({super.key});
@@ -15,6 +17,7 @@ class TVDisplayScreen extends StatefulWidget {
 
 class _TVDisplayScreenState extends State<TVDisplayScreen> {
   late Timer _timer;
+  late Timer _dataRefreshTimer;
   DateTime _currentTime = DateTime.now();
 
   @override
@@ -28,28 +31,45 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
       });
     });
 
-    // Initialize localization
+    // Initialize data refresh timer (every 10 seconds)
+    _dataRefreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      _refreshData();
+    });
+
+    // Load initial data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<LocalizationCubit>().initialize();
+      _refreshData();
     });
+  }
+
+  void _refreshData() {
+    final branchId = SessionManager.getBranch();
+    context.read<TVDisplayCubit>().loadDisplayData(branchId);
   }
 
   @override
   void dispose() {
     _timer.cancel();
+    _dataRefreshTimer.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TVDisplayCubit, TVDisplayState>(
-      builder: (context, tvState) {
-        return BlocBuilder<LocalizationCubit, LocalizationState>(
-          builder: (context, localizationState) {
-            return _buildScreen(context, tvState, localizationState);
-          },
-        );
+    return BlocListener<TVDisplayCubit, TVDisplayState>(
+      listener: (context, state) {
+        // Handle errors silently or show subtle notification
       },
+      child: BlocBuilder<TVDisplayCubit, TVDisplayState>(
+        builder: (context, tvState) {
+          return BlocBuilder<LocalizationCubit, LocalizationState>(
+            builder: (context, localizationState) {
+              return _buildScreen(context, tvState, localizationState);
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -71,14 +91,15 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
           textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
           child: Column(
             children: [
-              _buildTopBar(context, isRTL),
+              _buildTopBar(context, tvState, isRTL),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(32),
                   child: Column(
                     children: [
-                      if (tvState.latestCall.isNotEmpty)
-                        _buildLatestCalls(tvState.latestCall, isRTL),
+                      if (tvState is TVDisplayLoaded &&
+                          tvState.latestCalls.isNotEmpty)
+                        _buildLatestCalls(tvState.latestCalls, isRTL),
                       const SizedBox(height: 32),
                       // Row with table on left, upcoming on right
                       Row(
@@ -103,7 +124,17 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
     );
   }
 
-  Widget _buildTopBar(BuildContext context, bool isRTL) {
+  Widget _buildTopBar(
+    BuildContext context,
+    TVDisplayState tvState,
+    bool isRTL,
+  ) {
+    String branchName = 'Branch Muscat';
+
+    if (tvState is TVDisplayLoaded && tvState.branchName != null) {
+      branchName = tvState.branchName!;
+    }
+
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -127,7 +158,7 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
               ),
               const SizedBox(width: 16),
               Text(
-                context.tr('branch_muscat'),
+                branchName,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 28,
@@ -200,14 +231,16 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
   Widget _buildLatestCalls(List<DisplayToken> calls, bool isRTL) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: calls.take(2).map((call) {
+      children: calls.take(4).map((call) {
         return Expanded(
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 10),
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16), // Reduced from 20
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(
+                16,
+              ), // Slightly smaller radius
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.3),
@@ -223,11 +256,11 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
                   context.tr('now_calling'),
                   style: const TextStyle(
                     color: Colors.black87,
-                    fontSize: 20,
+                    fontSize: 16, // Reduced from 20
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8), // Reduced from 12
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -237,40 +270,40 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
                           context.tr('token'),
                           style: const TextStyle(
                             color: Colors.black54,
-                            fontSize: 14,
+                            fontSize: 12, // Reduced from 14
                           ),
                         ),
                         Text(
                           call.token,
                           style: const TextStyle(
                             color: Colors.blueAccent,
-                            fontSize: 42,
+                            fontSize: 32, // Reduced from 42
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(width: 30),
+                    const SizedBox(width: 20), // Reduced from 30
                     Icon(
                       isRTL ? Icons.arrow_back : Icons.arrow_forward,
                       color: Colors.teal,
-                      size: 36,
+                      size: 28, // Reduced from 36
                     ),
-                    const SizedBox(width: 30),
+                    const SizedBox(width: 20), // Reduced from 30
                     Column(
                       children: [
                         Text(
                           context.tr('counter'),
                           style: const TextStyle(
                             color: Colors.black54,
-                            fontSize: 14,
+                            fontSize: 12, // Reduced from 14
                           ),
                         ),
                         Text(
                           call.counter,
                           style: const TextStyle(
                             color: Colors.teal,
-                            fontSize: 42,
+                            fontSize: 32, // Reduced from 42
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -278,14 +311,24 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6), // Reduced from 8
                 Text(
                   call.service,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.black87,
-                    fontSize: 16,
+                    fontSize: 14, // Reduced from 16
                     fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4), // Reduced from 8
+                Text(
+                  _formatCalledAt(call.calledAt),
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 11, // Reduced from 12
                   ),
                 ),
               ],
@@ -296,7 +339,26 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
     );
   }
 
-  Widget _buildNowServingTable(TVDisplayState appState, bool isRTL) {
+  String _formatCalledAt(DateTime calledAt) {
+    final now = DateTime.now();
+    final difference = now.difference(calledAt);
+
+    if (difference.inMinutes < 1) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} min ago';
+    } else {
+      return intl.DateFormat('HH:mm').format(calledAt);
+    }
+  }
+
+  Widget _buildNowServingTable(TVDisplayState tvState, bool isRTL) {
+    List<DisplayToken> nowServing = [];
+
+    if (tvState is TVDisplayLoaded) {
+      nowServing = tvState.nowServing;
+    }
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -317,51 +379,60 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          Table(
-            border: TableBorder.all(
-              color: Colors.grey.shade300,
-              width: 1.5,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            columnWidths: const {
-              0: FlexColumnWidth(1),
-              1: FlexColumnWidth(1.5),
-              2: FlexColumnWidth(2),
-            },
-            children: [
-              // Header row
-              TableRow(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF2563EB), Color(0xFF0D9488)],
-                  ),
-                ),
-                children: [
-                  _buildTableHeader(context.tr('counter'), isRTL),
-                  _buildTableHeader(context.tr('token'), isRTL),
-                  _buildTableHeader(context.tr('service'), isRTL),
-                ],
+          if (nowServing.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(40),
+              child: Text(
+                context.tr('no_active_services'),
+                style: const TextStyle(fontSize: 20, color: Colors.grey),
               ),
-              ...appState.displayedTokens.asMap().entries.map((entry) {
-                final index = entry.key;
-                final token = entry.value;
-                return TableRow(
-                  decoration: BoxDecoration(
-                    color: index.isEven ? Colors.grey.shade50 : Colors.white,
+            )
+          else
+            Table(
+              border: TableBorder.all(
+                color: Colors.grey.shade300,
+                width: 1.5,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              columnWidths: const {
+                0: FlexColumnWidth(1),
+                1: FlexColumnWidth(1),
+                2: FlexColumnWidth(2),
+              },
+              children: [
+                // Header row
+                TableRow(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF2563EB), Color(0xFF0D9488)],
+                    ),
                   ),
                   children: [
-                    _buildTableCell(
-                      '#${token.counter}',
-                      isCounter: true,
-                      isRTL: isRTL,
-                    ),
-                    _buildTableCell(token.token, isBold: true, isRTL: isRTL),
-                    _buildTableCell(token.service, isRTL: isRTL),
+                    _buildTableHeader(context.tr('counter'), isRTL),
+                    _buildTableHeader(context.tr('token'), isRTL),
+                    _buildTableHeader(context.tr('service'), isRTL),
                   ],
-                );
-              }),
-            ],
-          ),
+                ),
+                ...nowServing.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final token = entry.value;
+                  return TableRow(
+                    decoration: BoxDecoration(
+                      color: index.isEven ? Colors.grey.shade50 : Colors.white,
+                    ),
+                    children: [
+                      _buildTableCell(
+                        token.counter,
+                        isCounter: true,
+                        isRTL: isRTL,
+                      ),
+                      _buildTableCell(token.token, isBold: true, isRTL: isRTL),
+                      _buildTableCell(token.service, isRTL: isRTL),
+                    ],
+                  );
+                }),
+              ],
+            ),
         ],
       ),
     );
@@ -402,7 +473,13 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
     );
   }
 
-  Widget _buildQueueSummary(TVDisplayState appState, bool isRTL) {
+  Widget _buildQueueSummary(TVDisplayState tvState, bool isRTL) {
+    List<String> upcomingTokens = [];
+
+    if (tvState is TVDisplayLoaded) {
+      upcomingTokens = tvState.upcomingTokens;
+    }
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -429,25 +506,36 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          ...appState.queue.take(5).map((t) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.teal.shade50,
-                borderRadius: BorderRadius.circular(10),
-              ),
+          if (upcomingTokens.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
               child: Text(
-                t.id,
-                textAlign: isRTL ? TextAlign.right : TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 20,
-                  color: Colors.teal,
-                  fontWeight: FontWeight.w600,
-                ),
+                context.tr('no_upcoming_tokens'),
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
-            );
-          }),
+            )
+          else
+            ...upcomingTokens.take(5).map((token) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.teal.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  token,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: Colors.teal,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              );
+            }),
         ],
       ),
     );

@@ -7,7 +7,6 @@ import 'package:get_storage/get_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servelq_agent/configs/get_it.dart';
 import 'package:servelq_agent/configs/lang/cubit/localization_cubit.dart';
-import 'package:servelq_agent/modules/tv_display/cubit/tv_display_cubit.dart';
 import 'package:servelq_agent/routes/routes.dart';
 
 Future<void> main() async {
@@ -26,11 +25,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (context) => LocalizationCubit()),
-        BlocProvider(create: (_) => TVDisplayCubit()),
-      ],
+    return BlocProvider(
+      create: (context) => LocalizationCubit(),
       child: BlocBuilder<LocalizationCubit, LocalizationState>(
         builder: (context, state) {
           return MaterialApp.router(

@@ -41,7 +41,7 @@ class AgentRepository {
           token = TokenModel.fromJson(data);
 
           // Call startServing after 4 seconds
-          Future.delayed(const Duration(seconds: 4), () {
+          Future.delayed(const Duration(seconds: 10), () {
             startServing(token!.id);
           });
 
@@ -136,6 +136,33 @@ class AgentRepository {
       }
 
       throw Exception('Failed to load counters');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Recall a token by token ID
+  Future<TokenModel> recallToken(String tokenId) async {
+    try {
+      final response = await _apiClient.postApi('agent/recall/$tokenId');
+
+      if (response != null && response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map<String, dynamic>) {
+          final token = TokenModel.fromJson(data);
+
+          // Optional: automatically start serving again after recall
+          Future.delayed(const Duration(seconds: 3), () {
+            startServing(token.id);
+          });
+
+          return token;
+        } else {
+          throw Exception('Expected a token object but got a different type');
+        }
+      }
+
+      throw Exception('Failed to recall token');
     } catch (e) {
       rethrow;
     }
