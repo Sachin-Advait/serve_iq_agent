@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:servelq_agent/configs/app_colors.dart';
 import 'package:servelq_agent/configs/lang/cubit/localization_cubit.dart';
 import 'package:servelq_agent/models/display_token.dart';
 import 'package:servelq_agent/modules/tv_display/cubit/tv_display_cubit.dart';
@@ -83,8 +84,9 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue.shade50, Colors.teal.shade50],
+          image: DecorationImage(
+            image: AssetImage('assets/images/Monitor_BG.png'),
+            fit: BoxFit.cover,
           ),
         ),
         child: Directionality(
@@ -93,25 +95,30 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
             children: [
               _buildTopBar(context, tvState, isRTL),
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(32),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(35, 25, 35, 35),
                   child: Column(
                     children: [
                       if (tvState is TVDisplayLoaded &&
                           tvState.latestCalls.isNotEmpty)
                         _buildLatestCalls(tvState.latestCalls, isRTL),
-                      const SizedBox(height: 32),
-                      // Row with table on left, upcoming on right
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: _buildNowServingTable(tvState, isRTL),
-                          ),
-                          const SizedBox(width: 32),
-                          _buildQueueSummary(tvState, isRTL),
-                        ],
+                      const SizedBox(height: 30),
+                      Expanded(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 4,
+                              child: _buildNowServingTable(tvState, isRTL),
+                            ),
+                            const SizedBox(width: 40),
+                            SizedBox(
+                              width: 320,
+                              child: _buildQueueSummary(tvState, isRTL),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -129,60 +136,30 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
     TVDisplayState tvState,
     bool isRTL,
   ) {
-    String branchName = 'Branch Muscat';
-
-    if (tvState is TVDisplayLoaded && tvState.branchName != null) {
-      branchName = tvState.branchName!;
-    }
-
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF2563EB), Color(0xFF0D9488)],
-        ),
-      ),
-      padding: const EdgeInsets.all(24),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 45,
-                height: 45,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: Image.asset("assets/images/logo.png"),
-              ),
-              const SizedBox(width: 16),
-              Text(
-                branchName,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          Image.asset(
+            "assets/images/logo.png",
+            height: 80,
+            color: AppColors.white,
           ),
           Column(
-            crossAxisAlignment: isRTL
-                ? CrossAxisAlignment.start
-                : CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 intl.DateFormat('HH:mm').format(_currentTime),
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 24,
+                  fontSize: 40,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
                 _getFormattedDate(_currentTime, isRTL),
-                style: const TextStyle(color: Color(0xFFBFDBFE), fontSize: 12),
+                style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
             ],
           ),
@@ -193,7 +170,6 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
 
   String _getFormattedDate(DateTime date, bool isRTL) {
     if (isRTL) {
-      // Arabic date format
       final arabicMonths = {
         'January': 'يناير',
         'February': 'فبراير',
@@ -229,127 +205,80 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
   }
 
   Widget _buildLatestCalls(List<DisplayToken> calls, bool isRTL) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: calls.take(4).map((call) {
-        return Expanded(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 10),
-            padding: const EdgeInsets.all(16), // Reduced from 20
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(
-                16,
-              ), // Slightly smaller radius
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+    return SizedBox(
+      height: 200,
+      child: Row(
+        children: calls.take(4).map((call) {
+          return Expanded(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.primary, AppColors.secondary],
                 ),
-              ],
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: AppColors.primary.withOpacity(0.3),
+                  width: 1.5,
+                ),
+              ),
+              child: Column(
+                children: [
+                  // Header
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      context.tr('now_calling'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  // Content
+                  Expanded(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(20),
+                        ),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              call.token,
+                              style: TextStyle(
+                                color: AppColors.red,
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              call.counter,
+                              style: TextStyle(
+                                color: AppColors.red,
+                                fontSize: 28,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  context.tr('now_calling'),
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 16, // Reduced from 20
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8), // Reduced from 12
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Column(
-                      children: [
-                        Text(
-                          context.tr('token'),
-                          style: const TextStyle(
-                            color: Colors.black54,
-                            fontSize: 12, // Reduced from 14
-                          ),
-                        ),
-                        Text(
-                          call.token,
-                          style: const TextStyle(
-                            color: Colors.blueAccent,
-                            fontSize: 32, // Reduced from 42
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 20), // Reduced from 30
-                    Icon(
-                      isRTL ? Icons.arrow_back : Icons.arrow_forward,
-                      color: Colors.teal,
-                      size: 28, // Reduced from 36
-                    ),
-                    const SizedBox(width: 20), // Reduced from 30
-                    Column(
-                      children: [
-                        Text(
-                          context.tr('counter'),
-                          style: const TextStyle(
-                            color: Colors.black54,
-                            fontSize: 12, // Reduced from 14
-                          ),
-                        ),
-                        Text(
-                          call.counter,
-                          style: const TextStyle(
-                            color: Colors.teal,
-                            fontSize: 32, // Reduced from 42
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6), // Reduced from 8
-                Text(
-                  call.service,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 14, // Reduced from 16
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4), // Reduced from 8
-                Text(
-                  _formatCalledAt(call.calledAt),
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 11, // Reduced from 12
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
-  }
-
-  String _formatCalledAt(DateTime calledAt) {
-    final now = DateTime.now();
-    final difference = now.difference(calledAt);
-
-    if (difference.inMinutes < 1) {
-      return 'Just now';
-    } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes} min ago';
-    } else {
-      return intl.DateFormat('HH:mm').format(calledAt);
-    }
   }
 
   Widget _buildNowServingTable(TVDisplayState tvState, bool isRTL) {
@@ -359,117 +288,102 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
       nowServing = tvState.nowServing;
     }
 
+    // Split into two columns
+    final leftColumn = nowServing.take((nowServing.length / 2).ceil()).toList();
+    final rightColumn = nowServing.skip(leftColumn.length).toList();
+
     return Container(
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(color: Colors.grey.withOpacity(0.15), blurRadius: 12),
-        ],
+        color: AppColors.lightBlue,
+        borderRadius: BorderRadius.circular(30),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            context.tr('now_serving'),
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1F2937),
+          Container(
+            padding: EdgeInsets.all(12),
+            alignment: Alignment.center,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              context.tr('now_serving'),
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
             ),
           ),
           const SizedBox(height: 20),
-          if (nowServing.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(40),
-              child: Text(
-                context.tr('no_active_services'),
-                style: const TextStyle(fontSize: 20, color: Colors.grey),
-              ),
-            )
-          else
-            Table(
-              border: TableBorder.all(
-                color: Colors.grey.shade300,
-                width: 1.5,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              columnWidths: const {
-                0: FlexColumnWidth(1),
-                1: FlexColumnWidth(1),
-                2: FlexColumnWidth(2),
-              },
-              children: [
-                // Header row
-                TableRow(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF2563EB), Color(0xFF0D9488)],
-                    ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(child: _buildServingColumn(leftColumn)),
+                  Container(
+                    width: 1.2,
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    color: AppColors.primary.withOpacity(0.5),
                   ),
-                  children: [
-                    _buildTableHeader(context.tr('counter'), isRTL),
-                    _buildTableHeader(context.tr('token'), isRTL),
-                    _buildTableHeader(context.tr('service'), isRTL),
-                  ],
-                ),
-                ...nowServing.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final token = entry.value;
-                  return TableRow(
-                    decoration: BoxDecoration(
-                      color: index.isEven ? Colors.grey.shade50 : Colors.white,
-                    ),
-                    children: [
-                      _buildTableCell(
-                        token.counter,
-                        isCounter: true,
-                        isRTL: isRTL,
-                      ),
-                      _buildTableCell(token.token, isBold: true, isRTL: isRTL),
-                      _buildTableCell(token.service, isRTL: isRTL),
-                    ],
-                  );
-                }),
-              ],
+                  Expanded(child: _buildServingColumn(rightColumn)),
+                ],
+              ),
             ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTableHeader(String text, bool isRTL) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Text(
-        text,
-        textAlign: isRTL ? TextAlign.right : TextAlign.center,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
+  Widget _buildServingColumn(List<DisplayToken> tokens) {
+    return ListView.builder(
+      itemCount: tokens.length,
+      itemBuilder: (context, index) {
+        final token = tokens[index];
 
-  Widget _buildTableCell(
-    String text, {
-    bool isCounter = false,
-    bool isBold = false,
-    required bool isRTL,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.all(14),
-      child: Text(
-        text,
-        textAlign: isRTL ? TextAlign.right : TextAlign.center,
-        style: TextStyle(
-          fontSize: isCounter || isBold ? 25 : 20,
-          fontWeight: isCounter || isBold ? FontWeight.bold : FontWeight.w600,
-          color: isCounter ? const Color(0xFF2563EB) : const Color(0xFF1F2937),
-        ),
-      ),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 80),
+              child: Row(
+                children: [
+                  Text(
+                    token.token,
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Spacer(),
+                  Text(
+                    token.counter,
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            if (index != tokens.length - 1)
+              Divider(
+                thickness: 1.2,
+                color: AppColors.primary.withOpacity(0.3),
+                indent: 30,
+                endIndent: 30,
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -481,61 +395,74 @@ class _TVDisplayScreenState extends State<TVDisplayScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(color: Colors.grey.withOpacity(0.15), blurRadius: 12),
-        ],
+        color: AppColors.lightGreen,
+        borderRadius: BorderRadius.circular(30),
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                context.tr('upcoming_tokens'),
-                textAlign: isRTL ? TextAlign.right : TextAlign.center,
-                style: const TextStyle(
-                  color: Color(0xFF1F2937),
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+          Container(
+            padding: EdgeInsets.all(12),
+            alignment: Alignment.center,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppColors.secondary,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              context.tr('upcoming_tokens'),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.w500,
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           if (upcomingTokens.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: Text(
-                context.tr('no_upcoming_tokens'),
-                style: const TextStyle(fontSize: 16, color: Colors.grey),
+            Expanded(
+              child: Center(
+                child: Text(
+                  context.tr('no_upcoming_tokens'),
+                  style: const TextStyle(fontSize: 18, color: Colors.white70),
+                  textAlign: TextAlign.center,
+                ),
               ),
             )
           else
-            ...upcomingTokens.take(5).map((token) {
-              return Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.teal.shade50,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  token,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    color: Colors.teal,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              );
-            }),
+            Expanded(
+              child: ListView.builder(
+                itemCount: upcomingTokens.length,
+                itemBuilder: (context, index) {
+                  final token = upcomingTokens[index];
+
+                  return Column(
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.symmetric(vertical: 5),
+                        child: Text(
+                          token,
+                          style: TextStyle(
+                            fontSize: 26,
+                            color: AppColors.secondary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+
+                      if (index != upcomingTokens.length - 1)
+                        Divider(
+                          thickness: 1.2,
+                          endIndent: 30,
+                          indent: 30,
+                          color: AppColors.secondary.withOpacity(0.6),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ),
         ],
       ),
     );

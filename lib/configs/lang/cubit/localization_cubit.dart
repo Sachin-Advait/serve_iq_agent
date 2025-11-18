@@ -1,9 +1,10 @@
 // lib/bloc/localization/localization_cubit.dart
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter/services.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'localization_state.dart';
 
@@ -53,7 +54,7 @@ class LocalizationCubit extends Cubit<LocalizationState> {
   }
 
   void _startLanguageRotation() {
-    _rotationTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+    _rotationTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       final newLocale = state.locale.languageCode == 'en'
           ? const Locale('ar', 'SA')
           : const Locale('en', 'US');

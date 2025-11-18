@@ -75,7 +75,6 @@ class _LoginScreenState extends State<LoginScreen>
     return BlocListener<LoginBloc, LoginState>(
       listener: (context, state) {
         if (state is LoginSuccess) {
-          
           _handleLoginSuccess();
           // Navigate based on user type
           if (state.user.isAgent) {
@@ -110,10 +109,6 @@ class _LoginScreenState extends State<LoginScreen>
               children: [
                 // Logo Section
                 Image.asset("assets/images/logo.png", height: 100),
-                const Text(
-                  'ServelQ',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
                 const SizedBox(height: 30),
                 Container(
                   decoration: BoxDecoration(
