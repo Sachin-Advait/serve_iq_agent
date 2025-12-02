@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:servelq_agent/configs/flutter_toast.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
 import 'package:servelq_agent/models/token_model.dart';
@@ -213,7 +214,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
     }
   }
 
-  Future<void> transferService() async {
+  Future<void> transferService(String counterId) async {
     try {
       final currentState = state;
       if (currentState is! ServiceAgentLoaded ||
@@ -222,10 +223,10 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       }
 
       final tokenId = currentState.currentToken!.id;
-      final counterId = currentState.counter.id;
 
       // Complete the current service
       await agentRepository.transferService(tokenId, counterId);
+      flutterToast(message: 'Token successfully recalled');
       loadInitialData();
     } catch (e) {
       emit(ServiceAgentError(e.toString()));

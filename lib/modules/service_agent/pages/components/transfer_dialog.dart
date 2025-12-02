@@ -58,9 +58,7 @@ class _TransferDialogState extends State<TransferDialog> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF8B5CF6), Color(0xFF7C3AED)],
-        ),
+        color: AppColors.primary,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -138,7 +136,7 @@ class _TransferDialogState extends State<TransferDialog> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
+            borderSide: const BorderSide(color: AppColors.primary, width: 2),
           ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -169,19 +167,17 @@ class _TransferDialogState extends State<TransferDialog> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: isSelected
-                  ? const Color(0xFF8B5CF6).withOpacity(0.1)
+                  ? AppColors.primary.withOpacity(0.1)
                   : Colors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected
-                    ? const Color(0xFF8B5CF6)
-                    : const Color(0xFFE5E7EB),
+                color: isSelected ? AppColors.primary : const Color(0xFFE5E7EB),
                 width: isSelected ? 2 : 1,
               ),
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: const Color(0xFF8B5CF6).withOpacity(0.1),
+                        color: AppColors.primary.withOpacity(0.1),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -194,9 +190,7 @@ class _TransferDialogState extends State<TransferDialog> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF8B5CF6), Color(0xFF7C3AED)],
-                    ),
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
@@ -332,7 +326,7 @@ class _TransferDialogState extends State<TransferDialog> {
                   ? () => _handleTransfer(context)
                   : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8B5CF6),
+                backgroundColor: AppColors.primary,
                 disabledBackgroundColor: const Color(0xFFE5E7EB),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -384,7 +378,9 @@ class _TransferDialogState extends State<TransferDialog> {
 
     try {
       // Call your transfer method from the cubit
-      await context.read<ServiceAgentCubit>().transferService();
+      await context.read<ServiceAgentCubit>().transferService(
+        selectedCounterId!,
+      );
 
       if (mounted) {
         Navigator.of(context).pop();

@@ -145,7 +145,10 @@ class AgentRepository {
   // Recall a token by token ID
   Future<TokenModel> recallToken(String tokenId) async {
     try {
-      final response = await _apiClient.postApi('agent/recall/$tokenId');
+      final response = await _apiClient.postApi(
+        'agent/recall',
+        queryPara: {"tokenId": tokenId, "counterId": ""},
+      );
 
       if (response != null && response.statusCode == 200) {
         final data = response.data;

@@ -36,12 +36,13 @@ class ApiClient {
     String path, {
     dynamic body,
     bool showLoader = true,
+    dynamic queryPara,
   }) async {
     // if (showLoader) customLoader();
     Response? response;
 
     // try {
-    response = await _dio.post(path, data: body);
+    response = await _dio.post(path, data: body, queryParameters: queryPara);
     // } on DioException catch (e) {
     //   _showErrorSnackbar(e);
     // } finally {
