@@ -156,7 +156,7 @@ class AgentRepository {
           final token = TokenModel.fromJson(data);
 
           // Optional: automatically start serving again after recall
-          Future.delayed(const Duration(seconds: 3), () {
+          Future.delayed(const Duration(seconds: 6), () {
             startServing(token.id);
           });
 
