@@ -10,5 +10,6 @@
   "service": "الخدمة",
   "upcoming_tokens": "التذاكر القادمة",
   "no_active_services": "لا توجد خدمات نشطة",
-  "no_upcoming_tokens": "لا توجد تذاكر قادمة"
+  "no_upcoming_tokens": "لا توجد تذاكر قادمة",
+  "no_tokens_serving": "لا يوجد خدمة رمزية"
 }

@@ -12,38 +12,34 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   ServiceAgentCubit(this.agentRepository) : super(ServiceAgentInitial());
 
   Future<void> loadInitialData() async {
-    try {
-      emit(ServiceAgentLoading());
+    emit(ServiceAgentLoading());
 
-      final counterFuture = agentRepository.getCounter();
-      final queueFuture = agentRepository.getQueue();
-      final recentServicesFuture = agentRepository.getRecentServices();
-      final allCounterFuture = agentRepository.getAllCounters();
+    final counterFuture = agentRepository.getCounter();
+    final queueFuture = agentRepository.getQueue();
+    final recentServicesFuture = agentRepository.getRecentServices();
+    final allCounterFuture = agentRepository.getAllCounters();
 
-      final results = await Future.wait([
-        counterFuture,
-        queueFuture,
-        recentServicesFuture,
-        allCounterFuture,
-      ]);
+    final results = await Future.wait([
+      counterFuture,
+      queueFuture,
+      recentServicesFuture,
+      allCounterFuture,
+    ]);
 
-      final counter = results[0] as CounterModel;
-      final queue = results[1] as List<TokenModel>;
-      final recentServices = results[2] as List<ServiceHistory>;
-      final allCounter = results[3] as List<CounterModel>;
+    final counter = results[0] as CounterModel;
+    final queue = results[1] as List<TokenModel>;
+    final recentServices = results[2] as List<ServiceHistory>;
+    final allCounter = results[3] as List<CounterModel>;
 
-      emit(
-        ServiceAgentLoaded(
-          counter: counter,
-          queue: queue,
-          recentServices: recentServices,
-          currentToken: null,
-          allCounter: allCounter,
-        ),
-      );
-    } catch (e) {
-      emit(ServiceAgentError(e.toString()));
-    }
+    emit(
+      ServiceAgentLoaded(
+        counter: counter,
+        queue: queue,
+        recentServices: recentServices,
+        currentToken: null,
+        allCounter: allCounter,
+      ),
+    );
   }
 
   Future<void> queueAPI() async {

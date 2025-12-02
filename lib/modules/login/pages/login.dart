@@ -11,30 +11,23 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final _agentEmail = TextEditingController();
-  final _agentPassword = TextEditingController();
-  final _tvEmail = TextEditingController();
-  final _tvPassword = TextEditingController();
-  bool _agentObscure = true;
-  bool _tvObscure = true;
+class _LoginScreenState extends State<LoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _emailController.text = 'farzan@serveiq.com';
+    _passwordController.text = '12345678';
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
-    _agentEmail.dispose();
-    _agentPassword.dispose();
-    _tvEmail.dispose();
-    _tvPassword.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -48,25 +41,17 @@ class _LoginScreenState extends State<LoginScreen>
     flutterToast(message: message);
   }
 
-  void _performAgentLogin() {
-    if (_agentEmail.text.isEmpty || _agentPassword.text.isEmpty) {
+  void _performLogin() {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       flutterToast(message: 'Please fill all fields');
       return;
     }
     setState(() => _isLoading = true);
     context.read<LoginBloc>().add(
-      AgentLogin(email: _agentEmail.text.trim(), password: _agentPassword.text),
-    );
-  }
-
-  void _performTVLogin() {
-    if (_tvEmail.text.isEmpty || _tvPassword.text.isEmpty) {
-      flutterToast(message: 'Please fill all fields');
-      return;
-    }
-    setState(() => _isLoading = true);
-    context.read<LoginBloc>().add(
-      TVDisplayLogin(email: _tvEmail.text.trim(), password: _tvPassword.text),
+      AgentLogin(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      ),
     );
   }
 
@@ -110,132 +95,43 @@ class _LoginScreenState extends State<LoginScreen>
                 // Logo Section
                 Image.asset("assets/images/logo.png", height: 100),
                 const SizedBox(height: 30),
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: TabBar(
-                    controller: _tabController,
-                    labelColor: Colors.white,
-                    dividerHeight: 0,
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    unselectedLabelColor: const Color(0xFF4B5563),
-                    indicator: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF2563EB), Color(0xFF0D9488)],
-                      ),
-                      borderRadius: BorderRadius.circular(10),
+                // Login Form
+                _buildTextField(
+                  controller: _emailController,
+                  label: 'Email Address',
+                  icon: Icons.email_outlined,
+                  enabled: !_isLoading,
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  controller: _passwordController,
+                  label: 'Password',
+                  icon: Icons.lock_outline,
+                  obscureText: _obscurePassword,
+                  enabled: !_isLoading,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: const Color(0xFF9CA3AF),
                     ),
-                    indicatorPadding: EdgeInsets.zero,
-                    labelPadding: EdgeInsets.zero,
-                    padding: const EdgeInsets.all(4),
-                    labelStyle: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    tabs: const [
-                      Tab(text: 'Agent Login'),
-                      Tab(text: 'TV Display Login'),
-                    ],
+                    onPressed: () => setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    }),
                   ),
                 ),
-                const SizedBox(height: 25),
-                // Tab Content
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildAgentLogin(context),
-                      _buildTVLogin(context),
-                    ],
-                  ),
+                const SizedBox(height: 30),
+                _buildLoginButton(
+                  label: 'Login',
+                  color: const Color(0xFF2563EB),
+                  isLoading: _isLoading,
+                  onPressed: _performLogin,
                 ),
               ],
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  // Agent Login Form
-  Widget _buildAgentLogin(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(height: 10),
-        _buildTextField(
-          controller: _agentEmail,
-          label: 'Email Address',
-          icon: Icons.email_outlined,
-          enabled: !_isLoading,
-        ),
-        const SizedBox(height: 16),
-        _buildTextField(
-          controller: _agentPassword,
-          label: 'Password',
-          icon: Icons.lock_outline,
-          obscureText: _agentObscure,
-          enabled: !_isLoading,
-          suffixIcon: IconButton(
-            icon: Icon(
-              _agentObscure ? Icons.visibility_off : Icons.visibility,
-              color: const Color(0xFF9CA3AF),
-            ),
-            onPressed: () => setState(() {
-              _agentObscure = !_agentObscure;
-            }),
-          ),
-        ),
-        const SizedBox(height: 30),
-        _buildLoginButton(
-          label: 'Login as Agent',
-          color: const Color(0xFF2563EB),
-          isLoading: _isLoading,
-          onPressed: _performAgentLogin,
-        ),
-      ],
-    );
-  }
-
-  // TV Display Login Form
-  Widget _buildTVLogin(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          const SizedBox(height: 10),
-          _buildTextField(
-            controller: _tvEmail,
-            label: 'Email Address',
-            icon: Icons.email_outlined,
-            enabled: !_isLoading,
-          ),
-          const SizedBox(height: 16),
-          _buildTextField(
-            controller: _tvPassword,
-            label: 'Password',
-            icon: Icons.lock_outline,
-            obscureText: _tvObscure,
-            enabled: !_isLoading,
-            suffixIcon: IconButton(
-              icon: Icon(
-                _tvObscure ? Icons.visibility_off : Icons.visibility,
-                color: const Color(0xFF9CA3AF),
-              ),
-              onPressed: () => setState(() {
-                _tvObscure = !_tvObscure;
-              }),
-            ),
-          ),
-          const SizedBox(height: 30),
-          _buildLoginButton(
-            label: 'Login as Display',
-            color: const Color(0xFF0D9488),
-            isLoading: _isLoading,
-            onPressed: _performTVLogin,
-          ),
-        ],
       ),
     );
   }

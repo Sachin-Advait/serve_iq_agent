@@ -6,8 +6,6 @@ import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
 import 'package:servelq_agent/modules/login/repository/auth_repo.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/modules/service_agent/repository/agent_repo.dart';
-import 'package:servelq_agent/modules/tv_display/cubit/tv_display_cubit.dart';
-import 'package:servelq_agent/modules/tv_display/repo/tv_repo.dart';
 import 'package:servelq_agent/services/api_client.dart';
 
 final getIt = GetIt.instance;
@@ -68,14 +66,6 @@ void getItSetup() {
 
   getIt.registerFactory<ServiceAgentCubit>(
     () => ServiceAgentCubit(getIt<AgentRepository>()),
-  );
-
-  getIt.registerLazySingleton<TVDisplayRepository>(
-    () => TVDisplayRepository(getIt<ApiClient>()),
-  );
-
-  getIt.registerFactory<TVDisplayCubit>(
-    () => TVDisplayCubit(getIt<TVDisplayRepository>()),
   );
 }
 

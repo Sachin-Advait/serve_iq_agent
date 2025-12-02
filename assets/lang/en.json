@@ -10,5 +10,6 @@
   "service": "Service",
   "upcoming_tokens": "Upcoming",
   "no_active_services": "No active services",
-  "no_upcoming_tokens": "No upcoming tokens"
+  "no_upcoming_tokens": "No upcoming tokens",
+  "no_tokens_serving": "No token serving"
 }
