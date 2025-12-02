@@ -84,6 +84,7 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
   Widget _buildLoadedScreen(BuildContext context, ServiceAgentLoaded state) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
+      resizeToAvoidBottomInset: false,
       body: Column(
         children: [
           Header(state: state),

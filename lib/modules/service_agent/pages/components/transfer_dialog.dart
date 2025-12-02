@@ -384,7 +384,6 @@ class _TransferDialogState extends State<TransferDialog> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        flutterToast(message: 'Visitor transferred successfully');
       }
     } catch (e) {
       if (mounted) {

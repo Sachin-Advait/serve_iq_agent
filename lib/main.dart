@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:servelq_agent/configs/get_it.dart';
 import 'package:servelq_agent/configs/lang/cubit/localization_cubit.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
       child: BlocBuilder<LocalizationCubit, LocalizationState>(
         builder: (context, state) {
           return MaterialApp.router(
+            builder: EasyLoading.init(),
             title: 'ServelQ',
             theme: ThemeData(primarySwatch: Colors.blue, fontFamily: 'Poppins'),
             routerConfig: AppRoutes.router,

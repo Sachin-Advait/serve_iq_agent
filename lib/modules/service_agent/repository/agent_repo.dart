@@ -210,4 +210,27 @@ class AgentRepository {
       throw Exception('Failed to complete service');
     }
   }
+
+  Future<TokenModel> counterActiveToken() async {
+    final response = await _apiClient.getApi(
+      'agent/counter/active-token/${SessionManager.getCounter()}',
+    );
+
+    if (response != null && response.statusCode == 200) {
+      final data = response.data;
+      TokenModel? token;
+
+      if (data is Map<String, dynamic>) {
+        token = TokenModel.fromJson(data);
+
+        // Call startServing after 4 seconds
+        Future.delayed(const Duration(seconds: 10), () {
+          startServing(token!.id);
+        });
+
+        return token;
+      }
+    }
+    throw Exception('Failed to call next token');
+  }
 }

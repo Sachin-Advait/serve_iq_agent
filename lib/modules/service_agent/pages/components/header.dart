@@ -87,7 +87,7 @@ class Header extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.refresh, color: Colors.white),
                 onPressed: () {
-                  context.read<ServiceAgentCubit>().refreshData();
+                  context.read<ServiceAgentCubit>().loadingData();
                 },
                 iconSize: 24,
               ),
