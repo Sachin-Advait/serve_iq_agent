@@ -167,4 +167,31 @@ class AgentRepository {
       rethrow;
     }
   }
+
+  // Add this method to AgentRepository class
+  Future<void> submitFeedback({
+    required String tokenId,
+    required int rating,
+    required String review,
+    required String counterCode,
+  }) async {
+    try {
+      final response = await _apiClient.postApi(
+        'feedback',
+        body: {
+          'tokenId': tokenId,
+          'rating': rating,
+          'review': review,
+          "counterCode": counterCode,
+          "agentName": SessionManager.getUsername(),
+        },
+      );
+
+      if (response != null && response.statusCode != 200) {
+        throw Exception('Failed to submit feedback');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

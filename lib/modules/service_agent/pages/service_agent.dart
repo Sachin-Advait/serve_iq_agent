@@ -35,7 +35,7 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
 
   void _startAutoCallNext(ServiceAgentCubit cubit) {
     _callNextTimer?.cancel();
-    _callNextTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+    _callNextTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
       final currentState = cubit.state;
       if (currentState is ServiceAgentLoaded) {
         await cubit.queueAPI();

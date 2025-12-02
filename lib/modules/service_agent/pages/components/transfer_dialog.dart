@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:servelq_agent/configs/app_colors.dart';
 import 'package:servelq_agent/configs/flutter_toast.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
@@ -44,12 +45,8 @@ class _TransferDialogState extends State<TransferDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(),
-            _buildSearchBar(),
-            Flexible(
-              child: filteredCounters.isEmpty
-                  ? _buildEmptyState()
-                  : _buildCounterList(),
-            ),
+            // _buildSearchBar(),
+            Flexible(child: _buildCounterList()),
             _buildFooter(context),
           ],
         ),
@@ -116,7 +113,7 @@ class _TransferDialogState extends State<TransferDialog> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: TextField(
@@ -168,7 +165,7 @@ class _TransferDialogState extends State<TransferDialog> {
             });
           },
           child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: const EdgeInsets.only(bottom: 10, top: 10),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: isSelected
@@ -219,36 +216,13 @@ class _TransferDialogState extends State<TransferDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        counter.name,
+                        '${counter.name} - ${counter.username}',
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF1F2937),
                         ),
                       ),
-                      if (counter.counter != null) ...[
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.location_on_outlined,
-                              size: 14,
-                              color: Color(0xFF6B7280),
-                            ),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                counter.counter!,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Color(0xFF6B7280),
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
                     ],
                   ),
                 ),
@@ -375,16 +349,21 @@ class _TransferDialogState extends State<TransferDialog> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : const Row(
+                  : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.send_rounded, size: 18),
+                        Icon(
+                          Icons.send_rounded,
+                          size: 18,
+                          color: AppColors.white,
+                        ),
                         SizedBox(width: 8),
                         Text(
                           'Transfer Visitor',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
+                            color: AppColors.white,
                           ),
                         ),
                       ],

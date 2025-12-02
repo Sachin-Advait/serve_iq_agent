@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter/material.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
 import 'package:servelq_agent/models/token_model.dart';
@@ -14,6 +15,10 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   Future<void> loadInitialData() async {
     emit(ServiceAgentLoading());
 
+    loadingData();
+  }
+
+  Future<void> loadingData() async {
     final counterFuture = agentRepository.getCounter();
     final queueFuture = agentRepository.getQueue();
     final recentServicesFuture = agentRepository.getRecentServices();
@@ -38,6 +43,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
         recentServices: recentServices,
         currentToken: null,
         allCounter: allCounter,
+        showReview: false,
       ),
     );
   }
@@ -54,6 +60,9 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
         recentServices: currentState.recentServices,
         currentToken: currentState.currentToken,
         allCounter: currentState.allCounter,
+        showReview: (state is ServiceAgentLoaded)
+            ? (state as ServiceAgentLoaded).showReview
+            : false,
       ),
     );
   }
@@ -76,6 +85,9 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
           recentServices: currentState.recentServices,
           currentToken: nextToken,
           allCounter: currentState.allCounter,
+          showReview: (state is ServiceAgentLoaded)
+              ? (state as ServiceAgentLoaded).showReview
+              : false,
         ),
       );
     } catch (e) {
@@ -109,6 +121,9 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
           recentServices: updatedRecentServices,
           currentToken: null,
           allCounter: currentState.allCounter,
+          showReview: (state is ServiceAgentLoaded)
+              ? (state as ServiceAgentLoaded).showReview
+              : false,
         ),
       );
     } catch (e) {
@@ -142,6 +157,9 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
           recentServices: updatedRecentServices,
           currentToken: recalledToken,
           allCounter: currentState.allCounter,
+          showReview: (state is ServiceAgentLoaded)
+              ? (state as ServiceAgentLoaded).showReview
+              : false,
         ),
       );
     } catch (e) {
@@ -152,6 +170,46 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   }
 
   Future<void> refreshData() async {
-    await loadInitialData();
+    await loadingData();
+  }
+
+  // Add these methods to ServiceAgentCubit class:
+
+  void showReviewSection() {
+    final currentState = state;
+    if (currentState is ServiceAgentLoaded) {
+      emit(currentState.copyWith(showReview: true));
+    }
+  }
+
+  void hideReviewSection() {
+    final currentState = state;
+    if (currentState is ServiceAgentLoaded) {
+      emit(currentState.copyWith(showReview: false));
+    }
+  }
+
+  Future<void> submitReview(int rating, String review) async {
+    try {
+      final currentState = state;
+      if (currentState is! ServiceAgentLoaded ||
+          currentState.currentToken == null) {
+        return;
+      }
+
+      // Submit feedback to API
+      await agentRepository.submitFeedback(
+        tokenId: currentState.currentToken!.id,
+        counterCode: currentState.counter.code,
+        rating: rating,
+        review: review,
+      );
+
+      // Hide review section and complete service
+      hideReviewSection();
+      await completeService();
+    } catch (e) {
+      emit(ServiceAgentError('Failed to submit review: ${e.toString()}'));
+    }
   }
 }

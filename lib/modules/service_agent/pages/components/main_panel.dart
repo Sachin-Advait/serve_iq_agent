@@ -1,6 +1,8 @@
+// components/main_panel.dart
 import 'package:flutter/material.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/modules/service_agent/pages/components/action_buttons.dart';
+import 'package:servelq_agent/modules/service_agent/pages/components/review_section.dart'; // Add this import
 import 'package:servelq_agent/modules/service_agent/pages/components/widgets.dart';
 
 class MainPanel extends StatelessWidget {
@@ -16,7 +18,10 @@ class MainPanel extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            if (state.currentToken != null)
+            // Show review section if enabled, otherwise show token info or empty state
+            if (state.showReview)
+              ReviewSection(state: state)
+            else if (state.currentToken != null)
               _buildCurrentTokenInfo(state)
             else
               _buildEmptyState(context, state),

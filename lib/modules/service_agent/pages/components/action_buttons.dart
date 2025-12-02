@@ -1,3 +1,4 @@
+// components/action_buttons.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
@@ -10,6 +11,11 @@ class ActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Don't show action buttons when review section is shown
+    if (state.showReview) {
+      return const SizedBox.shrink();
+    }
+
     return Row(
       children: [
         Expanded(
@@ -29,7 +35,7 @@ class ActionButtons extends StatelessWidget {
             'Complete',
             Icons.check_circle_outline_rounded,
             const Color(0xFF2563EB),
-            () => context.read<ServiceAgentCubit>().completeService(),
+            () => context.read<ServiceAgentCubit>().showReviewSection(),
             enabled: state.currentToken != null,
           ),
         ),
