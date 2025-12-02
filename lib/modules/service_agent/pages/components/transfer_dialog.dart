@@ -253,41 +253,41 @@ class _TransferDialogState extends State<TransferDialog> {
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.search_off_rounded,
-              size: 64,
-              color: Colors.grey.shade300,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              searchQuery.isEmpty
-                  ? 'No counters available'
-                  : 'No counters found',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            if (searchQuery.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Try adjusting your search',
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _buildEmptyState() {
+  //   return Center(
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(40),
+  //       child: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           Icon(
+  //             Icons.search_off_rounded,
+  //             size: 64,
+  //             color: Colors.grey.shade300,
+  //           ),
+  //           const SizedBox(height: 16),
+  //           Text(
+  //             searchQuery.isEmpty
+  //                 ? 'No counters available'
+  //                 : 'No counters found',
+  //             style: TextStyle(
+  //               fontSize: 16,
+  //               color: Colors.grey.shade600,
+  //               fontWeight: FontWeight.w500,
+  //             ),
+  //           ),
+  //           if (searchQuery.isNotEmpty) ...[
+  //             const SizedBox(height: 8),
+  //             Text(
+  //               'Try adjusting your search',
+  //               style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+  //             ),
+  //           ],
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildFooter(BuildContext context) {
     return Container(
@@ -384,7 +384,7 @@ class _TransferDialogState extends State<TransferDialog> {
 
     try {
       // Call your transfer method from the cubit
-      await context.read<ServiceAgentCubit>().completeService();
+      await context.read<ServiceAgentCubit>().transferService();
 
       if (mounted) {
         Navigator.of(context).pop();

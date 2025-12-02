@@ -212,4 +212,25 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       emit(ServiceAgentError('Failed to submit review: ${e.toString()}'));
     }
   }
+
+  Future<void> transferService() async {
+    try {
+      final currentState = state;
+      if (currentState is! ServiceAgentLoaded ||
+          currentState.currentToken == null) {
+        return;
+      }
+
+      final tokenId = currentState.currentToken!.id;
+      final counterId = currentState.counter.id;
+
+      // Complete the current service
+      await agentRepository.transferService(tokenId, counterId);
+      loadInitialData();
+    } catch (e) {
+      emit(ServiceAgentError(e.toString()));
+      // Reload to recover state
+      loadInitialData();
+    }
+  }
 }

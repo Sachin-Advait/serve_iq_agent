@@ -31,7 +31,6 @@ class SessionManager {
 
   static String getUsername() {
     String username = _userStorage.read<String?>(_username) ?? '';
-    debugPrint("Username ==> $username.");
     return username;
   }
 

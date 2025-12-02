@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
 import 'package:servelq_agent/models/token_model.dart';
@@ -192,6 +193,18 @@ class AgentRepository {
       }
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<void> transferService(String tokenId, String counterId) async {
+    final response = await _apiClient.postApi(
+      'tokens/transfer',
+      body: {"tokenId": tokenId, "toCounterId": counterId},
+    );
+
+    if (response != null && response.statusCode != 200) {
+      debugPrint("Failed to complete service");
+      throw Exception('Failed to complete service');
     }
   }
 }

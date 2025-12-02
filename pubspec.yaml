@@ -24,6 +24,7 @@ dependencies:
   video_player: ^2.10.0
   audioplayers: ^6.5.1
   wakelock_plus: ^1.4.0
+  top_snackbar_flutter: ^3.3.0
 
 dev_dependencies:
   flutter_test:
