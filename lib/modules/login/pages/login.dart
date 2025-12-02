@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:servelq_agent/configs/app_colors.dart';
 import 'package:servelq_agent/configs/flutter_toast.dart';
 import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
 
@@ -75,8 +76,8 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: Colors.white.withOpacity(0.9),
         body: Center(
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 480, maxHeight: 500),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            constraints: const BoxConstraints(maxWidth: 600, maxHeight: 650),
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
@@ -93,8 +94,8 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Logo Section
-                Image.asset("assets/images/logo.png", height: 100),
-                const SizedBox(height: 30),
+                Image.asset("assets/images/logo.png", height: 140),
+                const SizedBox(height: 40),
                 // Login Form
                 _buildTextField(
                   controller: _emailController,
@@ -102,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   icon: Icons.email_outlined,
                   enabled: !_isLoading,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 _buildTextField(
                   controller: _passwordController,
                   label: 'Password',
@@ -121,10 +122,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     }),
                   ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 40),
                 _buildLoginButton(
                   label: 'Login',
-                  color: const Color(0xFF2563EB),
+                  color: AppColors.primary,
                   isLoading: _isLoading,
                   onPressed: _performLogin,
                 ),
@@ -150,25 +151,30 @@ class _LoginScreenState extends State<LoginScreen> {
       obscureText: obscureText,
       enabled: enabled,
       decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: const Color(0xFF2563EB)),
+        prefixIcon: Icon(icon, color: const Color(0xFF2563EB), size: 28),
         suffixIcon: suffixIcon,
         labelText: label,
-        labelStyle: const TextStyle(color: Color(0xFF6B7280)),
+        labelStyle: const TextStyle(color: Color(0xFF6B7280), fontSize: 18),
         filled: true,
         fillColor: enabled ? const Color(0xFFF9FAFB) : Colors.grey[200],
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 24,
+        ),
         focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
-          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+          borderRadius: BorderRadius.circular(14),
         ),
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
         ),
         disabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
         ),
       ),
+      style: const TextStyle(fontSize: 18),
     );
   }
 
@@ -181,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }) {
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: 64,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
@@ -194,17 +200,17 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         child: isLoading
             ? const SizedBox(
-                height: 20,
-                width: 20,
+                height: 24,
+                width: 24,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2,
+                  strokeWidth: 3,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
             : Text(
                 label,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 20,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
