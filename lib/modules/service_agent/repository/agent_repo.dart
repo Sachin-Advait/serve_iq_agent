@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:servelq_agent/configs/api_constants.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
 import 'package:servelq_agent/models/token_model.dart';
@@ -12,11 +14,11 @@ class AgentRepository {
 
   Future<List<TokenModel>> getQueue() async {
     try {
-      final response = await _apiClient.getApi(
-        'agent/counter/queue/${SessionManager.getCounter()}',
+      final response = await Dio().get(
+        '${ApiConstants.baseUrl}/agent/counter/queue/${SessionManager.getCounter()}',
       );
 
-      if (response != null && response.statusCode == 200) {
+      if (response.statusCode == 200) {
         final data = response.data;
         if (data is List) {
           return data.map((json) => TokenModel.fromJson(json)).toList();
@@ -42,7 +44,7 @@ class AgentRepository {
           token = TokenModel.fromJson(data);
 
           // Call startServing after 4 seconds
-          Future.delayed(const Duration(seconds: 10), () {
+          Future.delayed(const Duration(seconds: 5), () {
             startServing(token!.id);
           });
 
@@ -57,31 +59,13 @@ class AgentRepository {
   }
 
   Future<void> startServing(String tokenId) async {
-    try {
-      final response = await _apiClient.postApi(
-        'agent/token/start-serving/$tokenId',
-      );
-
-      if (response != null && response.statusCode != 200) {
-        throw Exception('Failed to start serving');
-      }
-    } catch (e) {
-      rethrow;
-    }
+    await _apiClient.postApi('agent/token/start-serving/$tokenId');
   }
 
   Future<void> completeService(String tokenId) async {
-    try {
-      final response = await _apiClient.postApi(
-        'agent/token/complete/$tokenId',
-      );
+    final response = await _apiClient.postApi('agent/token/complete/$tokenId');
 
-      if (response != null && response.statusCode != 200) {
-        throw Exception('Failed to complete service');
-      }
-    } catch (e) {
-      rethrow;
-    }
+    if (response != null && response.statusCode != 200) {}
   }
 
   Future<List<ServiceHistory>> getRecentServices() async {
@@ -156,7 +140,7 @@ class AgentRepository {
           final token = TokenModel.fromJson(data);
 
           // Optional: automatically start serving again after recall
-          Future.delayed(const Duration(seconds: 6), () {
+          Future.delayed(const Duration(seconds: 5), () {
             startServing(token.id);
           });
 
@@ -224,7 +208,7 @@ class AgentRepository {
         token = TokenModel.fromJson(data);
 
         // Call startServing after 4 seconds
-        Future.delayed(const Duration(seconds: 10), () {
+        Future.delayed(const Duration(seconds: 5), () {
           startServing(token!.id);
         });
 

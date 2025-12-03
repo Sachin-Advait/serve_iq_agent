@@ -15,22 +15,22 @@ class BottomBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          TextButton.icon(
-            icon: const Icon(Icons.chat_bubble_outline, size: 20),
-            label: const Text('Chat with Admin'),
-            onPressed: () {},
-            style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF6B7280),
-            ),
-          ),
-          TextButton.icon(
-            icon: const Icon(Icons.trending_up, size: 20),
-            label: const Text('Service Performance'),
-            onPressed: () {},
-            style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF6B7280),
-            ),
-          ),
+          // TextButton.icon(
+          //   icon: const Icon(Icons.chat_bubble_outline, size: 20),
+          //   label: const Text('Chat with Admin'),
+          //   onPressed: () {},
+          //   style: TextButton.styleFrom(
+          //     foregroundColor: const Color(0xFF6B7280),
+          //   ),
+          // ),
+          // TextButton.icon(
+          //   icon: const Icon(Icons.trending_up, size: 20),
+          //   label: const Text('Service Performance'),
+          //   onPressed: () {},
+          //   style: TextButton.styleFrom(
+          //     foregroundColor: const Color(0xFF6B7280),
+          //   ),
+          // ),
           TextButton.icon(
             icon: const Icon(Icons.logout, size: 20),
             label: const Text('Logout'),

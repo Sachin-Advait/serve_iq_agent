@@ -52,7 +52,6 @@ class SessionManager {
 
   static String getCounter() {
     String counter = _userStorage.read<String?>(_counter) ?? '';
-    debugPrint("Counter Id ==> $counter.");
     return counter;
   }
 

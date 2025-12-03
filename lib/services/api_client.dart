@@ -102,14 +102,14 @@ class ApiClient {
         if (e.response?.statusCode == 401) {
           // _logoutAndShowTokenExpiryPopup();
         } else if (e.response?.statusCode == 400) {
-          final errorData = e.response!.data;
-          final errorMessage = errorData is Map<String, dynamic>
-              ? (errorData['message'] ??
-                    e.response!.statusMessage ??
-                    'Bad Request')
-              : e.response!.statusMessage ?? 'Bad Request';
+          // final errorData = e.response!.data;
+          // final errorMessage = errorData is Map<String, dynamic>
+          //     ? (errorData['message'] ??
+          //           e.response!.statusMessage ??
+          //           'Bad Request')
+          //     : e.response!.statusMessage ?? 'Bad Request';
 
-          flutterToast(message: errorMessage);
+          // flutterToast(message: errorMessage);
         } else {
           flutterToast(message: AppErrors.serverErrorDetails);
         }
