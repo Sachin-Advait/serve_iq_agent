@@ -126,6 +126,7 @@ class MainPanel extends StatelessWidget {
           const SizedBox(height: 12),
           TextField(
             maxLines: 4,
+            textInputAction: TextInputAction.done,
             decoration: InputDecoration(
               hintText: 'Add notes or attach documents...',
               hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),

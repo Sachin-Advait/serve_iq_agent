@@ -82,23 +82,26 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
   }
 
   Widget _buildLoadedScreen(BuildContext context, ServiceAgentLoaded state) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      resizeToAvoidBottomInset: false,
-      body: Column(
-        children: [
-          Header(state: state),
-          Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(width: 320, child: LeftPane(state: state)),
-                Expanded(child: MainPanel(state: state)),
-              ],
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8F9FA),
+        resizeToAvoidBottomInset: false,
+        body: Column(
+          children: [
+            Header(state: state),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(width: 320, child: LeftPane(state: state)),
+                  Expanded(child: MainPanel(state: state)),
+                ],
+              ),
             ),
-          ),
-          const BottomBar(),
-        ],
+            const BottomBar(),
+          ],
+        ),
       ),
     );
   }

@@ -137,6 +137,7 @@ class _ReviewSectionState extends State<ReviewSection> {
         ),
         const SizedBox(height: 12),
         TextField(
+          textInputAction: TextInputAction.done,
           controller: _reviewController,
           maxLines: 4,
           decoration: InputDecoration(
@@ -168,7 +169,7 @@ class _ReviewSectionState extends State<ReviewSection> {
         Expanded(
           child: ElevatedButton(
             onPressed: () =>
-                context.read<ServiceAgentCubit>().hideReviewSection(),
+                context.read<ServiceAgentCubit>().completeService(),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFF3F4F6),
               padding: const EdgeInsets.symmetric(vertical: 16),

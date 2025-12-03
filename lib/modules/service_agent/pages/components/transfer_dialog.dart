@@ -115,6 +115,7 @@ class _TransferDialogState extends State<TransferDialog> {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: TextField(
+        textInputAction: TextInputAction.done,
         onChanged: (value) {
           setState(() {
             searchQuery = value;

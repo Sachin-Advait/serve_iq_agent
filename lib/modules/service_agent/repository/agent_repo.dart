@@ -211,7 +211,7 @@ class AgentRepository {
     }
   }
 
-  Future<TokenModel> counterActiveToken() async {
+  Future<TokenModel?> counterActiveToken() async {
     final response = await _apiClient.getApi(
       'agent/counter/active-token/${SessionManager.getCounter()}',
     );
@@ -231,6 +231,6 @@ class AgentRepository {
         return token;
       }
     }
-    throw Exception('Failed to call next token');
+    return null;
   }
 }

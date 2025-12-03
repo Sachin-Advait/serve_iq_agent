@@ -123,18 +123,26 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       final updatedRecentServices = await agentRepository.getRecentServices();
 
       final activeToken = await agentRepository.counterActiveToken();
+      if (activeToken == null) {
+        emit(ServiceAgentLoading());
+      }
+
+      await Future.delayed(Duration(milliseconds: 500));
 
       emit(
-        currentState.copyWith(
+        ServiceAgentLoaded(
           queue: updatedQueue,
           recentServices: updatedRecentServices,
-          currentToken: activeToken, // Set to active token (could be null)
-          showReview: false, // Ensure review is hidden
+          counter: currentState.counter,
+          allCounter: currentState.allCounter,
+          showReview: false,
         ),
       );
 
       // Show message if there's another active token
-      flutterToast(message: 'Active token detected: ${activeToken.token}');
+      if (activeToken != null) {
+        flutterToast(message: 'Active token detected: ${activeToken.token}');
+      }
     } catch (e) {
       emit(ServiceAgentError(e.toString()));
       // Reload to recover state
@@ -261,19 +269,17 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
 
       final activeToken = await agentRepository.counterActiveToken();
 
-      if (currentState.currentToken?.id != activeToken.id) {
+      if (currentState.currentToken?.id != activeToken?.id) {
         // If we have a new active token different from current
         final updatedQueue = await agentRepository.getQueue();
 
         emit(
           currentState.copyWith(currentToken: activeToken, queue: updatedQueue),
         );
-
-        flutterToast(message: 'Active token loaded: ${activeToken.token}');
+        if (activeToken != null) {
+          flutterToast(message: 'Active token loaded: ${activeToken.token}');
+        }
       }
-    } catch (e) {
-      // Silent fail for token check
-      print('Active token check failed: $e');
     } finally {
       EasyLoading.dismiss();
     }
