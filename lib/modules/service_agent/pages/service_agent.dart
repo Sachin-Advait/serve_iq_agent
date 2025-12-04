@@ -37,7 +37,7 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
     _callNextTimer?.cancel();
     _callNextTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
       final currentState = cubit.state;
-      if (currentState is ServiceAgentLoaded) {
+      if (currentState.status == ServiceAgentStatus.loaded) {
         await cubit.queueAPI();
       }
     });
@@ -53,23 +53,25 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
   Widget build(BuildContext context) {
     return BlocListener<ServiceAgentCubit, ServiceAgentState>(
       listener: (context, state) {
-        if (state is ServiceAgentError) {
-          flutterToast(message: state.message);
+        if (state.status == ServiceAgentStatus.error &&
+            state.errorMessage != null) {
+          flutterToast(message: state.errorMessage!);
         }
       },
       child: BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
         builder: (context, state) {
-          if (state is ServiceAgentInitial || state is ServiceAgentLoading) {
+          if (state.status == ServiceAgentStatus.initial ||
+              state.status == ServiceAgentStatus.loading) {
             return const LoadingScreen();
           }
 
-          if (state is ServiceAgentLoaded) {
+          if (state.status == ServiceAgentStatus.loaded) {
             return _buildLoadedScreen(context, state);
           }
 
-          if (state is ServiceAgentError) {
+          if (state.status == ServiceAgentStatus.error) {
             return ErrorScreen(
-              message: state.message,
+              message: state.errorMessage ?? 'An error occurred',
               onRetry: () =>
                   context.read<ServiceAgentCubit>().loadInitialData(),
             );
@@ -81,7 +83,7 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
     );
   }
 
-  Widget _buildLoadedScreen(BuildContext context, ServiceAgentLoaded state) {
+  Widget _buildLoadedScreen(BuildContext context, ServiceAgentState state) {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -94,7 +96,7 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(width: 320, child: LeftPane(state: state)),
+                  SizedBox(width: 320, child: LeftPane()),
                   Expanded(child: MainPanel(state: state)),
                 ],
               ),

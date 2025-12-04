@@ -1,52 +1,54 @@
 part of 'service_agent_cubit.dart';
 
+enum ServiceAgentStatus { initial, loading, loaded, error }
+
+enum CurrentTokenStatus { initial, loading, loaded, error }
+
 @immutable
-abstract class ServiceAgentState {
-  const ServiceAgentState();
-}
-
-class ServiceAgentInitial extends ServiceAgentState {}
-
-class ServiceAgentLoading extends ServiceAgentState {}
-
-class ServiceAgentLoaded extends ServiceAgentState {
+class ServiceAgentState {
+  final ServiceAgentStatus status;
+  final CurrentTokenStatus currentTokenStatus;
   final List<TokenModel> queue;
   final List<ServiceHistory> recentServices;
   final TokenModel? currentToken;
-  final CounterModel counter;
+  final CounterModel? counter;
   final List<CounterModel> allCounter;
   final bool showReview;
+  final String? errorMessage;
 
-  const ServiceAgentLoaded({
-    required this.queue,
-    required this.recentServices,
+  const ServiceAgentState({
+    this.status = ServiceAgentStatus.initial,
+    this.currentTokenStatus = CurrentTokenStatus.initial,
+    this.queue = const [],
+    this.recentServices = const [],
     this.currentToken,
-    required this.counter,
-    required this.allCounter,
-    required this.showReview,
+    this.counter,
+    this.allCounter = const [],
+    this.showReview = false,
+    this.errorMessage,
   });
 
-  ServiceAgentLoaded copyWith({
+  ServiceAgentState copyWith({
+    ServiceAgentStatus? status,
+    CurrentTokenStatus? currentTokenStatus,
     List<TokenModel>? queue,
     List<ServiceHistory>? recentServices,
     TokenModel? currentToken,
     CounterModel? counter,
     List<CounterModel>? allCounter,
     bool? showReview,
+    String? errorMessage,
   }) {
-    return ServiceAgentLoaded(
+    return ServiceAgentState(
+      status: status ?? this.status,
+      currentTokenStatus: currentTokenStatus ?? this.currentTokenStatus,
       queue: queue ?? this.queue,
       recentServices: recentServices ?? this.recentServices,
       currentToken: currentToken ?? this.currentToken,
       counter: counter ?? this.counter,
       allCounter: allCounter ?? this.allCounter,
       showReview: showReview ?? this.showReview,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
-}
-
-class ServiceAgentError extends ServiceAgentState {
-  final String message;
-
-  const ServiceAgentError(this.message);
 }

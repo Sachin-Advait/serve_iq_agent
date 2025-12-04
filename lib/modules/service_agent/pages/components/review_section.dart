@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 
 class ReviewSection extends StatefulWidget {
-  final ServiceAgentLoaded state;
+  final ServiceAgentState state;
 
   const ReviewSection({super.key, required this.state});
 

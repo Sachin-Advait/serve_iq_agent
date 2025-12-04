@@ -5,14 +5,14 @@ import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.da
 import 'package:servelq_agent/services/session_manager.dart';
 
 class Header extends StatelessWidget {
-  final ServiceAgentLoaded state;
+  final ServiceAgentState state;
 
   const Header({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
     final branch = state.counter;
-    final displayText = '${branch.name} - ${branch.code}';
+    final displayText = '${branch?.name} - ${branch?.code}';
 
     return Container(
       decoration: const BoxDecoration(

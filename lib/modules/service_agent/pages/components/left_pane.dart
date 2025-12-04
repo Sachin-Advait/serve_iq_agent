@@ -1,51 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/modules/service_agent/pages/components/widgets.dart';
 
 class LeftPane extends StatelessWidget {
-  final ServiceAgentLoaded state;
-
-  const LeftPane({super.key, required this.state});
+  const LeftPane({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  QueueCard(
-                    label: 'Total Waiting',
-                    value: state.queue.length.toString(),
-                    color: Colors.blue,
-                    icon: Icons.people_outline,
+    return BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
+      builder: (context, state) {
+        return Container(
+          color: Colors.white,
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      QueueCard(
+                        label: 'Total Waiting',
+                        value: state.queue.length.toString(),
+                        color: Colors.blue,
+                        icon: Icons.people_outline,
+                      ),
+                      const SizedBox(height: 16),
+                      QueueCard(
+                        label: 'Avg Wait Time',
+                        value: "5", // Replace with actual calculation
+                        color: Colors.teal,
+                        icon: Icons.access_time,
+                      ),
+                      const SizedBox(height: 24),
+                      if (state.currentTokenStatus == CurrentTokenStatus.loaded)
+                        _buildCurrentTokenCard(state),
+                      const SizedBox(height: 24),
+                      _buildUpcomingTokens(state),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  QueueCard(
-                    label: 'Avg Wait Time',
-                    value: "5", // Replace with actual calculation
-                    color: Colors.teal,
-                    icon: Icons.access_time,
-                  ),
-                  const SizedBox(height: 24),
-                  if (state.currentToken != null) _buildCurrentTokenCard(state),
-                  const SizedBox(height: 24),
-                  _buildUpcomingTokens(state),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildCurrentTokenCard(ServiceAgentLoaded state) {
+  Widget _buildCurrentTokenCard(ServiceAgentState state) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -89,7 +93,7 @@ class LeftPane extends StatelessWidget {
     );
   }
 
-  Widget _buildUpcomingTokens(ServiceAgentLoaded state) {
+  Widget _buildUpcomingTokens(ServiceAgentState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

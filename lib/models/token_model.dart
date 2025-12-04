@@ -5,20 +5,20 @@ class TokenModel {
   final String serviceCode;
   final String status;
   final int waitingCount;
-  final DateTime createdAt;
-  final DateTime estimatedTime;
+  final DateTime? createdAt;
+  final DateTime? estimatedTime;
   final String civilId;
 
   TokenModel({
-    required this.id,
-    required this.token,
-    required this.serviceName,
-    required this.serviceCode,
-    required this.status,
-    required this.waitingCount,
-    required this.createdAt,
-    required this.estimatedTime,
-    required this.civilId,
+    this.id = '',
+    this.token = '',
+    this.serviceName = '',
+    this.serviceCode = '',
+    this.status = '',
+    this.waitingCount = 0,
+    this.createdAt,
+    this.estimatedTime,
+    this.civilId = '',
   });
 
   factory TokenModel.fromJson(Map<String, dynamic> json) {
@@ -38,14 +38,18 @@ class TokenModel {
 
   /// Derived computed field: human-readable remaining time
   String get formattedWaitTime {
-    final diff = estimatedTime.difference(DateTime.now()).inMinutes;
-    if (diff <= 0) return "Now";
-    if (diff < 60) {
-      return "$diff min";
+    if (estimatedTime != null) {
+      final diff = estimatedTime!.difference(DateTime.now()).inMinutes;
+      if (diff <= 0) return "Now";
+      if (diff < 60) {
+        return "$diff min";
+      } else {
+        final hours = diff ~/ 60;
+        final minutes = diff % 60;
+        return minutes > 0 ? "$hours h $minutes min" : "$hours h";
+      }
     } else {
-      final hours = diff ~/ 60;
-      final minutes = diff % 60;
-      return minutes > 0 ? "$hours h $minutes min" : "$hours h";
+      return 'N/A';
     }
   }
 }

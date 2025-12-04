@@ -6,7 +6,7 @@ import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 
 class TransferDialog extends StatefulWidget {
-  final ServiceAgentLoaded state;
+  final ServiceAgentState state;
 
   const TransferDialog({super.key, required this.state});
 
@@ -24,7 +24,7 @@ class _TransferDialogState extends State<TransferDialog> {
     return widget.state.allCounter
         .where(
           (counter) =>
-              counter.id != widget.state.counter.id &&
+              counter.id != widget.state.counter?.id &&
               (counter.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
                   counter.code.toLowerCase().contains(
                     searchQuery.toLowerCase(),
@@ -225,7 +225,7 @@ class _TransferDialogState extends State<TransferDialog> {
                 if (isSelected)
                   const Icon(
                     Icons.check_circle,
-                    color: Color(0xFF8B5CF6),
+                    color: AppColors.primary,
                     size: 24,
                   )
                 else

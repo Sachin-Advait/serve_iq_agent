@@ -13,10 +13,10 @@ part 'service_agent_state.dart';
 class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   final AgentRepository agentRepository;
 
-  ServiceAgentCubit(this.agentRepository) : super(ServiceAgentInitial());
+  ServiceAgentCubit(this.agentRepository) : super(const ServiceAgentState());
 
   Future<void> loadInitialData() async {
-    emit(ServiceAgentLoading());
+    emit(state.copyWith(status: ServiceAgentStatus.loading));
     await loadingData();
   }
 
@@ -26,8 +26,6 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       final queueFuture = agentRepository.getQueue();
       final recentServicesFuture = agentRepository.getRecentServices();
       final allCounterFuture = agentRepository.getAllCounters();
-
-      // Check for active token
       final activeTokenFuture = agentRepository.counterActiveToken();
 
       final results = await Future.wait([
@@ -45,59 +43,47 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       final activeToken = results[4] as TokenModel?;
 
       emit(
-        ServiceAgentLoaded(
+        ServiceAgentState(
+          status: ServiceAgentStatus.loaded,
+          currentTokenStatus: activeToken?.id != null
+              ? CurrentTokenStatus.loaded
+              : CurrentTokenStatus.initial,
           counter: counter,
           queue: queue,
           recentServices: recentServices,
-          currentToken: activeToken, // Use active token if exists
+          currentToken: activeToken,
           allCounter: allCounter,
           showReview: false,
         ),
       );
     } catch (e) {
-      emit(ServiceAgentError('Failed to load data: ${e.toString()}'));
+      emit(
+        state.copyWith(
+          status: ServiceAgentStatus.error,
+          errorMessage: 'Failed to load data: ${e.toString()}',
+        ),
+      );
     }
   }
 
   Future<void> queueAPI() async {
-    final currentState = state;
-    if (currentState is! ServiceAgentLoaded) return;
-
-    try {
-      final queue = await agentRepository.getQueue();
-
-      emit(
-        currentState.copyWith(
-          queue: queue,
-          showReview: (state is ServiceAgentLoaded)
-              ? (state as ServiceAgentLoaded).showReview
-              : false,
-        ),
-      );
-    } catch (e) {
-      // Don't emit error for queue updates, just log
-      print('Queue update failed: $e');
-    }
+    if (state.status != ServiceAgentStatus.loaded) return;
+    final queue = await agentRepository.getQueue();
+    emit(state.copyWith(queue: queue));
   }
 
   Future<void> callNext() async {
     try {
       customLoader();
 
-      final currentState = state;
-      if (currentState is! ServiceAgentLoaded) return;
-
-      // Call next token
       final nextToken = await agentRepository.callNext();
-
-      // Reload queue after calling next
-      final updatedQueue = await agentRepository.getQueue();
-
-      emit(currentState.copyWith(queue: updatedQueue, currentToken: nextToken));
-    } catch (e) {
-      emit(ServiceAgentError(e.toString()));
-      // Reload to recover state
-      await loadInitialData();
+      emit(
+        state.copyWith(
+          status: ServiceAgentStatus.loaded,
+          currentToken: nextToken,
+          currentTokenStatus: CurrentTokenStatus.loaded,
+        ),
+      );
     } finally {
       EasyLoading.dismiss();
     }
@@ -106,46 +92,21 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   Future<void> completeService() async {
     try {
       customLoader();
-
-      final currentState = state;
-      if (currentState is! ServiceAgentLoaded ||
-          currentState.currentToken == null) {
-        return;
-      }
-
-      final tokenId = currentState.currentToken!.id;
+      final tokenId = state.currentToken!.id;
 
       // Complete the current service
       await agentRepository.completeService(tokenId);
-
-      // Reload queue and recent services
-      final updatedQueue = await agentRepository.getQueue();
       final updatedRecentServices = await agentRepository.getRecentServices();
 
-      final activeToken = await agentRepository.counterActiveToken();
-      if (activeToken == null) {
-        emit(ServiceAgentLoading());
-      }
-
-      await Future.delayed(Duration(milliseconds: 500));
-
       emit(
-        ServiceAgentLoaded(
-          queue: updatedQueue,
+        state.copyWith(
+          currentTokenStatus: CurrentTokenStatus.initial,
           recentServices: updatedRecentServices,
-          counter: currentState.counter,
-          allCounter: currentState.allCounter,
+          currentToken: TokenModel(),
           showReview: false,
         ),
       );
-
-      // Show message if there's another active token
-      if (activeToken != null) {
-        flutterToast(message: 'Active token detected: ${activeToken.token}');
-      }
     } catch (e) {
-      emit(ServiceAgentError(e.toString()));
-      // Reload to recover state
       await loadInitialData();
     } finally {
       EasyLoading.dismiss();
@@ -154,16 +115,10 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
 
   Future<void> submitReview(int rating, String review) async {
     try {
-      final currentState = state;
-      if (currentState is! ServiceAgentLoaded ||
-          currentState.currentToken == null) {
-        return;
-      }
-
       // Submit feedback to API
       await agentRepository.submitFeedback(
-        tokenId: currentState.currentToken!.id,
-        counterCode: currentState.counter.code,
+        tokenId: state.currentToken!.id,
+        counterCode: state.counter!.code,
         rating: rating,
         review: review,
       );
@@ -174,57 +129,39 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       // Now complete the service and check for active token
       await completeService();
     } catch (e) {
-      emit(ServiceAgentError('Failed to submit review: ${e.toString()}'));
+      emit(
+        state.copyWith(
+          status: ServiceAgentStatus.error,
+          errorMessage: 'Failed to submit review: ${e.toString()}',
+        ),
+      );
     }
   }
 
   Future<void> recallCurrentToken() async {
     try {
       customLoader();
-      final currentState = state;
-      if (currentState is! ServiceAgentLoaded ||
-          currentState.currentToken == null) {
-        return;
-      }
+      final tokenId = state.currentToken!.id;
 
-      final tokenId = currentState.currentToken!.id;
-
-      // Call the recall API from repository
       final recalledToken = await agentRepository.recallToken(tokenId);
 
-      // Reload queue and recent services
-      final updatedQueue = await agentRepository.getQueue();
-      final updatedRecentServices = await agentRepository.getRecentServices();
-
-      emit(
-        currentState.copyWith(
-          queue: updatedQueue,
-          recentServices: updatedRecentServices,
-          currentToken: recalledToken,
-        ),
-      );
+      emit(state.copyWith(currentToken: recalledToken));
       flutterToast(message: 'Token successfully recalled');
-    } catch (e) {
-      emit(ServiceAgentError(e.toString()));
-      // Reload to recover state
-      await loadInitialData();
     } finally {
       EasyLoading.dismiss();
     }
   }
 
   void showReviewSection() {
-    final currentState = state;
-    if (currentState is ServiceAgentLoaded &&
-        currentState.currentToken != null) {
-      emit(currentState.copyWith(showReview: true));
+    if (state.status == ServiceAgentStatus.loaded &&
+        state.currentToken != null) {
+      emit(state.copyWith(showReview: true));
     }
   }
 
   void hideReviewSection() {
-    final currentState = state;
-    if (currentState is ServiceAgentLoaded) {
-      emit(currentState.copyWith(showReview: false));
+    if (state.status == ServiceAgentStatus.loaded) {
+      emit(state.copyWith(showReview: false));
     }
   }
 
@@ -232,28 +169,19 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
     try {
       customLoader();
 
-      final currentState = state;
-      if (currentState is! ServiceAgentLoaded ||
-          currentState.currentToken == null) {
-        return;
-      }
-
-      final tokenId = currentState.currentToken!.id;
-
-      // Transfer the service
+      final tokenId = state.currentToken!.id;
       await agentRepository.transferService(tokenId, counterId);
 
-      // Check for any active token after transfer
-      agentRepository.counterActiveToken();
-
-      // Reload all data
-      await loadInitialData();
+      emit(
+        state.copyWith(
+          currentTokenStatus: CurrentTokenStatus.initial,
+          currentToken: TokenModel(),
+        ),
+      );
 
       flutterToast(message: 'Token successfully transferred');
     } catch (e) {
-      emit(ServiceAgentError(e.toString()));
-      // Reload to recover state
-      await loadInitialData();
+      flutterToast(message: 'Error while transfering. Please try again');
     } finally {
       EasyLoading.dismiss();
     }
@@ -264,18 +192,15 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
     try {
       customLoader();
 
-      final currentState = state;
-      if (currentState is! ServiceAgentLoaded) return;
+      if (state.status != ServiceAgentStatus.loaded) return;
 
       final activeToken = await agentRepository.counterActiveToken();
 
-      if (currentState.currentToken?.id != activeToken?.id) {
+      if (state.currentToken?.id != activeToken?.id) {
         // If we have a new active token different from current
         final updatedQueue = await agentRepository.getQueue();
 
-        emit(
-          currentState.copyWith(currentToken: activeToken, queue: updatedQueue),
-        );
+        emit(state.copyWith(currentToken: activeToken, queue: updatedQueue));
         if (activeToken != null) {
           flutterToast(message: 'Active token loaded: ${activeToken.token}');
         }

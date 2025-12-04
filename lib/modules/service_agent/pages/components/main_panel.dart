@@ -6,7 +6,7 @@ import 'package:servelq_agent/modules/service_agent/pages/components/review_sect
 import 'package:servelq_agent/modules/service_agent/pages/components/widgets.dart';
 
 class MainPanel extends StatelessWidget {
-  final ServiceAgentLoaded state;
+  final ServiceAgentState state;
 
   const MainPanel({super.key, required this.state});
 
@@ -21,7 +21,7 @@ class MainPanel extends StatelessWidget {
             // Show review section if enabled, otherwise show token info or empty state
             if (state.showReview)
               ReviewSection(state: state)
-            else if (state.currentToken != null)
+            else if (state.currentToken?.civilId != null)
               _buildCurrentTokenInfo(state)
             else
               _buildEmptyState(context, state),
@@ -35,7 +35,7 @@ class MainPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, ServiceAgentLoaded state) {
+  Widget _buildEmptyState(BuildContext context, ServiceAgentState state) {
     return Container(
       padding: const EdgeInsets.all(48),
       decoration: BoxDecoration(
@@ -67,7 +67,7 @@ class MainPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildCurrentTokenInfo(ServiceAgentLoaded state) {
+  Widget _buildCurrentTokenInfo(ServiceAgentState state) {
     final token = state.currentToken!;
     return Container(
       padding: const EdgeInsets.all(28),
@@ -154,7 +154,7 @@ class MainPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildHistoryPanel(ServiceAgentLoaded state) {
+  Widget _buildHistoryPanel(ServiceAgentState state) {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(

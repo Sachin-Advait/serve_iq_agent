@@ -5,7 +5,7 @@ import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.da
 import 'package:servelq_agent/modules/service_agent/pages/components/transfer_dialog.dart';
 
 class ActionButtons extends StatelessWidget {
-  final ServiceAgentLoaded state;
+  final ServiceAgentState state;
 
   const ActionButtons({super.key, required this.state});
 
@@ -15,7 +15,6 @@ class ActionButtons extends StatelessWidget {
     if (state.showReview) {
       return const SizedBox.shrink();
     }
-
     return Row(
       children: [
         Expanded(
@@ -25,7 +24,10 @@ class ActionButtons extends StatelessWidget {
             Icons.play_arrow_rounded,
             const Color(0xFF10B981),
             () => context.read<ServiceAgentCubit>().callNext(),
-            enabled: state.queue.isNotEmpty && state.currentToken == null,
+            enabled:
+                state.queue.isNotEmpty &&
+                (state.currentToken?.id == null ||
+                    state.currentTokenStatus == CurrentTokenStatus.initial),
           ),
         ),
         const SizedBox(width: 16),
@@ -36,7 +38,9 @@ class ActionButtons extends StatelessWidget {
             Icons.check_circle_outline_rounded,
             const Color(0xFF2563EB),
             () => context.read<ServiceAgentCubit>().showReviewSection(),
-            enabled: state.currentToken != null,
+            enabled:
+                state.currentToken?.id != null &&
+                state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),
         ),
         const SizedBox(width: 16),
@@ -47,7 +51,9 @@ class ActionButtons extends StatelessWidget {
             Icons.refresh_rounded,
             const Color(0xFFF59E0B),
             () => context.read<ServiceAgentCubit>().recallCurrentToken(),
-            enabled: state.currentToken != null,
+            enabled:
+                state.currentToken?.id != null &&
+                state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),
         ),
         const SizedBox(width: 16),
@@ -69,7 +75,9 @@ class ActionButtons extends StatelessWidget {
                 },
               );
             },
-            enabled: state.currentToken != null,
+            enabled:
+                state.currentToken?.id != null &&
+                state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),
         ),
       ],
