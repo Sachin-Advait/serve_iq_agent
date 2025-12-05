@@ -53,7 +53,6 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
           recentServices: recentServices,
           currentToken: activeToken,
           allCounter: allCounter,
-          showReview: false,
         ),
       );
     } catch (e) {
@@ -103,38 +102,12 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
           currentTokenStatus: CurrentTokenStatus.initial,
           recentServices: updatedRecentServices,
           currentToken: TokenModel(),
-          showReview: false,
         ),
       );
     } catch (e) {
       await loadInitialData();
     } finally {
       EasyLoading.dismiss();
-    }
-  }
-
-  Future<void> submitReview(int rating, String review) async {
-    try {
-      // Submit feedback to API
-      await agentRepository.submitFeedback(
-        tokenId: state.currentToken!.id,
-        counterCode: state.counter!.code,
-        rating: rating,
-        review: review,
-      );
-
-      // Hide review section
-      hideReviewSection();
-
-      // Now complete the service and check for active token
-      await completeService();
-    } catch (e) {
-      emit(
-        state.copyWith(
-          status: ServiceAgentStatus.error,
-          errorMessage: 'Failed to submit review: ${e.toString()}',
-        ),
-      );
     }
   }
 
@@ -149,19 +122,6 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       flutterToast(message: 'Token successfully recalled');
     } finally {
       EasyLoading.dismiss();
-    }
-  }
-
-  void showReviewSection() {
-    if (state.status == ServiceAgentStatus.loaded &&
-        state.currentToken != null) {
-      emit(state.copyWith(showReview: true));
-    }
-  }
-
-  void hideReviewSection() {
-    if (state.status == ServiceAgentStatus.loaded) {
-      emit(state.copyWith(showReview: false));
     }
   }
 

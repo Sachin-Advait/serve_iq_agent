@@ -94,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Logo Section
-                Image.asset("assets/images/logo.png", height: 140),
+                Image.asset("assets/images/logo.png", height: 90),
                 const SizedBox(height: 40),
                 // Login Form
                 _buildTextField(
@@ -151,7 +151,10 @@ class _LoginScreenState extends State<LoginScreen> {
       obscureText: obscureText,
       enabled: enabled,
       decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: const Color(0xFF2563EB), size: 28),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+          child: Icon(icon, color: const Color(0xFF2563EB), size: 28),
+        ),
         suffixIcon: suffixIcon,
         labelText: label,
         labelStyle: const TextStyle(color: Color(0xFF6B7280), fontSize: 18),

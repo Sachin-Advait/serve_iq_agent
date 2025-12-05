@@ -13,7 +13,6 @@ class ServiceAgentState {
   final TokenModel? currentToken;
   final CounterModel? counter;
   final List<CounterModel> allCounter;
-  final bool showReview;
   final String? errorMessage;
 
   const ServiceAgentState({
@@ -24,7 +23,6 @@ class ServiceAgentState {
     this.currentToken,
     this.counter,
     this.allCounter = const [],
-    this.showReview = false,
     this.errorMessage,
   });
 
@@ -36,7 +34,6 @@ class ServiceAgentState {
     TokenModel? currentToken,
     CounterModel? counter,
     List<CounterModel>? allCounter,
-    bool? showReview,
     String? errorMessage,
   }) {
     return ServiceAgentState(
@@ -47,7 +44,6 @@ class ServiceAgentState {
       currentToken: currentToken ?? this.currentToken,
       counter: counter ?? this.counter,
       allCounter: allCounter ?? this.allCounter,
-      showReview: showReview ?? this.showReview,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }

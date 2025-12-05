@@ -87,7 +87,7 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F9FA),
+        backgroundColor: Colors.transparent,
         resizeToAvoidBottomInset: false,
         body: Column(
           children: [

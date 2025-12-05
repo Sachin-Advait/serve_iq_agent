@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/modules/service_agent/pages/components/action_buttons.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/review_section.dart'; // Add this import
 import 'package:servelq_agent/modules/service_agent/pages/components/widgets.dart';
 
 class MainPanel extends StatelessWidget {
@@ -13,15 +12,13 @@ class MainPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       color: const Color(0xFFF8F9FA),
-      padding: const EdgeInsets.all(28),
       child: SingleChildScrollView(
         child: Column(
           children: [
-            // Show review section if enabled, otherwise show token info or empty state
-            if (state.showReview)
-              ReviewSection(state: state)
-            else if (state.currentToken?.civilId != null)
+            SizedBox(height: 20),
+            if (state.currentToken?.civilId != null)
               _buildCurrentTokenInfo(state)
             else
               _buildEmptyState(context, state),
@@ -29,6 +26,7 @@ class MainPanel extends StatelessWidget {
             ActionButtons(state: state),
             const SizedBox(height: 28),
             _buildHistoryPanel(state),
+            SizedBox(height: 20),
           ],
         ),
       ),

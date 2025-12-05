@@ -28,7 +28,7 @@ class Splash extends StatelessWidget {
           children: [
             Container(
               alignment: Alignment.center,
-              child: Image.asset("assets/images/logo.png", height: 200),
+              child: Image.asset("assets/images/logo.png", height: 150),
             ),
           ],
         ),

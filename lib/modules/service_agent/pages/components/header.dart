@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servelq_agent/configs/app_colors.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/services/session_manager.dart';
@@ -20,7 +19,7 @@ class Header extends StatelessWidget {
           colors: [AppColors.primary, AppColors.secondary],
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
+      padding: const EdgeInsets.all(20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -84,13 +83,6 @@ class Header extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              IconButton(
-                icon: const Icon(Icons.refresh, color: Colors.white),
-                onPressed: () {
-                  context.read<ServiceAgentCubit>().loadingData();
-                },
-                iconSize: 24,
-              ),
               IconButton(
                 icon: const Icon(
                   Icons.notifications_outlined,

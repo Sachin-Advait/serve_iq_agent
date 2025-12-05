@@ -11,10 +11,6 @@ class ActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Don't show action buttons when review section is shown
-    if (state.showReview) {
-      return const SizedBox.shrink();
-    }
     return Row(
       children: [
         Expanded(
@@ -37,7 +33,7 @@ class ActionButtons extends StatelessWidget {
             'Complete',
             Icons.check_circle_outline_rounded,
             const Color(0xFF2563EB),
-            () => context.read<ServiceAgentCubit>().showReviewSection(),
+            () => context.read<ServiceAgentCubit>().completeService(),
             enabled:
                 state.currentToken?.id != null &&
                 state.currentTokenStatus == CurrentTokenStatus.loaded,
