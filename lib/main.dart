@@ -10,11 +10,9 @@ import 'package:go_router/go_router.dart';
 import 'package:servelq_agent/configs/get_it.dart';
 import 'package:servelq_agent/configs/lang/cubit/localization_cubit.dart';
 import 'package:servelq_agent/routes/routes.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await WakelockPlus.enable();
 
   setUrlStrategy(PathUrlStrategy());
   GoRouter.optionURLReflectsImperativeAPIs = true;

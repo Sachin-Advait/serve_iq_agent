@@ -141,7 +141,7 @@ class LeftPane extends StatelessWidget {
           )
         else
           ...state.queue
-              .take(3)
+              .take(6)
               .map(
                 (token) => Container(
                   margin: const EdgeInsets.only(bottom: 10),

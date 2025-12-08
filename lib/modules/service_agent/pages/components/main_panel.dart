@@ -18,7 +18,7 @@ class MainPanel extends StatelessWidget {
         child: Column(
           children: [
             SizedBox(height: 20),
-            if (state.currentToken?.civilId != null)
+            if (state.currentToken?.mobileNumber != null)
               _buildCurrentTokenInfo(state)
             else
               _buildEmptyState(context, state),
@@ -98,7 +98,7 @@ class MainPanel extends StatelessWidget {
               Expanded(
                 child: InfoField(
                   label: 'Civil Id',
-                  value: token.civilId,
+                  value: token.mobileNumber,
                   icon: Icons.person_outline,
                 ),
               ),

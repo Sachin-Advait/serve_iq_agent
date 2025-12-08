@@ -7,6 +7,7 @@ import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
 import 'package:servelq_agent/models/token_model.dart';
 import 'package:servelq_agent/modules/service_agent/repository/agent_repo.dart';
+import 'package:servelq_agent/services/web_socket_service.dart';
 
 part 'service_agent_state.dart';
 
@@ -18,51 +19,72 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   Future<void> loadInitialData() async {
     emit(state.copyWith(status: ServiceAgentStatus.loading));
     await loadingData();
+
+    // After counter is loaded → initialize WebSocket
+    if (state.counter != null) {
+      WebSocketService.connect(
+        counterId: state.counter!.id,
+        onUpcomingUpdate: (data) {
+          debugPrint("Upcoming queue update received");
+
+          try {
+            final List<TokenModel> queue = data
+                .map<TokenModel>(
+                  (json) => TokenModel.fromJson(json as Map<String, dynamic>),
+                )
+                .toList();
+
+            // Actually update the state
+            emit(state.copyWith(queue: queue));
+
+            debugPrint("Queue updated with ${queue.length} tokens");
+          } catch (e, stackTrace) {
+            debugPrint("Error parsing token data: $e");
+            debugPrint("StackTrace: $stackTrace");
+            debugPrint("Data type: ${data.runtimeType}");
+            debugPrint(
+              "First item type: ${data.isNotEmpty ? data.first.runtimeType : 'empty'}",
+            );
+          }
+        },
+      );
+    }
   }
 
   Future<void> loadingData() async {
-    try {
-      final counterFuture = agentRepository.getCounter();
-      final queueFuture = agentRepository.getQueue();
-      final recentServicesFuture = agentRepository.getRecentServices();
-      final allCounterFuture = agentRepository.getAllCounters();
-      final activeTokenFuture = agentRepository.counterActiveToken();
+    final counterFuture = agentRepository.getCounter();
+    final queueFuture = agentRepository.getQueue();
+    final recentServicesFuture = agentRepository.getRecentServices();
+    final allCounterFuture = agentRepository.getAllCounters();
+    final activeTokenFuture = agentRepository.counterActiveToken();
 
-      final results = await Future.wait([
-        counterFuture,
-        queueFuture,
-        recentServicesFuture,
-        allCounterFuture,
-        activeTokenFuture,
-      ]);
+    final results = await Future.wait([
+      counterFuture,
+      queueFuture,
+      recentServicesFuture,
+      allCounterFuture,
+      activeTokenFuture,
+    ]);
 
-      final counter = results[0] as CounterModel;
-      final queue = results[1] as List<TokenModel>;
-      final recentServices = results[2] as List<ServiceHistory>;
-      final allCounter = results[3] as List<CounterModel>;
-      final activeToken = results[4] as TokenModel?;
+    final counter = results[0] as CounterModel;
+    final queue = results[1] as List<TokenModel>;
+    final recentServices = results[2] as List<ServiceHistory>;
+    final allCounter = results[3] as List<CounterModel>;
+    final activeToken = results[4] as TokenModel?;
 
-      emit(
-        ServiceAgentState(
-          status: ServiceAgentStatus.loaded,
-          currentTokenStatus: activeToken?.id != null
-              ? CurrentTokenStatus.loaded
-              : CurrentTokenStatus.initial,
-          counter: counter,
-          queue: queue,
-          recentServices: recentServices,
-          currentToken: activeToken,
-          allCounter: allCounter,
-        ),
-      );
-    } catch (e) {
-      emit(
-        state.copyWith(
-          status: ServiceAgentStatus.error,
-          errorMessage: 'Failed to load data: ${e.toString()}',
-        ),
-      );
-    }
+    emit(
+      ServiceAgentState(
+        status: ServiceAgentStatus.loaded,
+        currentTokenStatus: activeToken?.id != null
+            ? CurrentTokenStatus.loaded
+            : CurrentTokenStatus.initial,
+        counter: counter,
+        queue: queue,
+        recentServices: recentServices,
+        currentToken: activeToken,
+        allCounter: allCounter,
+      ),
+    );
   }
 
   Future<void> queueAPI() async {
@@ -168,5 +190,11 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
     } finally {
       EasyLoading.dismiss();
     }
+  }
+
+  @override
+  Future<void> close() {
+    WebSocketService.disconnect();
+    return super.close();
   }
 }

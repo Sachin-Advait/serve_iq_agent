@@ -1,6 +1,4 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:servelq_agent/configs/api_constants.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
 import 'package:servelq_agent/models/token_model.dart';
@@ -14,11 +12,11 @@ class AgentRepository {
 
   Future<List<TokenModel>> getQueue() async {
     try {
-      final response = await Dio().get(
-        '${ApiConstants.baseUrl}/agent/counter/queue/${SessionManager.getCounter()}',
+      final response = await _apiClient.getApi(
+        'agent/counter/queue/${SessionManager.getCounter()}',
       );
 
-      if (response.statusCode == 200) {
+      if (response != null && response.statusCode == 200) {
         final data = response.data;
         if (data is List) {
           return data.map((json) => TokenModel.fromJson(json)).toList();
