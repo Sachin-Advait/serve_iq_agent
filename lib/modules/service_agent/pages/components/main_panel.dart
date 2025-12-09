@@ -18,7 +18,8 @@ class MainPanel extends StatelessWidget {
         child: Column(
           children: [
             SizedBox(height: 20),
-            if (state.currentToken?.mobileNumber != null)
+            if (state.currentToken?.mobileNumber != null &&
+                state.currentTokenStatus == CurrentTokenStatus.loaded)
               _buildCurrentTokenInfo(state)
             else
               _buildEmptyState(context, state),
