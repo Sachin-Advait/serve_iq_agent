@@ -67,7 +67,9 @@ class AgentRepository {
 
   Future<List<ServiceHistory>> getRecentServices() async {
     try {
-      final response = await _apiClient.getApi(ApiConstants.recentServices);
+      final response = await _apiClient.getApi(
+        ApiConstants.recentServices + SessionManager.getCounter(),
+      );
 
       if (response != null && response.statusCode == 200) {
         final data = response.data;
