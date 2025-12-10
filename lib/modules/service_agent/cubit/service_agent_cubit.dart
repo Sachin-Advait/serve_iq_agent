@@ -162,6 +162,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       );
 
       flutterToast(message: 'Token successfully transferred');
+      await queueAPI();
     } catch (e) {
       flutterToast(message: 'Error while transfering. Please try again');
     } finally {
