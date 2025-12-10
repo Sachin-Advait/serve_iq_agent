@@ -45,7 +45,7 @@ class ActionButtons extends StatelessWidget {
             context,
             'Recall',
             Icons.refresh_rounded,
-            const Color(0xFFF59E0B),
+            const Color(0xFF10B981),
             () => context.read<ServiceAgentCubit>().recallCurrentToken(),
             enabled:
                 state.currentToken?.id != null &&
@@ -58,7 +58,7 @@ class ActionButtons extends StatelessWidget {
             context,
             'Transfer',
             Icons.arrow_forward_rounded,
-            const Color(0xFF8B5CF6),
+            Color(0xFFDC2626),
             () {
               showDialog(
                 context: context,

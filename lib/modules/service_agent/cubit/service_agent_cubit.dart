@@ -52,39 +52,43 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   }
 
   Future<void> loadingData() async {
-    final counterFuture = agentRepository.getCounter();
-    final queueFuture = agentRepository.getQueue();
-    final recentServicesFuture = agentRepository.getRecentServices();
-    final allCounterFuture = agentRepository.getAllCounters();
-    final activeTokenFuture = agentRepository.counterActiveToken();
+    try {
+      final counterFuture = agentRepository.getCounter();
+      final queueFuture = agentRepository.getQueue();
+      final recentServicesFuture = agentRepository.getRecentServices();
+      final allCounterFuture = agentRepository.getAllCounters();
+      final activeTokenFuture = agentRepository.counterActiveToken();
 
-    final results = await Future.wait([
-      counterFuture,
-      queueFuture,
-      recentServicesFuture,
-      allCounterFuture,
-      activeTokenFuture,
-    ]);
+      final results = await Future.wait([
+        counterFuture,
+        queueFuture,
+        recentServicesFuture,
+        allCounterFuture,
+        activeTokenFuture,
+      ]);
 
-    final counter = results[0] as CounterModel;
-    final queue = results[1] as List<TokenModel>;
-    final recentServices = results[2] as List<ServiceHistory>;
-    final allCounter = results[3] as List<CounterModel>;
-    final activeToken = results[4] as TokenModel?;
+      final counter = results[0] as CounterModel;
+      final queue = results[1] as List<TokenModel>;
+      final recentServices = results[2] as List<ServiceHistory>;
+      final allCounter = results[3] as List<CounterModel>;
+      final activeToken = results[4] as TokenModel?;
 
-    emit(
-      ServiceAgentState(
-        status: ServiceAgentStatus.loaded,
-        currentTokenStatus: activeToken?.id != null
-            ? CurrentTokenStatus.loaded
-            : CurrentTokenStatus.initial,
-        counter: counter,
-        queue: queue,
-        recentServices: recentServices,
-        currentToken: activeToken,
-        allCounter: allCounter,
-      ),
-    );
+      emit(
+        ServiceAgentState(
+          status: ServiceAgentStatus.loaded,
+          currentTokenStatus: activeToken?.id != null
+              ? CurrentTokenStatus.loaded
+              : CurrentTokenStatus.initial,
+          counter: counter,
+          queue: queue,
+          recentServices: recentServices,
+          currentToken: activeToken,
+          allCounter: allCounter,
+        ),
+      );
+    } catch (e) {
+      emit(ServiceAgentState(status: ServiceAgentStatus.error));
+    }
   }
 
   Future<void> queueAPI() async {

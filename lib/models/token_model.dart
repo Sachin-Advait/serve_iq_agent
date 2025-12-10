@@ -5,6 +5,8 @@ class TokenModel {
   final String serviceId;
   final String status;
   final String mobileNumber;
+  final bool isTransfer;
+  final String? transferCounterName;
 
   TokenModel({
     this.id = '',
@@ -13,6 +15,8 @@ class TokenModel {
     this.serviceId = '',
     this.status = '',
     this.mobileNumber = '',
+    this.isTransfer = false,
+    this.transferCounterName,
   });
 
   factory TokenModel.fromJson(Map<String, dynamic> json) {
@@ -23,6 +27,8 @@ class TokenModel {
       serviceId: json['serviceId'] ?? '',
       status: json['status'] ?? 'WAITING',
       mobileNumber: json["mobileNumber"] ?? '',
+      isTransfer: json["isTransfer"] ?? false,
+      transferCounterName: json["transferCounterName"] ?? false,
     );
   }
 }
