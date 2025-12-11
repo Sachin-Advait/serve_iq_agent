@@ -28,7 +28,7 @@ class TokenModel {
       status: json['status'] ?? 'WAITING',
       mobileNumber: json["mobileNumber"] ?? '',
       isTransfer: json["isTransfer"] ?? false,
-      transferCounterName: json["transferCounterName"] ?? false,
+      transferCounterName: json["transferCounterName"] ?? '',
     );
   }
 }

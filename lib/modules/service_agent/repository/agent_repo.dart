@@ -40,7 +40,7 @@ class AgentRepository {
         if (data is Map<String, dynamic>) {
           final token = TokenModel.fromJson(data);
 
-          Future.delayed(const Duration(seconds: 5), () {
+          Future.delayed(const Duration(seconds: 10), () {
             startServing(token.id);
           });
 
@@ -135,7 +135,7 @@ class AgentRepository {
         if (data is Map<String, dynamic>) {
           final token = TokenModel.fromJson(data);
 
-          Future.delayed(const Duration(seconds: 5), () {
+          Future.delayed(const Duration(seconds: 10), () {
             startServing(token.id);
           });
 
@@ -173,9 +173,9 @@ class AgentRepository {
       if (data is Map<String, dynamic>) {
         final token = TokenModel.fromJson(data);
 
-        Future.delayed(const Duration(seconds: 5), () {
+        if (token.status == "CALLING") {
           startServing(token.id);
-        });
+        }
 
         return token;
       }

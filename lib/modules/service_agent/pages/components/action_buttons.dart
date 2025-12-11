@@ -1,13 +1,48 @@
 // components/action_buttons.dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/modules/service_agent/pages/components/transfer_dialog.dart';
 
-class ActionButtons extends StatelessWidget {
+class ActionButtons extends StatefulWidget {
   final ServiceAgentState state;
 
   const ActionButtons({super.key, required this.state});
+
+  @override
+  State<ActionButtons> createState() => _ActionButtonsState();
+}
+
+class _ActionButtonsState extends State<ActionButtons> {
+  Timer? _completeButtonTimer;
+  int _remainingSeconds = 0;
+  bool _isCompleteButtonDisabled = false;
+
+  @override
+  void dispose() {
+    _completeButtonTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startCompleteButtonTimer() {
+    setState(() {
+      _isCompleteButtonDisabled = true;
+      _remainingSeconds = 20;
+    });
+
+    _completeButtonTimer?.cancel();
+    _completeButtonTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _remainingSeconds--;
+        if (_remainingSeconds <= 0) {
+          _isCompleteButtonDisabled = false;
+          timer.cancel();
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,24 +54,31 @@ class ActionButtons extends StatelessWidget {
             'Call Next',
             Icons.play_arrow_rounded,
             const Color(0xFF10B981),
-            () => context.read<ServiceAgentCubit>().callNext(),
+            () async {
+              await context.read<ServiceAgentCubit>().callNext();
+              _startCompleteButtonTimer();
+            },
             enabled:
-                state.queue.isNotEmpty &&
-                (state.currentToken?.id == null ||
-                    state.currentTokenStatus == CurrentTokenStatus.initial),
+                widget.state.queue.isNotEmpty &&
+                (widget.state.currentToken?.id == null ||
+                    widget.state.currentTokenStatus ==
+                        CurrentTokenStatus.initial),
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: _buildActionButton(
             context,
-            'Complete',
+            _isCompleteButtonDisabled
+                ? 'Complete ($_remainingSeconds)'
+                : 'Complete',
             Icons.check_circle_outline_rounded,
             const Color(0xFF2563EB),
             () => context.read<ServiceAgentCubit>().completeService(),
             enabled:
-                state.currentToken?.id != null &&
-                state.currentTokenStatus == CurrentTokenStatus.loaded,
+                !_isCompleteButtonDisabled &&
+                widget.state.currentToken?.id != null &&
+                widget.state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),
         ),
         const SizedBox(width: 16),
@@ -46,10 +88,13 @@ class ActionButtons extends StatelessWidget {
             'Recall',
             Icons.refresh_rounded,
             const Color(0xFF10B981),
-            () => context.read<ServiceAgentCubit>().recallCurrentToken(),
+            () async {
+              await context.read<ServiceAgentCubit>().recallCurrentToken();
+              _startCompleteButtonTimer();
+            },
             enabled:
-                state.currentToken?.id != null &&
-                state.currentTokenStatus == CurrentTokenStatus.loaded,
+                widget.state.currentToken?.id != null &&
+                widget.state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),
         ),
         const SizedBox(width: 16),
@@ -58,7 +103,7 @@ class ActionButtons extends StatelessWidget {
             context,
             'Transfer',
             Icons.arrow_forward_rounded,
-            Color(0xFFDC2626),
+            const Color(0xFFDC2626),
             () {
               showDialog(
                 context: context,
@@ -66,14 +111,14 @@ class ActionButtons extends StatelessWidget {
                 builder: (BuildContext dialogContext) {
                   return BlocProvider.value(
                     value: context.read<ServiceAgentCubit>(),
-                    child: TransferDialog(state: state),
+                    child: TransferDialog(state: widget.state),
                   );
                 },
               );
             },
             enabled:
-                state.currentToken?.id != null &&
-                state.currentTokenStatus == CurrentTokenStatus.loaded,
+                widget.state.currentToken?.id != null &&
+                widget.state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),
         ),
       ],

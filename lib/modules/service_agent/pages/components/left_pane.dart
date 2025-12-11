@@ -34,10 +34,12 @@ class LeftPane extends StatelessWidget {
                         color: Colors.teal,
                         icon: Icons.access_time,
                       ),
-                      const SizedBox(height: 24),
-                      if (state.currentTokenStatus == CurrentTokenStatus.loaded)
+
+                      if (state.currentTokenStatus ==
+                          CurrentTokenStatus.loaded) ...[
+                        const SizedBox(height: 24),
                         _buildCurrentTokenCard(state),
-                      const SizedBox(height: 24),
+                      ],
                       _buildTransferredTokens(state),
                       const SizedBox(height: 24),
                       _buildUpcomingTokens(state),
@@ -197,38 +199,38 @@ class LeftPane extends StatelessWidget {
     final transferredTokens = state.queue
         .where((token) => token.isTransfer)
         .toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFDC2626), AppColors.red],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Row(
-            children: [
-              Icon(Icons.swap_horiz, color: Colors.white, size: 16),
-              SizedBox(width: 8),
-              Text(
-                'Transferred Tokens',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                ),
+    if (transferredTokens.isNotEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFDC2626), AppColors.red],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
               ),
-            ],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.swap_horiz, color: Colors.white, size: 16),
+                SizedBox(width: 8),
+                Text(
+                  'Transferred Tokens',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        if (transferredTokens.isNotEmpty)
+          const SizedBox(height: 12),
           ...transferredTokens
               .take(6)
               .map(
@@ -269,7 +271,7 @@ class LeftPane extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'From: ${token.transferCounterName}',
+                              'From: Counter ${token.transferCounterName}',
                               style: const TextStyle(
                                 fontSize: 10,
                                 color: Color(0xFFDC2626),
@@ -285,7 +287,9 @@ class LeftPane extends StatelessWidget {
                   ),
                 ),
               ),
-      ],
-    );
+        ],
+      );
+    }
+    return SizedBox();
   }
 }
