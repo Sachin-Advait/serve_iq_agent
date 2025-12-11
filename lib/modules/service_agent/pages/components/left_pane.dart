@@ -38,9 +38,9 @@ class LeftPane extends StatelessWidget {
                       if (state.currentTokenStatus == CurrentTokenStatus.loaded)
                         _buildCurrentTokenCard(state),
                       const SizedBox(height: 24),
-                      _buildUpcomingTokens(state),
-                      const SizedBox(height: 24),
                       _buildTransferredTokens(state),
+                      const SizedBox(height: 24),
+                      _buildUpcomingTokens(state),
                     ],
                   ),
                 ),
