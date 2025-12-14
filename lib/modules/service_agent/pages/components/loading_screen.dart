@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:servelq_agent/configs/theme/app_colors.dart';
 
 class LoadingScreen extends StatelessWidget {
   const LoadingScreen({super.key});
@@ -11,7 +12,7 @@ class LoadingScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(color: Color(0xFF2563EB)),
+            const CircularProgressIndicator(color: AppColors.primary),
             const SizedBox(height: 20),
             Text(
               'Loading Agent Dashboard...',

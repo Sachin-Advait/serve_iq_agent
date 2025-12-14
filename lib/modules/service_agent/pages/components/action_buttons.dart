@@ -3,6 +3,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:servelq_agent/configs/assets/app_images.dart';
+import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/modules/service_agent/pages/components/transfer_dialog.dart';
 
@@ -52,7 +56,7 @@ class _ActionButtonsState extends State<ActionButtons> {
           child: _buildActionButton(
             context,
             'Call Next',
-            Icons.play_arrow_rounded,
+            AppImages.callNext,
             const Color(0xFF10B981),
             () async {
               await context.read<ServiceAgentCubit>().callNext();
@@ -72,8 +76,8 @@ class _ActionButtonsState extends State<ActionButtons> {
             _isCompleteButtonDisabled
                 ? 'Complete ($_remainingSeconds)'
                 : 'Complete',
-            Icons.check_circle_outline_rounded,
-            const Color(0xFF2563EB),
+            AppImages.complete,
+            AppColors.green,
             () => context.read<ServiceAgentCubit>().completeService(),
             enabled:
                 !_isCompleteButtonDisabled &&
@@ -86,8 +90,8 @@ class _ActionButtonsState extends State<ActionButtons> {
           child: _buildActionButton(
             context,
             'Recall',
-            Icons.refresh_rounded,
-            const Color(0xFF10B981),
+            AppImages.recall,
+            AppColors.brownDark,
             () async {
               await context.read<ServiceAgentCubit>().recallCurrentToken();
               _startCompleteButtonTimer();
@@ -102,8 +106,8 @@ class _ActionButtonsState extends State<ActionButtons> {
           child: _buildActionButton(
             context,
             'Transfer',
-            Icons.arrow_forward_rounded,
-            const Color(0xFFDC2626),
+            AppImages.transferred,
+            AppColors.red,
             () {
               showDialog(
                 context: context,
@@ -128,7 +132,7 @@ class _ActionButtonsState extends State<ActionButtons> {
   Widget _buildActionButton(
     BuildContext context,
     String label,
-    IconData icon,
+    String icon,
     Color color,
     VoidCallback onPressed, {
     bool enabled = true,
@@ -137,25 +141,25 @@ class _ActionButtonsState extends State<ActionButtons> {
       onPressed: enabled ? onPressed : null,
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
-        disabledBackgroundColor: const Color(0xFFE5E7EB),
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        disabledBackgroundColor: AppColors.lightBeige,
+        padding: const EdgeInsets.symmetric(vertical: 25),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
         shadowColor: Colors.transparent,
       ),
-      child: Column(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          SvgPicture.asset(
             icon,
-            size: 28,
-            color: enabled ? Colors.white : const Color(0xFF9CA3AF),
+            height: 33,
+            color: enabled ? Colors.white : AppColors.brownDark,
           ),
-          const SizedBox(height: 8),
+          15.horizontalSpace,
           Text(
             label,
             style: TextStyle(
-              color: enabled ? Colors.white : const Color(0xFF9CA3AF),
+              color: enabled ? AppColors.white : AppColors.primary,
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),

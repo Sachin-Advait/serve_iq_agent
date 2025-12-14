@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
+import 'package:servelq_agent/configs/theme/app_colors.dart';
+import 'package:servelq_agent/configs/theme/app_theme.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/services/session_manager.dart';
 
@@ -15,79 +18,80 @@ class Header extends StatelessWidget {
     final displayText = '${branch?.name} - ${branch?.code}';
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                padding: const EdgeInsets.all(8),
-                child: SvgPicture.asset(AppImages.logo),
-              ),
-              const SizedBox(width: 16),
-              Text(
-                displayText,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
+          SvgPicture.asset(AppImages.logo, height: 80),
+          40.horizontalSpace,
+          Text(
+            displayText,
+            style: context.semiBold.copyWith(
+              color: AppColors.brownDeep,
+              fontSize: 20,
+              letterSpacing: 0.5,
+            ),
           ),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+          Spacer(),
+          Container(
+            padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+            decoration: BoxDecoration(
+              color: AppColors.red,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Row(
+              children: [
+                SvgPicture.asset(
+                  AppImages.logout,
+                  color: AppColors.white,
+                  height: 40,
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(20),
+                10.horizontalSpace,
+                Text(
+                  'Logout',
+                  style: context.semiBold.copyWith(
+                    color: AppColors.white,
+                    fontSize: 12,
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    Text(
-                      'Agent: ${SessionManager.getUsername()}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Icon(
-                      Icons.circle,
-                      color: Color(0xFF86EFAC),
-                      size: 10,
-                    ),
-                    const SizedBox(width: 4),
-                    const Text(
-                      'Online',
-                      style: TextStyle(color: Color(0xFF86EFAC), fontSize: 12),
-                    ),
-                  ],
+              ],
+            ),
+          ),
+          20.horizontalSpace,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  'Agent: ${SessionManager.getUsername()}',
+                  style: context.medium.copyWith(
+                    color: AppColors.brownDarker,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              IconButton(
-                icon: const Icon(
-                  Icons.notifications_outlined,
-                  color: Colors.white,
+                8.horizontalSpace,
+                const Icon(Icons.circle, color: AppColors.green, size: 10),
+                4.horizontalSpace,
+                Text(
+                  'Online',
+                  style: context.medium.copyWith(
+                    color: AppColors.green,
+                    fontSize: 12,
+                  ),
                 ),
-                onPressed: () {},
-                iconSize: 24,
-              ),
-            ],
+              ],
+            ),
+          ),
+          10.horizontalSpace,
+          SvgPicture.asset(
+            AppImages.notification,
+            height: 80,
+            color: AppColors.white,
           ),
         ],
       ),

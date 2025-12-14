@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:servelq_agent/configs/theme/app_colors.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
+import 'package:servelq_agent/configs/assets/app_images.dart';
+import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 
@@ -36,6 +38,7 @@ class _TransferDialogState extends State<TransferDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: AppColors.offWhite.withValues(alpha: .8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       elevation: 8,
       child: Container(
@@ -107,43 +110,6 @@ class _TransferDialogState extends State<TransferDialog> {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: TextField(
-        textInputAction: TextInputAction.done,
-        onChanged: (value) {
-          setState(() {
-            searchQuery = value;
-          });
-        },
-        decoration: InputDecoration(
-          hintText: 'Search counters...',
-          hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
-          prefixIcon: const Icon(Icons.search, color: Color(0xFF6B7280)),
-          filled: true,
-          fillColor: const Color(0xFFF9FAFB),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.primary, width: 2),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-        ),
       ),
     );
   }
@@ -248,42 +214,6 @@ class _TransferDialogState extends State<TransferDialog> {
     );
   }
 
-  // Widget _buildEmptyState() {
-  //   return Center(
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(40),
-  //       child: Column(
-  //         mainAxisSize: MainAxisSize.min,
-  //         children: [
-  //           Icon(
-  //             Icons.search_off_rounded,
-  //             size: 64,
-  //             color: Colors.grey.shade300,
-  //           ),
-  //           const SizedBox(height: 16),
-  //           Text(
-  //             searchQuery.isEmpty
-  //                 ? 'No counters available'
-  //                 : 'No counters found',
-  //             style: TextStyle(
-  //               fontSize: 16,
-  //               color: Colors.grey.shade600,
-  //               fontWeight: FontWeight.w500,
-  //             ),
-  //           ),
-  //           if (searchQuery.isNotEmpty) ...[
-  //             const SizedBox(height: 8),
-  //             Text(
-  //               'Try adjusting your search',
-  //               style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-  //             ),
-  //           ],
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
   Widget _buildFooter(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -347,9 +277,8 @@ class _TransferDialogState extends State<TransferDialog> {
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.send_rounded,
-                          size: 18,
+                        SvgPicture.asset(
+                          AppImages.transferred,
                           color: AppColors.white,
                         ),
                         SizedBox(width: 8),

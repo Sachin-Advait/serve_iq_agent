@@ -7,6 +7,7 @@ class CounterModel {
   final String status;
   final String? userId;
   final String? username;
+  final double avgSecond;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -19,6 +20,7 @@ class CounterModel {
     required this.status,
     this.userId,
     this.username,
+    required this.avgSecond,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -35,6 +37,7 @@ class CounterModel {
       username: json['username'],
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
+      avgSecond: json['avgSecond'] ?? 10,
     );
   }
 }

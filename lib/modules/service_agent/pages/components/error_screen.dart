@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:servelq_agent/configs/theme/app_colors.dart';
 
 class ErrorScreen extends StatelessWidget {
   final String message;
@@ -34,7 +35,7 @@ class ErrorScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: onRetry,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
+                backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,

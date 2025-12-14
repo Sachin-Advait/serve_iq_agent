@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/bottom_bar.dart';
 import 'package:servelq_agent/modules/service_agent/pages/components/error_screen.dart';
 import 'package:servelq_agent/modules/service_agent/pages/components/header.dart';
 import 'package:servelq_agent/modules/service_agent/pages/components/left_pane.dart';
@@ -109,7 +108,6 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
                   ],
                 ),
               ),
-              const BottomBar(),
             ],
           ),
         ),

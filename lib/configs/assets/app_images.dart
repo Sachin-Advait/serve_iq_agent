@@ -17,6 +17,7 @@ class AppImages {
 
   // Token / Queue
   static const String tokenSvg = 'assets/images/Token.svg';
+  static const String tokenPng = 'assets/images/Token.png';
   static const String transferred = 'assets/images/Transferred.svg';
 
   // Actions

@@ -75,13 +75,12 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white.withOpacity(0.9),
         body: Center(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 600, maxHeight: 650),
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
@@ -96,8 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Logo Section
-                SvgPicture.asset(AppImages.logo, height: 90),
-                const SizedBox(height: 40),
+                SvgPicture.asset(AppImages.logo, height: 150),
                 // Login Form
                 _buildTextField(
                   controller: _emailController,
@@ -117,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       _obscurePassword
                           ? Icons.visibility_off
                           : Icons.visibility,
-                      color: const Color(0xFF9CA3AF),
+                      color: AppColors.warmGray,
                     ),
                     onPressed: () => setState(() {
                       _obscurePassword = !_obscurePassword;
@@ -155,27 +153,27 @@ class _LoginScreenState extends State<LoginScreen> {
       decoration: InputDecoration(
         prefixIcon: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10.0),
-          child: Icon(icon, color: const Color(0xFF2563EB), size: 28),
+          child: Icon(icon, color: AppColors.primary, size: 28),
         ),
         suffixIcon: suffixIcon,
         labelText: label,
-        labelStyle: const TextStyle(color: Color(0xFF6B7280), fontSize: 18),
+        labelStyle: const TextStyle(color: AppColors.brownDarker, fontSize: 18),
         filled: true,
-        fillColor: enabled ? const Color(0xFFF9FAFB) : Colors.grey[200],
+        fillColor: enabled ? AppColors.white : Colors.grey[200],
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 24,
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
           borderRadius: BorderRadius.circular(14),
         ),
         enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderSide: const BorderSide(color: AppColors.offWhite),
           borderRadius: BorderRadius.circular(14),
         ),
         disabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderSide: const BorderSide(color: AppColors.offWhite),
           borderRadius: BorderRadius.circular(14),
         ),
       ),
@@ -209,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: 24,
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                 ),
               )
             : Text(
@@ -217,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
               ),
       ),

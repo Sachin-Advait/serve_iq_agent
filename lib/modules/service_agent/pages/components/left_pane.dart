@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
+import 'package:servelq_agent/configs/theme/app_theme.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/modules/service_agent/pages/components/widgets.dart';
 
@@ -22,15 +26,13 @@ class LeftPane extends StatelessWidget {
                     QueueCard(
                       label: 'Total Waiting',
                       value: state.queue.length.toString(),
-                      color: Colors.blue,
-                      icon: Icons.people_outline,
+                      icon: AppImages.totalWaiting,
                     ),
                     const SizedBox(height: 16),
                     QueueCard(
                       label: 'Avg Wait Time',
-                      value: "5", // Replace with actual calculation
-                      color: Colors.teal,
-                      icon: Icons.access_time,
+                      value: (state.counter?.avgSecond ?? 0).toString(),
+                      icon: AppImages.avgWaitingTime,
                     ),
 
                     if (state.currentTokenStatus ==
@@ -40,7 +42,7 @@ class LeftPane extends StatelessWidget {
                     ],
                     _buildTransferredTokens(state),
                     const SizedBox(height: 24),
-                    _buildUpcomingTokens(state),
+                    _buildUpcomingTokens(state, context),
                   ],
                 ),
               ),
@@ -53,39 +55,33 @@ class LeftPane extends StatelessWidget {
 
   Widget _buildCurrentTokenCard(ServiceAgentState state) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      alignment: Alignment.center,
+      padding: const EdgeInsets.all(16),
+      width: double.infinity,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF2563EB), Color(0xFF0D9488)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        image: DecorationImage(
+          image: AssetImage(AppImages.tokenPng),
+          fit: BoxFit.cover,
         ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF2563EB).withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Current Token',
             style: TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
+              color: AppColors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 8),
+          20.verticalSpace,
+          // Safe access
           Text(
-            state.currentToken!.token,
+            state.currentToken?.token ?? '--',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 40,
+              fontSize: 30,
               fontWeight: FontWeight.bold,
               letterSpacing: 1,
             ),
@@ -95,7 +91,7 @@ class LeftPane extends StatelessWidget {
     );
   }
 
-  Widget _buildUpcomingTokens(ServiceAgentState state) {
+  Widget _buildUpcomingTokens(ServiceAgentState state, BuildContext context) {
     // Filter out transferred tokens
     final upcomingTokens = state.queue
         .where((token) => !token.isTransfer)
@@ -108,16 +104,21 @@ class LeftPane extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF2563EB), Color(0xFF0D9488)],
+              colors: [AppColors.primary, AppColors.beige],
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
             ),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.schedule, color: Colors.white, size: 16),
-              SizedBox(width: 8),
+              15.horizontalSpace,
+              SvgPicture.asset(
+                AppImages.avgWaitingTime,
+                height: 25,
+                color: AppColors.white,
+              ),
+              10.horizontalSpace,
               Text(
                 'Upcoming Tokens',
                 style: TextStyle(
@@ -135,15 +136,21 @@ class LeftPane extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8F9FA),
+              color: AppColors.lightBeige,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
             ),
-            child: const Center(
-              child: Text(
-                'No upcoming tokens',
-                style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
-              ),
+            child: Row(
+              children: [
+                SvgPicture.asset(AppImages.noToken, height: 25),
+                10.horizontalSpace,
+                Text(
+                  'No upcoming tokens',
+                  style: context.medium.copyWith(
+                    fontSize: 14,
+                    color: AppColors.brownDeep,
+                  ),
+                ),
+              ],
             ),
           )
         else
@@ -154,30 +161,27 @@ class LeftPane extends StatelessWidget {
                   margin: const EdgeInsets.only(bottom: 10),
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8F9FA),
+                    color: AppColors.offWhite,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: const Color(0xFFE5E7EB),
-                      width: 1,
-                    ),
+                    border: Border.all(color: AppColors.beige, width: 1),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         token.token,
-                        style: const TextStyle(
+                        style: context.bold.copyWith(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
-                          color: Color(0xFF1F2937),
+                          color: AppColors.brownDeep,
                         ),
                       ),
                       Flexible(
                         child: Text(
                           token.serviceName,
-                          style: const TextStyle(
+                          style: context.medium.copyWith(
                             fontSize: 11,
-                            color: Color(0xFF6B7280),
+                            color: AppColors.brownDark,
                           ),
                           textAlign: TextAlign.right,
                           overflow: TextOverflow.ellipsis,
@@ -209,17 +213,21 @@ class LeftPane extends StatelessWidget {
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(14),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.swap_horiz, color: Colors.white, size: 16),
+                SvgPicture.asset(
+                  AppImages.transferred,
+                  color: AppColors.white,
+                  height: 28,
+                ),
                 SizedBox(width: 8),
                 Text(
                   'Transferred Tokens',
                   style: TextStyle(
                     fontSize: 15,
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
                   ),
@@ -261,7 +269,7 @@ class LeftPane extends StatelessWidget {
                               token.serviceName,
                               style: const TextStyle(
                                 fontSize: 11,
-                                color: Color(0xFF6B7280),
+                                color: AppColors.brownDeep,
                               ),
                               textAlign: TextAlign.right,
                               overflow: TextOverflow.ellipsis,
@@ -271,7 +279,7 @@ class LeftPane extends StatelessWidget {
                               'From: Counter ${token.transferCounterName}',
                               style: const TextStyle(
                                 fontSize: 10,
-                                color: Color(0xFFDC2626),
+                                color: Color(0xFF991B1B),
                                 fontWeight: FontWeight.w500,
                               ),
                               textAlign: TextAlign.right,

@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:servelq_agent/common/utils/app_screen_util.dart';
+import 'package:servelq_agent/configs/theme/app_colors.dart';
+import 'package:servelq_agent/configs/theme/app_theme.dart';
 
 class QueueCard extends StatelessWidget {
   final String label;
   final String value;
-  final Color color;
-  final IconData icon;
+  final String icon;
 
   const QueueCard({
     super.key,
     required this.label,
     required this.value,
-    required this.color,
     required this.icon,
   });
 
@@ -19,33 +21,31 @@ class QueueCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: AppColors.lightBeige,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2), width: 1),
+        border: Border.all(color: AppColors.brownDark, width: 1),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: 10),
+              SvgPicture.asset(icon, height: 20, color: AppColors.brownDeep),
+              14.horizontalSpace,
               Text(
                 label,
-                style: const TextStyle(
-                  color: Color(0xFF6B7280),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
+                style: context.medium.copyWith(
+                  color: AppColors.brownDeep,
+                  fontSize: 15,
                 ),
               ),
             ],
           ),
           Text(
             value,
-            style: TextStyle(
-              color: color,
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
+            style: context.bold.copyWith(
+              color: AppColors.brownDeep,
+              fontSize: 20,
             ),
           ),
         ],
@@ -57,7 +57,7 @@ class QueueCard extends StatelessWidget {
 class InfoField extends StatelessWidget {
   final String label;
   final String value;
-  final IconData icon;
+  final String icon;
 
   const InfoField({
     super.key,
@@ -73,25 +73,23 @@ class InfoField extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(icon, size: 16, color: const Color(0xFF6B7280)),
-            const SizedBox(width: 6),
+            SvgPicture.asset(icon, height: 18, color: AppColors.brownDark),
+            10.horizontalSpace,
             Text(
               label,
-              style: const TextStyle(
+              style: context.semiBold.copyWith(
                 fontSize: 13,
-                color: Color(0xFF6B7280),
-                fontWeight: FontWeight.w600,
+                color: AppColors.brownDarker,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        10.verticalSpace,
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF1F2937),
+          style: context.semiBold.copyWith(
+            fontSize: 14,
+            color: AppColors.brownDeep,
           ),
         ),
       ],
