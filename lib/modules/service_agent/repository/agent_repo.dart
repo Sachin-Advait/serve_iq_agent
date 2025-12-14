@@ -1,4 +1,4 @@
-import 'package:servelq_agent/configs/api_constants.dart';
+import 'package:servelq_agent/common/constants/api_constants.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
 import 'package:servelq_agent/models/token_model.dart';

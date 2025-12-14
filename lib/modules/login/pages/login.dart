@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:servelq_agent/configs/app_colors.dart';
-import 'package:servelq_agent/configs/flutter_toast.dart';
+import 'package:servelq_agent/common/widgets/flutter_toast.dart';
+import 'package:servelq_agent/configs/assets/app_images.dart';
+import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -94,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Logo Section
-                Image.asset("assets/images/logo.png", height: 90),
+                SvgPicture.asset(AppImages.logo, height: 90),
                 const SizedBox(height: 40),
                 // Login Form
                 _buildTextField(

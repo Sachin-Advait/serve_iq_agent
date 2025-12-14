@@ -2,13 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:go_router/go_router.dart';
-import 'package:servelq_agent/configs/get_it.dart';
-import 'package:servelq_agent/configs/lang/cubit/localization_cubit.dart';
+import 'package:servelq_agent/common/constants/app_strings.dart';
+import 'package:servelq_agent/common/utils/app_screen_util.dart';
+import 'package:servelq_agent/common/utils/get_it.dart';
+import 'package:servelq_agent/configs/theme/app_theme.dart';
 import 'package:servelq_agent/routes/routes.dart';
 
 Future<void> main() async {
@@ -32,16 +33,27 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => LocalizationCubit(),
-      child: BlocBuilder<LocalizationCubit, LocalizationState>(
-        builder: (context, state) {
-          return MaterialApp.router(
-            builder: EasyLoading.init(),
-            title: 'ServelQ',
-            theme: ThemeData(primarySwatch: Colors.blue, fontFamily: 'Poppins'),
-            routerConfig: AppRoutes.router,
-            debugShowCheckedModeBanner: false,
+    return LayoutBuilder(
+      builder: (context, constraints) => ScreenUtilInit(
+        designSize: Size(constraints.maxWidth, constraints.maxHeight),
+        minTextAdapt: true,
+        ensureScreenSize: true,
+        splitScreenMode: true,
+        builder: (context, child) {
+          final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+
+          AppScreenUtil().init(constraints);
+
+          return MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: TextScaler.linear(isTablet ? 1.2 : 1.0)),
+            child: MaterialApp.router(
+              routerConfig: AppRoutes.router,
+              title: AppStrings.appTitle,
+              debugShowCheckedModeBanner: false,
+              theme: AppThemes.lightTheme,
+            ),
           );
         },
       ),

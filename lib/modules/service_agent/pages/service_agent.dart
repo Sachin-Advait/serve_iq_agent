@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:servelq_agent/configs/flutter_toast.dart';
+import 'package:servelq_agent/common/widgets/flutter_toast.dart';
+import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/modules/service_agent/pages/components/bottom_bar.dart';
 import 'package:servelq_agent/modules/service_agent/pages/components/error_screen.dart';
@@ -86,23 +87,31 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
   Widget _buildLoadedScreen(BuildContext context, ServiceAgentState state) {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        resizeToAvoidBottomInset: false,
-        body: Column(
-          children: [
-            Header(state: state),
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(width: 320, child: LeftPane()),
-                  Expanded(child: MainPanel(state: state)),
-                ],
+      child: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(AppImages.bg01Png),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          resizeToAvoidBottomInset: false,
+          body: Column(
+            children: [
+              Header(state: state),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(width: 320, child: LeftPane()),
+                    Expanded(child: MainPanel(state: state)),
+                  ],
+                ),
               ),
-            ),
-            const BottomBar(),
-          ],
+              const BottomBar(),
+            ],
+          ),
         ),
       ),
     );

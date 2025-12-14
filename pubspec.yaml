@@ -27,6 +27,8 @@ dependencies:
   url_strategy: ^0.3.0
   stomp_dart_client: ^3.0.1
   web_socket_channel: ^3.0.3
+  flutter_screenutil: ^5.9.3
+  flutter_svg: ^2.2.1
 
 dev_dependencies:
   flutter_test:

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:servelq_agent/configs/app_colors.dart';
-import 'package:servelq_agent/configs/flutter_toast.dart';
+import 'package:servelq_agent/configs/theme/app_colors.dart';
+import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 

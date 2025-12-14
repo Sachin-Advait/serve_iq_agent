@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:servelq_agent/configs/app_colors.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/services/session_manager.dart';
 
@@ -14,11 +15,6 @@ class Header extends StatelessWidget {
     final displayText = '${branch?.name} - ${branch?.code}';
 
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.secondary],
-        ),
-      ),
       padding: const EdgeInsets.all(20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -33,7 +29,7 @@ class Header extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 padding: const EdgeInsets.all(8),
-                child: Image.asset("assets/images/logo.png"),
+                child: SvgPicture.asset(AppImages.logo),
               ),
               const SizedBox(width: 16),
               Text(

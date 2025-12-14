@@ -13,7 +13,6 @@ class MainPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 28),
-      color: const Color(0xFFF8F9FA),
       child: SingleChildScrollView(
         child: Column(
           children: [

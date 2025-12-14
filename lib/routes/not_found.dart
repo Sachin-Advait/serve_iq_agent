@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:servelq_agent/configs/assets/app_images.dart';
 
 class NotFound extends StatelessWidget {
   const NotFound({super.key, required this.state});
@@ -20,7 +21,7 @@ class NotFound extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Image.asset("assets/images/404.png", height: 500),
+                    Image.asset(AppImages.notFound404, height: 500),
                     SizedBox(height: 30),
                     Text(
                       'Ooops! Page Not Found',

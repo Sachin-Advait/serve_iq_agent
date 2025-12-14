@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:servelq_agent/configs/custom_loader.dart';
-import 'package:servelq_agent/configs/flutter_toast.dart';
+import 'package:servelq_agent/common/widgets/custom_loader.dart';
+import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
 import 'package:servelq_agent/models/token_model.dart';

@@ -1,8 +1,8 @@
 // Router Configuration
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:servelq_agent/configs/get_it.dart';
-import 'package:servelq_agent/configs/global_keys.dart';
+import 'package:servelq_agent/common/utils/get_it.dart';
+import 'package:servelq_agent/common/utils/global_keys.dart';
 import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
 import 'package:servelq_agent/modules/login/pages/login.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';

@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:servelq_agent/configs/app_errors.dart';
-import 'package:servelq_agent/configs/flutter_toast.dart';
+import 'package:servelq_agent/common/constants/app_errors.dart';
+import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 
 /// 🔹 This replaces ApiClient — directly use this for network calls.
 class ApiClient {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:servelq_agent/configs/app_colors.dart';
+import 'package:servelq_agent/configs/theme/app_colors.dart';
 
 void customLoader() {
   EasyLoading.instance
