@@ -64,12 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
       listener: (context, state) {
         if (state is LoginSuccess) {
           _handleLoginSuccess();
-          // Navigate based on user type
-          if (state.user.isAgent) {
-            context.go('/agent');
-          } else if (state.user.isDisplay) {
-            context.go('/display');
-          }
+          context.go('/agent');
         } else if (state is LoginError) {
           _handleLoginError(state.message);
         }

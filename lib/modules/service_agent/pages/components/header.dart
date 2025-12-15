@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/configs/theme/app_theme.dart';
@@ -33,28 +34,43 @@ class Header extends StatelessWidget {
             ),
           ),
           Spacer(),
-          Container(
-            padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-            decoration: BoxDecoration(
-              color: AppColors.red,
-              borderRadius: BorderRadius.circular(30),
+          ElevatedButton(
+            onPressed: () {
+              SessionManager.clearSession();
+              context.go('/');
+            },
+            style: ElevatedButton.styleFrom(
+              disabledBackgroundColor: AppColors.lightBeige,
+              padding: const EdgeInsets.symmetric(vertical: 0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              elevation: 0,
+              shadowColor: Colors.transparent,
             ),
-            child: Row(
-              children: [
-                SvgPicture.asset(
-                  AppImages.logout,
-                  color: AppColors.white,
-                  height: 40,
-                ),
-                10.horizontalSpace,
-                Text(
-                  'Logout',
-                  style: context.semiBold.copyWith(
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+              decoration: BoxDecoration(
+                color: AppColors.red,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Row(
+                children: [
+                  SvgPicture.asset(
+                    AppImages.logout,
                     color: AppColors.white,
-                    fontSize: 12,
+                    height: 40,
                   ),
-                ),
-              ],
+                  10.horizontalSpace,
+                  Text(
+                    'Logout',
+                    style: context.semiBold.copyWith(
+                      color: AppColors.white,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           20.horizontalSpace,

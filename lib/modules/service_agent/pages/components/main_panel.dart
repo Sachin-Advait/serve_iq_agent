@@ -17,22 +17,20 @@ class MainPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 28),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(height: 20),
-            if (state.currentToken?.mobileNumber != null &&
-                state.currentTokenStatus == CurrentTokenStatus.loaded)
-              _buildCurrentTokenInfo(state, context)
-            else
-              _buildEmptyState(context, state),
-            const SizedBox(height: 28),
-            ActionButtons(state: state),
-            const SizedBox(height: 28),
-            _buildHistoryPanel(state),
-            SizedBox(height: 20),
-          ],
-        ),
+      child: Column(
+        children: [
+          SizedBox(height: 20),
+          if (state.currentToken?.mobileNumber != null &&
+              state.currentTokenStatus == CurrentTokenStatus.loaded)
+            _buildCurrentTokenInfo(state, context)
+          else
+            _buildEmptyState(context, state),
+          const SizedBox(height: 28),
+          ActionButtons(state: state),
+          const SizedBox(height: 28),
+          Expanded(child: _buildHistoryPanel(state)),
+          SizedBox(height: 20),
+        ],
       ),
     );
   }
@@ -42,9 +40,8 @@ class MainPanel extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(48),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.offWhite.withValues(alpha: .9),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -52,7 +49,7 @@ class MainPanel extends StatelessWidget {
           Icon(
             Icons.playlist_add_check_circle_outlined,
             size: 80,
-            color: Colors.grey[300],
+            color: AppColors.brownDark,
           ),
           const SizedBox(height: 16),
           Text(
@@ -61,7 +58,7 @@ class MainPanel extends StatelessWidget {
                 : 'Click "Call Next" to serve the next visitor',
             style: TextStyle(
               fontSize: 18,
-              color: Colors.grey[600],
+              color: AppColors.primary,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -156,7 +153,7 @@ class MainPanel extends StatelessWidget {
 
   Widget _buildHistoryPanel(ServiceAgentState state) {
     return Container(
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.fromLTRB(28, 28, 28, 0),
       decoration: BoxDecoration(
         color: AppColors.offWhite.withValues(alpha: .9),
         borderRadius: BorderRadius.circular(16),
@@ -180,86 +177,218 @@ class MainPanel extends StatelessWidget {
             ),
           ),
           20.verticalSpace,
-          ...state.recentServices.map(
-            (history) => Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Row(
+          Expanded(
+            child: state.recentServices.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            history.token,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.white,
-                              fontSize: 14,
-                            ),
+                        Icon(
+                          Icons.history,
+                          size: 64,
+                          color: AppColors.brownDarker.withOpacity(0.3),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No service history yet',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.brownDarker.withOpacity(0.6),
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                history.civilId,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                  color: Color(0xFF1F2937),
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                history.service,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF6B7280),
-                                ),
-                              ),
-                            ],
+                        const SizedBox(height: 8),
+                        Text(
+                          'Recent services will appear here',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.brownDarker.withOpacity(0.4),
                           ),
                         ),
                       ],
                     ),
+                  )
+                : state.recentServices.length > 3
+                ? GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 2.5,
+                        ),
+                    itemCount: state.recentServices.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      state.recentServices[index].token,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.white,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          state.recentServices[index].civilId,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
+                                            color: Color(0xFF1F2937),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          state.recentServices[index].service,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Color(0xFF6B7280),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF10B981).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                '${state.recentServices[index].time} mins',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF10B981),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  )
+                : ListView.builder(
+                    itemCount: state.recentServices.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      state.recentServices[index].token,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.white,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          state.recentServices[index].civilId,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
+                                            color: Color(0xFF1F2937),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          state.recentServices[index].service,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Color(0xFF6B7280),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF10B981).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                '${state.recentServices[index].time} mins',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF10B981),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      '${history.time} mins',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF10B981),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
         ],
       ),
