@@ -57,7 +57,7 @@ class _ActionButtonsState extends State<ActionButtons> {
             context,
             'Call Next',
             AppImages.callNext,
-            const Color(0xFF10B981),
+            AppColors.green,
             () async {
               await context.read<ServiceAgentCubit>().callNext();
               _startCompleteButtonTimer();

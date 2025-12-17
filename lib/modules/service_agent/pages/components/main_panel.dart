@@ -262,7 +262,7 @@ class MainPanel extends StatelessWidget {
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w600,
                                             fontSize: 14,
-                                            color: Color(0xFF1F2937),
+                                            color: AppColors.brownVeryDark,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -271,7 +271,7 @@ class MainPanel extends StatelessWidget {
                                           state.recentServices[index].service,
                                           style: const TextStyle(
                                             fontSize: 12,
-                                            color: Color(0xFF6B7280),
+                                            color: AppColors.brownDarker,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -287,14 +287,14 @@ class MainPanel extends StatelessWidget {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF10B981).withOpacity(0.1),
+                                color: AppColors.green.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 '${state.recentServices[index].time} mins',
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: Color(0xFF10B981),
+                                  color: AppColors.green,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -349,7 +349,7 @@ class MainPanel extends StatelessWidget {
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w600,
                                             fontSize: 14,
-                                            color: Color(0xFF1F2937),
+                                            color: AppColors.brownVeryDark,
                                           ),
                                         ),
                                         const SizedBox(height: 2),
@@ -357,7 +357,7 @@ class MainPanel extends StatelessWidget {
                                           state.recentServices[index].service,
                                           style: const TextStyle(
                                             fontSize: 12,
-                                            color: Color(0xFF6B7280),
+                                            color: AppColors.brownDark,
                                           ),
                                         ),
                                       ],
@@ -372,14 +372,14 @@ class MainPanel extends StatelessWidget {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF10B981).withOpacity(0.1),
+                                color: AppColors.green.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 '${state.recentServices[index].time} mins',
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: Color(0xFF10B981),
+                                  color: AppColors.green,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),

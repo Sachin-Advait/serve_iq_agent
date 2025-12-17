@@ -38,7 +38,7 @@ class _TransferDialogState extends State<TransferDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: AppColors.offWhite.withValues(alpha: .8),
+      backgroundColor: AppColors.offWhite,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       elevation: 8,
       child: Container(
@@ -133,12 +133,10 @@ class _TransferDialogState extends State<TransferDialog> {
             margin: const EdgeInsets.only(bottom: 10, top: 10),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? AppColors.primary.withOpacity(0.1)
-                  : Colors.white,
+              color: AppColors.beige,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected ? AppColors.primary : const Color(0xFFE5E7EB),
+                color: isSelected ? AppColors.brownDeep : AppColors.beige,
                 width: isSelected ? 2 : 1,
               ),
               boxShadow: isSelected
@@ -181,7 +179,7 @@ class _TransferDialogState extends State<TransferDialog> {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF1F2937),
+                          color: AppColors.almostBlack,
                         ),
                       ),
                     ],
@@ -200,10 +198,7 @@ class _TransferDialogState extends State<TransferDialog> {
                     height: 24,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFFE5E7EB),
-                        width: 2,
-                      ),
+                      border: Border.all(color: AppColors.brownDark, width: 2),
                     ),
                   ),
               ],
@@ -218,7 +213,7 @@ class _TransferDialogState extends State<TransferDialog> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
+        color: AppColors.offWhite,
         border: Border(top: BorderSide(color: Colors.grey.shade200, width: 1)),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(20),
@@ -233,8 +228,8 @@ class _TransferDialogState extends State<TransferDialog> {
                   ? null
                   : () => Navigator.of(context).pop(),
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                side: const BorderSide(color: Color(0xFFE5E7EB)),
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                side: const BorderSide(color: AppColors.warmGray),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -242,7 +237,7 @@ class _TransferDialogState extends State<TransferDialog> {
               child: const Text(
                 'Cancel',
                 style: TextStyle(
-                  color: Color(0xFF6B7280),
+                  color: AppColors.brownDeep,
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
                 ),
@@ -257,9 +252,9 @@ class _TransferDialogState extends State<TransferDialog> {
                   ? () => _handleTransfer(context)
                   : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                disabledBackgroundColor: const Color(0xFFE5E7EB),
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                backgroundColor: AppColors.brownDark,
+                disabledBackgroundColor: AppColors.beige,
+                padding: const EdgeInsets.symmetric(vertical: 20),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

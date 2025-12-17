@@ -51,39 +51,10 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ServiceAgentCubit, ServiceAgentState>(
-      listener: (context, state) {
-        if (state.status == ServiceAgentStatus.error &&
-            state.errorMessage != null) {
-          flutterToast(message: state.errorMessage!);
-        }
-      },
-      child: BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
-        builder: (context, state) {
-          if (state.status == ServiceAgentStatus.initial ||
-              state.status == ServiceAgentStatus.loading) {
-            return const LoadingScreen();
-          }
-
-          if (state.status == ServiceAgentStatus.loaded) {
-            return _buildLoadedScreen(context, state);
-          }
-
-          if (state.status == ServiceAgentStatus.error) {
-            return ErrorScreen(
-              message: state.errorMessage ?? 'An error occurred',
-              onRetry: () =>
-                  context.read<ServiceAgentCubit>().loadInitialData(),
-            );
-          }
-
-          return const LoadingScreen();
-        },
-      ),
-    );
+    return _buildLoadedScreen(context);
   }
 
-  Widget _buildLoadedScreen(BuildContext context, ServiceAgentState state) {
+  Widget _buildLoadedScreen(BuildContext context) {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Container(
@@ -96,19 +67,48 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           resizeToAvoidBottomInset: false,
-          body: Column(
-            children: [
-              Header(state: state),
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(width: 320, child: LeftPane()),
-                    Expanded(child: MainPanel(state: state)),
-                  ],
-                ),
-              ),
-            ],
+          body: BlocListener<ServiceAgentCubit, ServiceAgentState>(
+            listener: (context, state) {
+              if (state.status == ServiceAgentStatus.error &&
+                  state.errorMessage != null) {
+                flutterToast(message: state.errorMessage!);
+              }
+            },
+            child: BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
+              builder: (context, state) {
+                if (state.status == ServiceAgentStatus.initial ||
+                    state.status == ServiceAgentStatus.loading) {
+                  return const LoadingScreen();
+                }
+
+                if (state.status == ServiceAgentStatus.loaded) {
+                  return Column(
+                    children: [
+                      Header(state: state),
+                      Expanded(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(width: 320, child: LeftPane()),
+                            Expanded(child: MainPanel(state: state)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
+                if (state.status == ServiceAgentStatus.error) {
+                  return ErrorScreen(
+                    message: state.errorMessage ?? 'An error occurred',
+                    onRetry: () =>
+                        context.read<ServiceAgentCubit>().loadInitialData(),
+                  );
+                }
+
+                return const LoadingScreen();
+              },
+            ),
           ),
         ),
       ),

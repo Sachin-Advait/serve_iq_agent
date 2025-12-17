@@ -258,7 +258,7 @@ class LeftPane extends StatelessWidget {
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
-                          color: Color(0xFF991B1B),
+                          color: AppColors.darkRed,
                         ),
                       ),
                       Flexible(
@@ -279,7 +279,7 @@ class LeftPane extends StatelessWidget {
                               'From: Counter ${token.transferCounterName}',
                               style: const TextStyle(
                                 fontSize: 10,
-                                color: Color(0xFF991B1B),
+                                color: AppColors.darkRed,
                                 fontWeight: FontWeight.w500,
                               ),
                               textAlign: TextAlign.right,
