@@ -66,7 +66,8 @@ class _ActionButtonsState extends State<ActionButtons> {
                 widget.state.queue.isNotEmpty &&
                 (widget.state.currentToken?.id == null ||
                     widget.state.currentTokenStatus ==
-                        CurrentTokenStatus.initial),
+                        CurrentTokenStatus.initial) &&
+                widget.state.counter!.status == 'IDLE',
           ),
         ),
         const SizedBox(width: 16),
@@ -105,7 +106,9 @@ class _ActionButtonsState extends State<ActionButtons> {
         Expanded(
           child: _buildActionButton(
             context,
-            'Transfer',
+            _isCompleteButtonDisabled
+                ? 'Transfer ($_remainingSeconds)'
+                : 'Transfer',
             AppImages.transferred,
             AppColors.red,
             () {
@@ -121,6 +124,7 @@ class _ActionButtonsState extends State<ActionButtons> {
               );
             },
             enabled:
+                !_isCompleteButtonDisabled &&
                 widget.state.currentToken?.id != null &&
                 widget.state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),

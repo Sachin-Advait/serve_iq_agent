@@ -47,6 +47,21 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
             );
           }
         },
+        onCounterUpdate: (json) async {
+          final updatedCounter = CounterModel.fromJson(json);
+
+          final updatedRecentServices = await agentRepository
+              .getRecentServices();
+
+          emit(
+            state.copyWith(
+              counter: updatedCounter,
+              recentServices: updatedRecentServices,
+            ),
+          );
+
+          debugPrint("Counter status updated: ${updatedCounter.status}");
+        },
       );
     }
   }
@@ -121,12 +136,12 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
 
       // Complete the current service
       await agentRepository.completeService(tokenId);
-      final updatedRecentServices = await agentRepository.getRecentServices();
+      final counter = await agentRepository.getCounter();
 
       emit(
         state.copyWith(
           currentTokenStatus: CurrentTokenStatus.initial,
-          recentServices: updatedRecentServices,
+          counter: counter,
           currentToken: TokenModel(),
         ),
       );

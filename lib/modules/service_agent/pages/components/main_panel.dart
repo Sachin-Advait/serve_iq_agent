@@ -36,6 +36,16 @@ class MainPanel extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context, ServiceAgentState state) {
+    String message;
+
+    if (state.counter!.status == "COMPLETE") {
+      message = 'Visitor is writing the feedback, please wait';
+    } else if (state.queue.isEmpty) {
+      message = 'No tokens in queue';
+    } else {
+      message = 'Click "Call Next" to serve the next visitor';
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(48),
@@ -53,14 +63,13 @@ class MainPanel extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            state.queue.isEmpty
-                ? 'No tokens in queue'
-                : 'Click "Call Next" to serve the next visitor',
+            message,
             style: TextStyle(
               fontSize: 18,
               color: AppColors.primary,
               fontWeight: FontWeight.w500,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -215,7 +224,7 @@ class MainPanel extends StatelessWidget {
                           crossAxisCount: 2,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
-                          childAspectRatio: 2.5,
+                          childAspectRatio: 6,
                         ),
                     itemCount: state.recentServices.length,
                     itemBuilder: (context, index) {

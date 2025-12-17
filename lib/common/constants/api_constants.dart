@@ -1,5 +1,5 @@
 class ApiConstants {
-  // static const String baseUrl = "http://localhost:8085/serveiq/api/";
+  // static const String baseUrl = "http://192.168.1.121:8085/serveiq/api/";
   static const String baseUrl = "https://gissoft.duckdns.org/serveiq/api/";
   static const String wsUrl = "wss://gissoft.duckdns.org/serveiq/ws";
 

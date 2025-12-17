@@ -5,13 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:servelq_agent/common/constants/app_errors.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 
-/// 🔹 This replaces ApiClient — directly use this for network calls.
 class ApiClient {
   final Dio _dio;
 
   ApiClient({required Dio dio}) : _dio = dio;
 
-  /// Common GET
   Future<Response?> getApi(
     String path, {
     Map<String, dynamic>? queryParameters,
@@ -27,7 +25,6 @@ class ApiClient {
     } on DioException catch (e) {
       _showErrorSnackbar(e);
     }
-    // _showErrorSnackbarWhenStatusCodeIs200(response);
     return response;
   }
 
@@ -35,25 +32,19 @@ class ApiClient {
   Future<Response?> postApi(
     String path, {
     dynamic body,
-    bool showLoader = true,
     dynamic queryPara,
   }) async {
-    // if (showLoader) customLoader();
     Response? response;
 
-    // try {
-    response = await _dio.post(path, data: body, queryParameters: queryPara);
-    // } on DioException catch (e) {
-    //   _showErrorSnackbar(e);
-    // } finally {
-    //   // EasyLoading.dismiss();
-    // }
+    try {
+      response = await _dio.post(path, data: body, queryParameters: queryPara);
+    } on DioException catch (e) {
+      _showErrorSnackbar(e);
+    }
 
-    // _showErrorSnackbarWhenStatusCodeIs200(response);
     return response;
   }
 
-  /// Common MULTIPART POST
   Future<Response?> postMultipartApi(
     String path, {
     FormData? formData,
@@ -62,7 +53,6 @@ class ApiClient {
     bool showLoader = true,
     bool showToast = true,
   }) async {
-    // if (showLoader) customLoader();
     Response? response;
 
     try {
@@ -74,11 +64,7 @@ class ApiClient {
       );
     } on DioException catch (e) {
       _showErrorSnackbar(e);
-    } finally {
-      // EasyLoading.dismiss();
     }
-
-    // if (showToast) _showErrorSnackbarWhenStatusCodeIs200(response);
     return response;
   }
 
@@ -100,16 +86,9 @@ class ApiClient {
 
       case DioExceptionType.badResponse:
         if (e.response?.statusCode == 401) {
-          // _logoutAndShowTokenExpiryPopup();
+          // Do Nothing
         } else if (e.response?.statusCode == 400) {
-          // final errorData = e.response!.data;
-          // final errorMessage = errorData is Map<String, dynamic>
-          //     ? (errorData['message'] ??
-          //           e.response!.statusMessage ??
-          //           'Bad Request')
-          //     : e.response!.statusMessage ?? 'Bad Request';
-
-          // flutterToast(message: errorMessage);
+          // Do Nothing
         } else {
           flutterToast(message: AppErrors.serverErrorDetails);
         }
@@ -121,15 +100,4 @@ class ApiClient {
     }
     return null;
   }
-
-  // void _showErrorSnackbarWhenStatusCodeIs200(Response? response) {
-  //   if (response != null) {
-  //     final commonResponse = CommonResponse.fromJson(response.data);
-  //     if (commonResponse.status == false) {
-  //       flutterToast(
-  //         message: commonResponse.message ?? AppErrors.unknownErrorDetails,
-  //       );
-  //     }
-  //   }
-  // }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:get_storage/get_storage.dart';
@@ -52,6 +53,7 @@ class MyApp extends StatelessWidget {
               routerConfig: AppRoutes.router,
               title: AppStrings.appTitle,
               debugShowCheckedModeBanner: false,
+              builder: EasyLoading.init(),
               theme: AppThemes.lightTheme,
             ),
           );
