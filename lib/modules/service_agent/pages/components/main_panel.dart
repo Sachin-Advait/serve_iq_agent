@@ -106,7 +106,7 @@ class MainPanel extends StatelessWidget {
             children: [
               Expanded(
                 child: InfoField(
-                  label: 'Civil Id',
+                  label: 'Mobile Number',
                   value: token.mobileNumber,
                   icon: AppImages.id,
                 ),

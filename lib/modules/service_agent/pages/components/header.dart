@@ -24,7 +24,7 @@ class Header extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           SvgPicture.asset(AppImages.logo, height: 80),
-          40.horizontalSpace,
+          160.horizontalSpace,
           Text(
             displayText,
             style: context.semiBold.copyWith(
