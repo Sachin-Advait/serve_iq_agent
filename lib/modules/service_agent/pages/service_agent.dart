@@ -19,7 +19,7 @@ class ServiceAgentScreen extends StatefulWidget {
 }
 
 class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
-  Timer? _callNextTimer;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
@@ -29,13 +29,13 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
       context.read<ServiceAgentCubit>().loadInitialData();
       final cubit = context.read<ServiceAgentCubit>();
 
-      _startAutoCallNext(cubit);
+      _startPolling(cubit);
     });
   }
 
-  void _startAutoCallNext(ServiceAgentCubit cubit) {
-    _callNextTimer?.cancel();
-    _callNextTimer = Timer.periodic(const Duration(minutes: 2), (timer) async {
+  void _startPolling(ServiceAgentCubit cubit) {
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(const Duration(minutes: 2), (timer) async {
       final currentState = cubit.state;
       if (currentState.status == ServiceAgentStatus.loaded) {
         await cubit.queueAPI();
@@ -45,16 +45,12 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
 
   @override
   void dispose() {
-    _callNextTimer?.cancel();
+    _pollingTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _buildLoadedScreen(context);
-  }
-
-  Widget _buildLoadedScreen(BuildContext context) {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Container(

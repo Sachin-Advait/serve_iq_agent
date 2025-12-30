@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -13,8 +15,46 @@ part 'service_agent_state.dart';
 
 class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   final AgentRepository agentRepository;
+  Timer? _completeButtonTimer;
 
   ServiceAgentCubit(this.agentRepository) : super(const ServiceAgentState());
+
+  void startCompleteButtonTimer() {
+    _completeButtonTimer?.cancel();
+
+    emit(
+      state.copyWith(
+        completeButtonRemainingSeconds: 20,
+        isCompleteButtonDisabled: true,
+      ),
+    );
+
+    _completeButtonTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final newSeconds = state.completeButtonRemainingSeconds - 1;
+
+      if (newSeconds <= 0) {
+        emit(
+          state.copyWith(
+            completeButtonRemainingSeconds: 0,
+            isCompleteButtonDisabled: false,
+          ),
+        );
+        timer.cancel();
+      } else {
+        emit(state.copyWith(completeButtonRemainingSeconds: newSeconds));
+      }
+    });
+  }
+
+  void cancelCompleteButtonTimer() {
+    _completeButtonTimer?.cancel();
+    emit(
+      state.copyWith(
+        completeButtonRemainingSeconds: 0,
+        isCompleteButtonDisabled: false,
+      ),
+    );
+  }
 
   Future<void> loadInitialData() async {
     emit(state.copyWith(status: ServiceAgentStatus.loading));
@@ -34,8 +74,16 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
                 )
                 .toList();
 
-            // Actually update the state
-            emit(state.copyWith(queue: queue));
+            List<TokenModel> upcomingToken = [];
+            List<TokenModel> holdToken = [];
+            for (var element in queue) {
+              if (element.status == "HOLD") {
+                holdToken.add(element);
+              } else {
+                upcomingToken.add(element);
+              }
+            }
+            emit(state.copyWith(queue: upcomingToken, holdQueue: holdToken));
 
             debugPrint("Queue updated with ${queue.length} tokens");
           } catch (e, stackTrace) {
@@ -50,8 +98,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
         onCounterUpdate: (json) async {
           final updatedCounter = CounterModel.fromJson(json);
 
-          final updatedRecentServices = await agentRepository
-              .getRecentServices();
+          final updatedRecentServices = await agentRepository.getRecentTokens();
 
           emit(
             state.copyWith(
@@ -70,7 +117,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
     try {
       final counterFuture = agentRepository.getCounter();
       final queueFuture = agentRepository.getQueue();
-      final recentServicesFuture = agentRepository.getRecentServices();
+      final recentServicesFuture = agentRepository.getRecentTokens();
       final allCounterFuture = agentRepository.getAllCounters();
       final activeTokenFuture = agentRepository.counterActiveToken();
 
@@ -84,9 +131,20 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
 
       final counter = results[0] as CounterModel;
       final queue = results[1] as List<TokenModel>;
+
       final recentServices = results[2] as List<ServiceHistory>;
       final allCounter = results[3] as List<CounterModel>;
       final activeToken = results[4] as TokenModel?;
+
+      List<TokenModel> upcomingToken = [];
+      List<TokenModel> holdToken = [];
+      for (var element in queue) {
+        if (element.status == "HOLD") {
+          holdToken.add(element);
+        } else {
+          upcomingToken.add(element);
+        }
+      }
 
       emit(
         ServiceAgentState(
@@ -95,7 +153,8 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
               ? CurrentTokenStatus.loaded
               : CurrentTokenStatus.initial,
           counter: counter,
-          queue: queue,
+          queue: upcomingToken,
+          holdQueue: holdToken,
           recentServices: recentServices,
           currentToken: activeToken,
           allCounter: allCounter,
@@ -109,14 +168,23 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   Future<void> queueAPI() async {
     if (state.status != ServiceAgentStatus.loaded) return;
     final queue = await agentRepository.getQueue();
-    emit(state.copyWith(queue: queue));
+    List<TokenModel> upcomingToken = [];
+    List<TokenModel> holdToken = [];
+    for (var element in queue) {
+      if (element.status == "HOLD") {
+        holdToken.add(element);
+      } else {
+        upcomingToken.add(element);
+      }
+    }
+    emit(state.copyWith(queue: upcomingToken, holdQueue: holdToken));
   }
 
-  Future<void> callNext() async {
+  Future<void> callToken({String? tokenId}) async {
     try {
       customLoader();
 
-      final nextToken = await agentRepository.callNext();
+      final nextToken = await agentRepository.callToken(tokenId: tokenId);
       emit(
         state.copyWith(
           status: ServiceAgentStatus.loaded,
@@ -124,19 +192,26 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
           currentTokenStatus: CurrentTokenStatus.loaded,
         ),
       );
+
+      // Start the timer after calling token
+      startCompleteButtonTimer();
+      // queueAPI();
     } finally {
       EasyLoading.dismiss();
     }
   }
 
-  Future<void> completeService() async {
+  Future<void> completeToken() async {
     try {
       customLoader();
       final tokenId = state.currentToken!.id;
 
       // Complete the current service
-      await agentRepository.completeService(tokenId);
+      await agentRepository.completeToken(tokenId);
       final counter = await agentRepository.getCounter();
+
+      // Cancel timer and reset state
+      cancelCompleteButtonTimer();
 
       emit(
         state.copyWith(
@@ -152,7 +227,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
     }
   }
 
-  Future<void> recallCurrentToken() async {
+  Future<void> recallToken() async {
     try {
       customLoader();
       final tokenId = state.currentToken!.id;
@@ -160,18 +235,25 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       final recalledToken = await agentRepository.recallToken(tokenId);
 
       emit(state.copyWith(currentToken: recalledToken));
+
+      // Restart the timer after recall
+      startCompleteButtonTimer();
+
       flutterToast(message: 'Token successfully recalled');
     } finally {
       EasyLoading.dismiss();
     }
   }
 
-  Future<void> transferService(String counterId) async {
+  Future<void> transferToken(String counterId) async {
     try {
       customLoader();
 
       final tokenId = state.currentToken!.id;
-      await agentRepository.transferService(tokenId, counterId);
+      await agentRepository.transferToken(tokenId, counterId);
+
+      // Cancel timer and reset state
+      cancelCompleteButtonTimer();
 
       emit(
         state.copyWith(
@@ -189,6 +271,31 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
     }
   }
 
+  Future<void> holdToken() async {
+    try {
+      customLoader();
+
+      final tokenId = state.currentToken!.id;
+      await agentRepository.holdToken(tokenId);
+      final counter = await agentRepository.getCounter();
+
+      // Cancel timer and reset state
+      cancelCompleteButtonTimer();
+
+      emit(
+        state.copyWith(
+          currentTokenStatus: CurrentTokenStatus.initial,
+          currentToken: TokenModel(),
+          counter: counter,
+        ),
+      );
+    } catch (e) {
+      flutterToast(message: 'Error while holding token. Please try again');
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
   // New method to check for active token manually
   Future<void> checkActiveToken() async {
     try {
@@ -201,8 +308,22 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       if (state.currentToken?.id != activeToken?.id) {
         // If we have a new active token different from current
         final updatedQueue = await agentRepository.getQueue();
-
-        emit(state.copyWith(currentToken: activeToken, queue: updatedQueue));
+        List<TokenModel> upcomingToken = [];
+        List<TokenModel> holdToken = [];
+        for (var element in updatedQueue) {
+          if (element.status == "HOLD") {
+            holdToken.add(element);
+          } else {
+            upcomingToken.add(element);
+          }
+        }
+        emit(
+          state.copyWith(
+            queue: upcomingToken,
+            holdQueue: holdToken,
+            currentToken: activeToken,
+          ),
+        );
         if (activeToken != null) {
           flutterToast(message: 'Active token loaded: ${activeToken.token}');
         }
@@ -214,6 +335,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
 
   @override
   Future<void> close() {
+    _completeButtonTimer?.cancel();
     WebSocketService.disconnect();
     return super.close();
   }

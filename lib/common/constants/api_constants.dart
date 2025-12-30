@@ -1,5 +1,5 @@
 class ApiConstants {
-  // static const String baseUrl = "http://192.168.1.121:8085/serveiq/api/";
+  // static const String baseUrl = "http://localhost:8085/serveiq/api/";
   static const String baseUrl =
       "https://serveiqbackend.insyncproducts.online/serveiq/api/";
   static const String wsUrl =
@@ -10,14 +10,16 @@ class ApiConstants {
   static const String register = 'auth/register';
 
   // ---------- AGENT ----------
-  static const String queue = 'agent/counter/queue/';
-  static const String callNext = 'agent/counter/call-next/';
-  static const String activeToken = 'agent/counter/active-token/';
+  static const String queue = 'agent/queue/';
+  static const String callNext = 'agent/call-next-token/';
+  static const String activeToken = 'agent/active-token/';
   static const String startServing = 'agent/token/start-serving/';
   static const String completeService = 'agent/token/complete/';
   static const String recentServices = 'agent/recent-services/';
-  static const String recall = 'agent/recall';
-  static const String transfer = 'agent/transfer';
+  static const String recall = 'agent/token/recall/';
+  static const String transfer = 'agent/token/transfer';
+  static const String hold = 'agent/hold-token/';
+  static const String callHoldToken = 'agent/call-hold-token/';
 
   // ---------- COUNTERS ----------
   static const String counters = 'counters';

@@ -1,6 +1,3 @@
-// components/action_buttons.dart
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,43 +7,10 @@ import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/modules/service_agent/pages/components/transfer_dialog.dart';
 
-class ActionButtons extends StatefulWidget {
+class ActionButtons extends StatelessWidget {
   final ServiceAgentState state;
 
   const ActionButtons({super.key, required this.state});
-
-  @override
-  State<ActionButtons> createState() => _ActionButtonsState();
-}
-
-class _ActionButtonsState extends State<ActionButtons> {
-  Timer? _completeButtonTimer;
-  int _remainingSeconds = 0;
-  bool _isCompleteButtonDisabled = false;
-
-  @override
-  void dispose() {
-    _completeButtonTimer?.cancel();
-    super.dispose();
-  }
-
-  void _startCompleteButtonTimer() {
-    setState(() {
-      _isCompleteButtonDisabled = true;
-      _remainingSeconds = 20;
-    });
-
-    _completeButtonTimer?.cancel();
-    _completeButtonTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _remainingSeconds--;
-        if (_remainingSeconds <= 0) {
-          _isCompleteButtonDisabled = false;
-          timer.cancel();
-        }
-      });
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,32 +22,28 @@ class _ActionButtonsState extends State<ActionButtons> {
             'Call Next',
             AppImages.callNext,
             AppColors.green,
-            () async {
-              await context.read<ServiceAgentCubit>().callNext();
-              _startCompleteButtonTimer();
-            },
+            () => context.read<ServiceAgentCubit>().callToken(),
             enabled:
-                widget.state.queue.isNotEmpty &&
-                (widget.state.currentToken?.id == null ||
-                    widget.state.currentTokenStatus ==
-                        CurrentTokenStatus.initial) &&
-                widget.state.counter!.status == 'IDLE',
+                state.queue.isNotEmpty &&
+                (state.currentToken?.id == null ||
+                    state.currentTokenStatus == CurrentTokenStatus.initial) &&
+                state.counter!.status == 'IDLE',
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: _buildActionButton(
             context,
-            _isCompleteButtonDisabled
-                ? 'Complete ($_remainingSeconds)'
+            state.isCompleteButtonDisabled
+                ? 'Complete (${state.completeButtonRemainingSeconds})'
                 : 'Complete',
             AppImages.complete,
             AppColors.green,
-            () => context.read<ServiceAgentCubit>().completeService(),
+            () => context.read<ServiceAgentCubit>().completeToken(),
             enabled:
-                !_isCompleteButtonDisabled &&
-                widget.state.currentToken?.id != null &&
-                widget.state.currentTokenStatus == CurrentTokenStatus.loaded,
+                !state.isCompleteButtonDisabled &&
+                state.currentToken?.id != null &&
+                state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),
         ),
         const SizedBox(width: 16),
@@ -93,21 +53,18 @@ class _ActionButtonsState extends State<ActionButtons> {
             'Recall',
             AppImages.recall,
             AppColors.brownDark,
-            () async {
-              await context.read<ServiceAgentCubit>().recallCurrentToken();
-              _startCompleteButtonTimer();
-            },
+            () => context.read<ServiceAgentCubit>().recallToken(),
             enabled:
-                widget.state.currentToken?.id != null &&
-                widget.state.currentTokenStatus == CurrentTokenStatus.loaded,
+                state.currentToken?.id != null &&
+                state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: _buildActionButton(
             context,
-            _isCompleteButtonDisabled
-                ? 'Transfer ($_remainingSeconds)'
+            state.isCompleteButtonDisabled
+                ? 'Transfer (${state.completeButtonRemainingSeconds})'
                 : 'Transfer',
             AppImages.transferred,
             AppColors.red,
@@ -118,15 +75,31 @@ class _ActionButtonsState extends State<ActionButtons> {
                 builder: (BuildContext dialogContext) {
                   return BlocProvider.value(
                     value: context.read<ServiceAgentCubit>(),
-                    child: TransferDialog(state: widget.state),
+                    child: TransferDialog(state: state),
                   );
                 },
               );
             },
             enabled:
-                !_isCompleteButtonDisabled &&
-                widget.state.currentToken?.id != null &&
-                widget.state.currentTokenStatus == CurrentTokenStatus.loaded,
+                !state.isCompleteButtonDisabled &&
+                state.currentToken?.id != null &&
+                state.currentTokenStatus == CurrentTokenStatus.loaded,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildActionButton(
+            context,
+            state.isCompleteButtonDisabled
+                ? 'Hold (${state.completeButtonRemainingSeconds})'
+                : 'Hold',
+            AppImages.hold,
+            AppColors.blue,
+            () => context.read<ServiceAgentCubit>().holdToken(),
+            enabled:
+                !state.isCompleteButtonDisabled &&
+                state.currentToken?.id != null &&
+                state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),
         ),
       ],

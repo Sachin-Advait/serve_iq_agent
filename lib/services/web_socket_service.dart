@@ -28,9 +28,14 @@ class WebSocketService {
 
   static void connect({
     required String counterId,
-    required Function(List<dynamic> data) onUpcomingUpdate,
-    required Function(Map<String, dynamic> counter) onCounterUpdate,
+    required Function(List<dynamic>) onUpcomingUpdate,
+    required Function(Map<String, dynamic>) onCounterUpdate,
   }) {
+    if (_isConnected && _counterId == counterId) {
+      debugPrint("WebSocket already connected for counter $counterId");
+      return;
+    }
+
     _counterId = counterId;
     _onUpcomingUpdate = onUpcomingUpdate;
     _onCounterUpdate = onCounterUpdate;
@@ -176,7 +181,15 @@ class WebSocketService {
   static void _cleanup() {
     _heartbeatTimer?.cancel();
     _streamSubscription?.cancel();
+    _reconnectTimer?.cancel();
+
+    _heartbeatTimer = null;
+    _streamSubscription = null;
+    _reconnectTimer = null;
+
     _isSubscribed = false;
+    _isConnected = false;
+
     _channel?.sink.close();
     _channel = null;
   }

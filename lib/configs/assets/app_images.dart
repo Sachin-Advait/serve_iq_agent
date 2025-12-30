@@ -16,9 +16,9 @@ class AppImages {
   static const String serviceType = 'assets/images/Service_Type.svg';
 
   // Token / Queue
-  static const String tokenSvg = 'assets/images/Token.svg';
   static const String tokenPng = 'assets/images/Token.png';
   static const String transferred = 'assets/images/Transferred.svg';
+  static const String hold = 'assets/images/hold.svg';
 
   // Actions
   static const String callNext = 'assets/images/Call_Next.svg';

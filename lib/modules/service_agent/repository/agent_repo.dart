@@ -28,11 +28,13 @@ class AgentRepository {
     }
   }
 
-  Future<TokenModel> callNext() async {
+  Future<TokenModel> callToken({String? tokenId}) async {
     try {
-      final response = await _apiClient.postApi(
-        ApiConstants.callNext + SessionManager.getCounter(),
-      );
+      final endpoint = tokenId != null
+          ? ApiConstants.callHoldToken + tokenId
+          : ApiConstants.callNext + SessionManager.getCounter();
+
+      final response = await _apiClient.postApi(endpoint);
 
       if (response != null && response.statusCode == 200) {
         final data = response.data;
@@ -47,7 +49,7 @@ class AgentRepository {
           return token;
         }
       }
-      throw Exception('Failed to call next token');
+      throw Exception('Failed to call token');
     } catch (e) {
       rethrow;
     }
@@ -57,7 +59,7 @@ class AgentRepository {
     await _apiClient.postApi(ApiConstants.startServing + tokenId);
   }
 
-  Future<void> completeService(String tokenId) async {
+  Future<void> completeToken(String tokenId) async {
     final response = await _apiClient.postApi(
       ApiConstants.completeService + tokenId,
     );
@@ -65,7 +67,7 @@ class AgentRepository {
     if (response != null && response.statusCode != 200) {}
   }
 
-  Future<List<ServiceHistory>> getRecentServices() async {
+  Future<List<ServiceHistory>> getRecentTokens() async {
     try {
       final response = await _apiClient.getApi(
         ApiConstants.recentServices + SessionManager.getCounter(),
@@ -125,10 +127,7 @@ class AgentRepository {
 
   Future<TokenModel> recallToken(String tokenId) async {
     try {
-      final response = await _apiClient.postApi(
-        ApiConstants.recall,
-        queryPara: {"tokenId": tokenId, "counterId": ""},
-      );
+      final response = await _apiClient.postApi(ApiConstants.recall + tokenId);
 
       if (response != null && response.statusCode == 200) {
         final data = response.data;
@@ -151,11 +150,19 @@ class AgentRepository {
     }
   }
 
-  Future<void> transferService(String tokenId, String counterId) async {
+  Future<void> transferToken(String tokenId, String counterId) async {
     final response = await _apiClient.postApi(
       ApiConstants.transfer,
       body: {"tokenId": tokenId, "toCounterId": counterId},
     );
+
+    if (response != null && response.statusCode != 200) {
+      throw Exception('Failed to complete service');
+    }
+  }
+
+  Future<void> holdToken(String tokenId) async {
+    final response = await _apiClient.postApi(ApiConstants.hold + tokenId);
 
     if (response != null && response.statusCode != 200) {
       throw Exception('Failed to complete service');
@@ -172,7 +179,6 @@ class AgentRepository {
 
       if (data is Map<String, dynamic>) {
         final token = TokenModel.fromJson(data);
-
         if (token.status == "CALLING") {
           startServing(token.id);
         }

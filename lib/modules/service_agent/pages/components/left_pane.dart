@@ -31,7 +31,7 @@ class LeftPane extends StatelessWidget {
                     const SizedBox(height: 16),
                     QueueCard(
                       label: 'Avg Wait Time',
-                      value: (state.counter?.avgSecond ?? 0).toString(),
+                      value: (state.counter?.avgSecond ?? 0).toStringAsFixed(1),
                       icon: AppImages.avgWaitingTime,
                     ),
 
@@ -40,8 +40,9 @@ class LeftPane extends StatelessWidget {
                       const SizedBox(height: 24),
                       _buildCurrentTokenCard(state),
                     ],
-                    _buildTransferredTokens(state),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
+                    _buildHoldTokens(state, context),
+                    _buildTransferredTokens(state, context),
                     _buildUpcomingTokens(state, context),
                   ],
                 ),
@@ -91,6 +92,100 @@ class LeftPane extends StatelessWidget {
     );
   }
 
+  Widget _buildHoldTokens(ServiceAgentState state, BuildContext context) {
+    if (state.holdQueue.isNotEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppColors.blue, AppColors.darkBlue],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                SvgPicture.asset(
+                  AppImages.hold,
+                  color: AppColors.white,
+                  height: 28,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'Hold Tokens',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...state.holdQueue
+              .take(6)
+              .map(
+                (token) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: () {
+                      if ((state.currentToken?.id == null ||
+                              state.currentTokenStatus ==
+                                  CurrentTokenStatus.initial) &&
+                          state.counter!.status == 'IDLE') {
+                        context.read<ServiceAgentCubit>().callToken(
+                          tokenId: token.id,
+                        );
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFE9F6F7),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.darkBlue, width: 1),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            token.token,
+                            style: context.bold.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: AppColors.blue,
+                            ),
+                          ),
+                          Spacer(),
+                          Text(
+                            token.serviceName,
+                            style: context.medium.copyWith(
+                              fontSize: 11,
+                              color: AppColors.blue,
+                            ),
+                            textAlign: TextAlign.right,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          const SizedBox(height: 10),
+        ],
+      );
+    }
+    return SizedBox();
+  }
+
   Widget _buildUpcomingTokens(ServiceAgentState state, BuildContext context) {
     // Filter out transferred tokens
     final upcomingTokens = state.queue
@@ -108,7 +203,7 @@ class LeftPane extends StatelessWidget {
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
             ),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [
@@ -159,10 +254,10 @@ class LeftPane extends StatelessWidget {
               .map(
                 (token) => Container(
                   margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: AppColors.offWhite,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: AppColors.beige, width: 1),
                   ),
                   child: Row(
@@ -191,11 +286,15 @@ class LeftPane extends StatelessWidget {
                   ),
                 ),
               ),
+        const SizedBox(height: 10),
       ],
     );
   }
 
-  Widget _buildTransferredTokens(ServiceAgentState state) {
+  Widget _buildTransferredTokens(
+    ServiceAgentState state,
+    BuildContext context,
+  ) {
     // Filter only transferred tokens
     final transferredTokens = state.queue
         .where((token) => token.isTransfer)
@@ -204,7 +303,6 @@ class LeftPane extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 24),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
             decoration: BoxDecoration(
@@ -213,7 +311,7 @@ class LeftPane extends StatelessWidget {
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
@@ -225,10 +323,9 @@ class LeftPane extends StatelessWidget {
                 SizedBox(width: 8),
                 Text(
                   'Transferred Tokens',
-                  style: TextStyle(
+                  style: context.medium.copyWith(
                     fontSize: 15,
                     color: AppColors.white,
-                    fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -244,7 +341,7 @@ class LeftPane extends StatelessWidget {
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFEF2F2),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: const Color(0xFFFECACA),
                       width: 1,
@@ -292,6 +389,7 @@ class LeftPane extends StatelessWidget {
                   ),
                 ),
               ),
+          const SizedBox(height: 10),
         ],
       );
     }

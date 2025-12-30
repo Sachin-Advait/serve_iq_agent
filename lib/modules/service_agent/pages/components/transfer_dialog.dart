@@ -303,9 +303,7 @@ class _TransferDialogState extends State<TransferDialog> {
 
     try {
       // Call your transfer method from the cubit
-      await context.read<ServiceAgentCubit>().transferService(
-        selectedCounterId!,
-      );
+      await context.read<ServiceAgentCubit>().transferToken(selectedCounterId!);
 
       if (mounted) {
         Navigator.of(context).pop();
