@@ -20,6 +20,7 @@ class ApiConstants {
   static const String transfer = 'agent/token/transfer';
   static const String hold = 'agent/hold-token/';
   static const String callHoldToken = 'agent/call-hold-token/';
+  static const String noShow = 'agent/no-show-token/';
 
   // ---------- COUNTERS ----------
   static const String counters = 'counters';

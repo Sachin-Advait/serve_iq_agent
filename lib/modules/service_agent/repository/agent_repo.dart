@@ -156,7 +156,7 @@ class AgentRepository {
       body: {"tokenId": tokenId, "toCounterId": counterId},
     );
 
-    if (response != null && response.statusCode != 200) {
+    if (response == null && response?.statusCode != 200) {
       throw Exception('Failed to complete service');
     }
   }
@@ -164,7 +164,15 @@ class AgentRepository {
   Future<void> holdToken(String tokenId) async {
     final response = await _apiClient.postApi(ApiConstants.hold + tokenId);
 
-    if (response != null && response.statusCode != 200) {
+    if (response == null && response?.statusCode != 200) {
+      throw Exception('Failed to complete service');
+    }
+  }
+
+  Future<void> noShow(String tokenId) async {
+    final response = await _apiClient.postApi(ApiConstants.noShow + tokenId);
+
+    if (response == null && response?.statusCode != 200) {
       throw Exception('Failed to complete service');
     }
   }

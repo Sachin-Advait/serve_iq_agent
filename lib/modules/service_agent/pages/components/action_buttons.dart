@@ -30,7 +30,7 @@ class ActionButtons extends StatelessWidget {
                 state.counter!.status == 'IDLE',
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 10),
         Expanded(
           child: _buildActionButton(
             context,
@@ -46,7 +46,7 @@ class ActionButtons extends StatelessWidget {
                 state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 10),
         Expanded(
           child: _buildActionButton(
             context,
@@ -59,7 +59,7 @@ class ActionButtons extends StatelessWidget {
                 state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 10),
         Expanded(
           child: _buildActionButton(
             context,
@@ -86,7 +86,7 @@ class ActionButtons extends StatelessWidget {
                 state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 10),
         Expanded(
           child: _buildActionButton(
             context,
@@ -102,6 +102,23 @@ class ActionButtons extends StatelessWidget {
                 state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),
         ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _buildActionButton(
+            context,
+            state.isCompleteButtonDisabled
+                ? 'No Show (${state.completeButtonRemainingSeconds})'
+                : 'No Show',
+            AppImages.noShow,
+            AppColors.brownVeryDark,
+            () => context.read<ServiceAgentCubit>().noShow(),
+            enabled:
+                !state.isCompleteButtonDisabled &&
+                state.currentToken?.id != null &&
+                state.currentTokenStatus == CurrentTokenStatus.loaded,
+          ),
+        ),
+        const SizedBox(width: 16),
       ],
     );
   }
@@ -129,10 +146,10 @@ class ActionButtons extends StatelessWidget {
         children: [
           SvgPicture.asset(
             icon,
-            height: 33,
+            height: 28,
             color: enabled ? Colors.white : AppColors.brownDark,
           ),
-          15.horizontalSpace,
+          5.horizontalSpace,
           Text(
             label,
             style: TextStyle(

@@ -543,7 +543,10 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       flutterToast(message: 'Token successfully transferred');
       await queueAPI();
     } catch (e) {
-      flutterToast(message: 'Error while transferring. Please try again');
+      flutterToast(
+        message: 'Error while transferring. Please try again',
+        color: AppColors.darkRed,
+      );
     } finally {
       EasyLoading.dismiss();
     }
@@ -574,7 +577,43 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
         ),
       );
     } catch (e) {
-      flutterToast(message: 'Error while holding token. Please try again');
+      flutterToast(
+        message: 'Error while holding token. Please try again',
+        color: AppColors.darkRed,
+      );
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+  Future<void> noShow() async {
+    // Check network
+    if (!state.isNetworkConnected) {
+      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      return;
+    }
+
+    try {
+      customLoader();
+
+      final tokenId = state.currentToken!.id;
+      await agentRepository.noShow(tokenId);
+
+      // Cancel timer and reset state
+      cancelCompleteButtonTimer();
+
+      emit(
+        state.copyWith(
+          currentTokenStatus: CurrentTokenStatus.initial,
+          currentToken: TokenModel(),
+          counter: await agentRepository.getCounter(),
+        ),
+      );
+    } catch (e) {
+      flutterToast(
+        message: 'Unknown Error. Please try again',
+        color: AppColors.darkRed,
+      );
     } finally {
       EasyLoading.dismiss();
     }

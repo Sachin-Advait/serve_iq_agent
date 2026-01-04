@@ -17,13 +17,14 @@ class AppImages {
 
   // Token / Queue
   static const String tokenPng = 'assets/images/Token.png';
-  static const String transferred = 'assets/images/Transferred.svg';
-  static const String hold = 'assets/images/hold.svg';
 
   // Actions
   static const String callNext = 'assets/images/Call_Next.svg';
   static const String recall = 'assets/images/Recall.svg';
   static const String complete = 'assets/images/Complete.svg';
+  static const String transferred = 'assets/images/Transferred.svg';
+  static const String hold = 'assets/images/hold.svg';
+  static const String noShow = 'assets/images/no_show.svg';
 
   // UI Icons
   static const String id = 'assets/images/ID.svg';
