@@ -38,7 +38,7 @@ class MainPanel extends StatelessWidget {
   Widget _buildEmptyState(BuildContext context, ServiceAgentState state) {
     String message;
 
-    if (state.counter!.status == "COMPLETE") {
+    if (state.counter?.status == "COMPLETE") {
       message = 'Visitor is writing the feedback, please wait';
     } else if (state.queue.isEmpty) {
       message = 'No tokens in queue';

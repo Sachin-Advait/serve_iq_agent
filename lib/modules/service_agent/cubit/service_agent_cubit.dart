@@ -302,7 +302,6 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   }
 
   Future<void> loadingData() async {
-    // Check network before making API calls
     if (!state.isNetworkConnected) {
       emit(
         state.copyWith(
@@ -360,7 +359,9 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
           allCounter: allCounter,
           isNetworkConnected: state.isNetworkConnected,
           connectivityStatus: state.connectivityStatus,
-          webSocketStatus: state.webSocketStatus,
+          webSocketStatus: WebSocketService.isConnected
+              ? WebSocketStatus.connected
+              : WebSocketStatus.error,
           webSocketErrorMessage: state.webSocketErrorMessage,
         ),
       );
