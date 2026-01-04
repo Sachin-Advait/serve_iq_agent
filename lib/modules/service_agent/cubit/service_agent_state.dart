@@ -1,34 +1,36 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 part of 'service_agent_cubit.dart';
 
 enum ServiceAgentStatus { initial, loading, loaded, error }
 
-enum CurrentTokenStatus { initial, loading, loaded, error }
+enum CurrentTokenStatus { initial, loaded }
 
-@immutable
+enum WebSocketStatus { initial, connecting, connected, error }
+
 class ServiceAgentState {
   final ServiceAgentStatus status;
   final CurrentTokenStatus currentTokenStatus;
+  final WebSocketStatus webSocketStatus;
+  final String? webSocketErrorMessage;
+  final CounterModel? counter;
   final List<TokenModel> queue;
   final List<TokenModel> holdQueue;
   final List<ServiceHistory> recentServices;
   final TokenModel? currentToken;
-  final CounterModel? counter;
   final List<CounterModel> allCounter;
-  final String? errorMessage;
   final int completeButtonRemainingSeconds;
   final bool isCompleteButtonDisabled;
 
   const ServiceAgentState({
     this.status = ServiceAgentStatus.initial,
     this.currentTokenStatus = CurrentTokenStatus.initial,
+    this.webSocketStatus = WebSocketStatus.initial,
+    this.webSocketErrorMessage,
+    this.counter,
     this.queue = const [],
     this.holdQueue = const [],
     this.recentServices = const [],
     this.currentToken,
-    this.counter,
     this.allCounter = const [],
-    this.errorMessage,
     this.completeButtonRemainingSeconds = 0,
     this.isCompleteButtonDisabled = false,
   });
@@ -36,26 +38,29 @@ class ServiceAgentState {
   ServiceAgentState copyWith({
     ServiceAgentStatus? status,
     CurrentTokenStatus? currentTokenStatus,
+    WebSocketStatus? webSocketStatus,
+    String? webSocketErrorMessage,
+    CounterModel? counter,
     List<TokenModel>? queue,
     List<TokenModel>? holdQueue,
     List<ServiceHistory>? recentServices,
     TokenModel? currentToken,
-    CounterModel? counter,
     List<CounterModel>? allCounter,
-    String? errorMessage,
     int? completeButtonRemainingSeconds,
     bool? isCompleteButtonDisabled,
   }) {
     return ServiceAgentState(
       status: status ?? this.status,
       currentTokenStatus: currentTokenStatus ?? this.currentTokenStatus,
+      webSocketStatus: webSocketStatus ?? this.webSocketStatus,
+      webSocketErrorMessage:
+          webSocketErrorMessage ?? this.webSocketErrorMessage,
+      counter: counter ?? this.counter,
       queue: queue ?? this.queue,
       holdQueue: holdQueue ?? this.holdQueue,
       recentServices: recentServices ?? this.recentServices,
       currentToken: currentToken ?? this.currentToken,
-      counter: counter ?? this.counter,
       allCounter: allCounter ?? this.allCounter,
-      errorMessage: errorMessage ?? this.errorMessage,
       completeButtonRemainingSeconds:
           completeButtonRemainingSeconds ?? this.completeButtonRemainingSeconds,
       isCompleteButtonDisabled:

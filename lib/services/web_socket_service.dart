@@ -1,218 +1,467 @@
+// ignore_for_file: constant_identifier_names
+
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:servelq_agent/common/constants/api_constants.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:stomp_dart_client/stomp_dart_client.dart';
 
 class WebSocketService {
-  static WebSocketChannel? _channel;
-  static bool _isConnected = false;
-  static bool _isIntentionalDisconnect = false;
-  static bool _isSubscribed = false;
-  static Timer? _reconnectTimer;
-  static Timer? _heartbeatTimer;
-  static int _reconnectAttempts = 0;
-  static const int _maxReconnectAttempts = 10;
-  static const Duration _reconnectDelay = Duration(seconds: 5);
+  static StompClient? _stompClient;
+  static Timer? _reconnectionTimer;
+  static Timer? _healthCheckTimer;
+  static Timer? _connectionTimeoutTimer;
 
-  // Store connection parameters for reconnection
-  static String? _counterId;
+  static DateTime? _lastMessageReceived;
+  static DateTime? _lastHeartbeatReceived;
+  static String? _currentCounterId;
   static Function(List<dynamic> data)? _onUpcomingUpdate;
   static Function(Map<String, dynamic> counter)? _onCounterUpdate;
-  static StreamSubscription? _streamSubscription;
+  static Function(String message, bool isError)? _onConnectionStatus;
 
-  // Message deduplication
-  static final Set<String> _processedMessageIds = {};
-  static const int _maxCachedMessageIds = 100;
+  static int _reconnectAttempts = 0;
+  static bool _isWebSocketConnected = false;
+  static bool _isConnecting = false;
+  static bool _shouldReconnect = true;
+  static bool _hasNotifiedUser = false;
 
-  static void connect({
+  // Configuration
+  static const int MAX_RECONNECT_ATTEMPTS = 10;
+  static const Duration HEALTH_CHECK_INTERVAL = Duration(minutes: 1);
+  static const Duration HEARTBEAT_TIMEOUT = Duration(minutes: 3);
+  static const Duration MESSAGE_TIMEOUT = Duration(minutes: 10);
+  static const Duration CONNECTION_TIMEOUT = Duration(seconds: 10);
+
+  static bool get isConnected => _isWebSocketConnected;
+  static DateTime? get lastMessageReceived => _lastMessageReceived;
+  static int get reconnectAttempts => _reconnectAttempts;
+
+  /// Connect to WebSocket with callbacks
+  static Future<void> connect({
     required String counterId,
     required Function(List<dynamic>) onUpcomingUpdate,
     required Function(Map<String, dynamic>) onCounterUpdate,
-  }) {
-    if (_isConnected && _counterId == counterId) {
-      debugPrint("WebSocket already connected for counter $counterId");
-      return;
-    }
-
-    _counterId = counterId;
+    Function(String message, bool isError)? onConnectionStatus,
+  }) async {
+    _currentCounterId = counterId;
     _onUpcomingUpdate = onUpcomingUpdate;
     _onCounterUpdate = onCounterUpdate;
-    _isIntentionalDisconnect = false;
+    _onConnectionStatus = onConnectionStatus;
+    _shouldReconnect = true;
+    _hasNotifiedUser = false;
 
-    if (_isConnected) {
-      _cleanup();
-    }
-
-    _connectInternal();
+    await _connectWebSocket();
+    _startHealthCheck();
   }
 
-  static void _connectInternal() {
-    if (_counterId == null || _onUpcomingUpdate == null) {
-      debugPrint("Cannot connect: missing connection parameters");
-      return;
-    }
+  static void _startHealthCheck() {
+    _healthCheckTimer?.cancel();
+    _lastMessageReceived = DateTime.now();
+    _lastHeartbeatReceived = DateTime.now();
 
-    try {
-      _streamSubscription?.cancel();
-      _streamSubscription = null;
-      _isSubscribed = false;
+    _healthCheckTimer = Timer.periodic(HEALTH_CHECK_INTERVAL, (timer) {
+      // Don't run health checks if we've exceeded max reconnect attempts
+      if (_reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+        debugPrint(
+          '[WS] ${DateTime.now()} [WARN] Max reconnect attempts reached - stopping health checks',
+        );
+        _healthCheckTimer?.cancel();
+        _healthCheckTimer = null;
+        return;
+      }
 
-      final wsUri = Uri.parse(ApiConstants.wsUrl);
-      _channel = WebSocketChannel.connect(wsUri);
-      _isConnected = true;
+      // Only run health checks if we think we're connected
+      if (!_isWebSocketConnected) {
+        debugPrint(
+          '[WS] ${DateTime.now()} [DEBUG] Not connected - skipping health check',
+        );
+        return;
+      }
 
-      final connectFrame =
-          'CONNECT\naccept-version:1.0,1.1,2.0\nheart-beat:10000,10000\n\n\x00';
-      _channel!.sink.add(connectFrame);
-
-      _startHeartbeat();
-
-      _streamSubscription = _channel!.stream.listen(
-        (message) {
-          try {
-            final messageStr = message.toString();
-
-            if (messageStr.startsWith('CONNECTED')) {
-              _reconnectAttempts = 0;
-
-              if (!_isSubscribed) {
-                _channel!.sink.add(
-                  'SUBSCRIBE\nid:sub-queue\ndestination:/topic/agent-upcoming/$_counterId\n\n\x00',
-                );
-
-                _channel!.sink.add(
-                  'SUBSCRIBE\nid:sub-counter\ndestination:/topic/counter/$_counterId\n\n\x00',
-                );
-
-                _isSubscribed = true;
-              }
-            } else if (messageStr.startsWith('MESSAGE')) {
-              final messageIdMatch = RegExp(
-                r'message-id:([^\n]+)',
-              ).firstMatch(messageStr);
-              final messageId = messageIdMatch?.group(1)?.trim();
-
-              if (messageId != null &&
-                  _processedMessageIds.contains(messageId)) {
-                return;
-              }
-
-              // ✅ ADD: extract destination
-              final destinationMatch = RegExp(
-                r'destination:([^\n]+)',
-              ).firstMatch(messageStr);
-              final destination = destinationMatch?.group(1);
-
-              final bodyStart = messageStr.indexOf('\n\n') + 2;
-              final bodyEnd = messageStr.indexOf('\x00', bodyStart);
-
-              if (bodyStart > 1 && bodyEnd > bodyStart) {
-                final body = messageStr.substring(bodyStart, bodyEnd);
-
-                if (body.isNotEmpty) {
-                  // ✅ ADD: route based on destination
-                  if (destination?.startsWith('/topic/agent-upcoming/') ==
-                      true) {
-                    final decodedData = jsonDecode(body);
-
-                    if (decodedData is List) {
-                      _onUpcomingUpdate?.call(List<dynamic>.from(decodedData));
-                    }
-                  } else if (destination?.startsWith('/topic/counter/') ==
-                      true) {
-                    final decodedData = jsonDecode(body);
-
-                    if (decodedData is Map<String, dynamic>) {
-                      _onCounterUpdate?.call(decodedData);
-                    }
-                  }
-
-                  if (messageId != null) {
-                    _processedMessageIds.add(messageId);
-                    if (_processedMessageIds.length > _maxCachedMessageIds) {
-                      _processedMessageIds.remove(_processedMessageIds.first);
-                    }
-                  }
-                }
-              }
-            }
-          } catch (e, stackTrace) {
-            debugPrint("Error processing WebSocket message: $e");
-            debugPrint("StackTrace: $stackTrace");
-          }
-        },
-        onError: (_) => _handleDisconnection(),
-        onDone: _handleDisconnection,
-        cancelOnError: false,
+      final now = DateTime.now();
+      final timeSinceLastHeartbeat = now.difference(
+        _lastHeartbeatReceived ?? now,
       );
-    } catch (_) {
-      _handleDisconnection();
-    }
-  }
+      final timeSinceLastMessage = now.difference(_lastMessageReceived ?? now);
 
-  static void _startHeartbeat() {
-    _heartbeatTimer?.cancel();
-    _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (_) {
-      if (_isConnected && _channel != null) {
-        _channel!.sink.add('\n');
+      debugPrint(
+        '[WS] ${DateTime.now()} [INFO] Health check - Connected: $_isWebSocketConnected, '
+        'Last heartbeat: ${timeSinceLastHeartbeat.inSeconds}s ago, '
+        'Last message: ${timeSinceLastMessage.inSeconds}s ago',
+      );
+
+      // Check heartbeat first (most reliable indicator)
+      if (timeSinceLastHeartbeat > HEARTBEAT_TIMEOUT) {
+        debugPrint(
+          '[WS] ${DateTime.now()} [WARN] Heartbeat timeout (${timeSinceLastHeartbeat.inSeconds}s) - scheduling reconnect',
+        );
+        _reconnectWebSocket();
+        return;
+      }
+
+      // Log warning if no business messages for a while
+      if (timeSinceLastMessage > MESSAGE_TIMEOUT) {
+        debugPrint(
+          '[WS] ${DateTime.now()} [WARN] No messages received for ${timeSinceLastMessage.inMinutes} minutes',
+        );
       }
     });
   }
 
-  static void _handleDisconnection() {
-    _heartbeatTimer?.cancel();
-    _heartbeatTimer = null;
-
-    _reconnectTimer?.cancel();
-    _reconnectTimer = null;
-
-    if (_isIntentionalDisconnect) return;
-
-    if (_counterId == null || _onUpcomingUpdate == null) return;
-
-    if (_reconnectAttempts >= _maxReconnectAttempts) return;
-
-    _reconnectAttempts++;
-    _reconnectTimer = Timer(_reconnectDelay, _connectInternal);
-  }
-
-  static void _cleanup() {
-    _heartbeatTimer?.cancel();
-    _streamSubscription?.cancel();
-    _reconnectTimer?.cancel();
-
-    _heartbeatTimer = null;
-    _streamSubscription = null;
-    _reconnectTimer = null;
-
-    _isSubscribed = false;
-    _isConnected = false;
-
-    _channel?.sink.close();
-    _channel = null;
-  }
-
-  static void disconnect() {
-    _isIntentionalDisconnect = true;
-    _reconnectTimer?.cancel();
-    _heartbeatTimer?.cancel();
-    _streamSubscription?.cancel();
-    _processedMessageIds.clear();
-
-    if (_channel != null) {
-      _channel!.sink.add('DISCONNECT\n\n\x00');
-      _channel!.sink.close();
+  static Future<void> _connectWebSocket() async {
+    if (_isConnecting) {
+      debugPrint(
+        '[WS] ${DateTime.now()} [DEBUG] WebSocket connection already in progress',
+      );
+      return;
     }
 
-    _channel = null;
-    _isConnected = false;
-    _counterId = null;
-    _onUpcomingUpdate = null;
-    _onCounterUpdate = null;
-    _reconnectAttempts = 0;
+    _isConnecting = true;
+    _reconnectionTimer?.cancel();
+    _connectionTimeoutTimer?.cancel();
+
+    // Set connection timeout
+    _connectionTimeoutTimer = Timer(CONNECTION_TIMEOUT, () {
+      if (_isConnecting) {
+        debugPrint(
+          '[WS] ${DateTime.now()} [ERROR] ⏱️ WebSocket connection timeout',
+        );
+        _isConnecting = false;
+        _stompClient?.deactivate();
+        _stompClient = null;
+        _scheduleReconnection();
+      }
+    });
+
+    // Clean up existing connection
+    if (_stompClient != null) {
+      debugPrint(
+        '[WS] ${DateTime.now()} [INFO] Deactivating existing WebSocket connection',
+      );
+      try {
+        _stompClient?.deactivate();
+        await Future.delayed(Duration(milliseconds: 100));
+      } catch (e) {
+        debugPrint(
+          '[WS] ${DateTime.now()} [ERROR] Error during WebSocket deactivation: $e',
+        );
+      }
+      _stompClient = null;
+    }
+
+    debugPrint(
+      '[WS] ${DateTime.now()} [INFO] Initializing WebSocket connection to ${ApiConstants.wsUrl}',
+    );
+
+    _stompClient = StompClient(
+      config: StompConfig(
+        url: ApiConstants.wsUrl,
+        onConnect: (StompFrame frame) async {
+          _connectionTimeoutTimer?.cancel();
+          _isConnecting = false;
+          _isWebSocketConnected = true;
+          _lastMessageReceived = DateTime.now();
+          _lastHeartbeatReceived = DateTime.now();
+          _reconnectAttempts = 0;
+          _hasNotifiedUser = false;
+
+          debugPrint(
+            '[WS] ${DateTime.now()} [SUCCESS] ✅ WebSocket connected for counter: $_currentCounterId',
+          );
+
+          // Notify user of successful connection
+          _onConnectionStatus?.call('Connected to server', false);
+
+          // Subscribe to upcoming queue updates
+          _stompClient?.subscribe(
+            destination: '/topic/agent-upcoming/$_currentCounterId',
+            callback: (StompFrame frame) {
+              _lastMessageReceived = DateTime.now();
+              _reconnectAttempts = 0;
+
+              debugPrint(
+                '[WS] ${DateTime.now()} [INFO] 📨 Upcoming queue message received',
+              );
+
+              if (frame.body != null && frame.body!.isNotEmpty) {
+                try {
+                  final decoded = json.decode(frame.body!);
+                  if (decoded is List) {
+                    _onUpcomingUpdate?.call(List<dynamic>.from(decoded));
+                  }
+                } catch (e) {
+                  debugPrint(
+                    '[WS] ${DateTime.now()} [ERROR] Error parsing upcoming queue message: $e',
+                  );
+                }
+              }
+            },
+          );
+
+          // Subscribe to counter status updates
+          _stompClient?.subscribe(
+            destination: '/topic/counter/$_currentCounterId',
+            callback: (StompFrame frame) {
+              _lastMessageReceived = DateTime.now();
+              _reconnectAttempts = 0;
+
+              debugPrint(
+                '[WS] ${DateTime.now()} [INFO] 📨 Counter status message received',
+              );
+
+              if (frame.body != null && frame.body!.isNotEmpty) {
+                try {
+                  final decoded = json.decode(frame.body!);
+                  if (decoded is Map<String, dynamic>) {
+                    _onCounterUpdate?.call(decoded);
+                  }
+                } catch (e) {
+                  debugPrint(
+                    '[WS] ${DateTime.now()} [ERROR] Error parsing counter message: $e',
+                  );
+                }
+              }
+            },
+          );
+
+          // Subscribe to global heartbeat topic
+          _stompClient?.subscribe(
+            destination: '/topic/heartbeat',
+            callback: (StompFrame frame) {
+              _lastHeartbeatReceived = DateTime.now();
+              debugPrint('[WS] ${DateTime.now()} [INFO] 💓 Heartbeat received');
+            },
+          );
+
+          debugPrint(
+            '[WS] ${DateTime.now()} [SUCCESS] ✅ All subscriptions completed',
+          );
+        },
+        onWebSocketError: (dynamic error) {
+          _connectionTimeoutTimer?.cancel();
+          _isConnecting = false;
+          _isWebSocketConnected = false;
+          debugPrint(
+            '[WS] ${DateTime.now()} [ERROR] ❌ WebSocket error: $error',
+          );
+          _scheduleReconnection();
+        },
+        onStompError: (StompFrame frame) {
+          _connectionTimeoutTimer?.cancel();
+          _isConnecting = false;
+          _isWebSocketConnected = false;
+          debugPrint(
+            '[WS] ${DateTime.now()} [ERROR] ❌ STOMP error: ${frame.body}',
+          );
+          _scheduleReconnection();
+        },
+        onDisconnect: (StompFrame frame) {
+          _connectionTimeoutTimer?.cancel();
+          _isConnecting = false;
+
+          if (_isWebSocketConnected) {
+            debugPrint(
+              '[WS] ${DateTime.now()} [WARN] ⚠️ WebSocket disconnected unexpectedly',
+            );
+            _isWebSocketConnected = false;
+            _scheduleReconnection();
+          }
+        },
+        beforeConnect: () async {
+          debugPrint(
+            '[WS] ${DateTime.now()} [INFO] Attempting WebSocket connection...',
+          );
+        },
+        stompConnectHeaders: {},
+        webSocketConnectHeaders: {},
+        heartbeatIncoming: Duration(seconds: 60),
+        heartbeatOutgoing: Duration(seconds: 60),
+        reconnectDelay: Duration.zero,
+      ),
+    );
+
+    debugPrint('[WS] ${DateTime.now()} [INFO] Activating STOMP client...');
+    _stompClient?.activate();
+
+    // Log current state for debugging
+    debugPrint(
+      '[WS] ${DateTime.now()} [DEBUG] WebSocket State:\n'
+      '  Connected: $_isWebSocketConnected\n'
+      '  Connecting: $_isConnecting\n'
+      '  Counter ID: $_currentCounterId\n'
+      '  Reconnect Attempts: $_reconnectAttempts\n'
+      '  Last Message: $_lastMessageReceived\n'
+      '  Last Heartbeat: $_lastHeartbeatReceived\n'
+      '  Should Reconnect: $_shouldReconnect',
+    );
   }
 
-  static bool get isConnected => _isConnected;
+  static Future<void> _reconnectWebSocket() async {
+    debugPrint(
+      '[WS] ${DateTime.now()} [WARN] 🔄 Forcing WebSocket reconnection (attempt $_reconnectAttempts)',
+    );
+    _isWebSocketConnected = false;
+    _isConnecting = false;
+    await _connectWebSocket();
+  }
+
+  static void _scheduleReconnection() {
+    if (!_shouldReconnect || _isConnecting) {
+      return;
+    }
+
+    if (_reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+      debugPrint(
+        '[WS] ${DateTime.now()} [ERROR] ⛔ MAX reconnection attempts ($MAX_RECONNECT_ATTEMPTS) reached',
+      );
+
+      // Stop health check timer to prevent further reconnection attempts
+      _healthCheckTimer?.cancel();
+      _healthCheckTimer = null;
+
+      // Notify user once
+      if (!_hasNotifiedUser) {
+        _onConnectionStatus?.call(
+          'Unable to connect to server after $MAX_RECONNECT_ATTEMPTS attempts. '
+          'Please check your connection and tap retry.',
+          true, // isError = true
+        );
+        _hasNotifiedUser = true;
+      }
+
+      return;
+    }
+
+    // Notify user after 3 failed attempts
+    if (_reconnectAttempts == 3 && !_hasNotifiedUser) {
+      _onConnectionStatus?.call(
+        'Having trouble connecting to the server. Retrying...',
+        true, // isError = true
+      );
+      _hasNotifiedUser = true;
+    }
+
+    _reconnectAttempts++;
+    final delay = Duration(seconds: (5 * _reconnectAttempts).clamp(5, 30));
+
+    debugPrint(
+      '[WS] ${DateTime.now()} [INFO] ⏰ Scheduling reconnection attempt $_reconnectAttempts in ${delay.inSeconds}s',
+    );
+
+    _reconnectionTimer?.cancel();
+    _reconnectionTimer = Timer(delay, () async {
+      if (_shouldReconnect && !_isConnecting) {
+        await _connectWebSocket();
+      }
+    });
+  }
+
+  /// Handle app resume from background
+  static Future<void> onAppResumed() async {
+    debugPrint('[WS] ${DateTime.now()} [INFO] 📱 App resumed from background');
+
+    if (!_isWebSocketConnected && _currentCounterId != null) {
+      // Reset attempts on app resume to give it a fresh start
+      if (_reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+        debugPrint(
+          '[WS] ${DateTime.now()} [INFO] Resetting reconnection attempts on app resume',
+        );
+        _reconnectAttempts = 0;
+        _hasNotifiedUser = false;
+      }
+      await _reconnectWebSocket();
+      _startHealthCheck();
+    }
+  }
+
+  /// Manually reconnect (useful for retry buttons)
+  static Future<void> reconnect() async {
+    if (_currentCounterId == null) {
+      debugPrint(
+        '[WS] ${DateTime.now()} [ERROR] Cannot reconnect: no counter ID set',
+      );
+      return;
+    }
+
+    debugPrint(
+      '[WS] ${DateTime.now()} [INFO] 🔄 Manual reconnection requested',
+    );
+
+    // Reset reconnection state for manual retry
+    _reconnectAttempts = 0;
+    _hasNotifiedUser = false;
+    _lastMessageReceived = DateTime.now();
+    _lastHeartbeatReceived = DateTime.now();
+
+    await _reconnectWebSocket();
+    _startHealthCheck();
+  }
+
+  /// Reset and retry after max attempts reached (for manual retry button)
+  static Future<void> resetAndRetry() async {
+    debugPrint(
+      '[WS] ${DateTime.now()} [INFO] 🔄 Reset and retry - clearing reconnection state',
+    );
+
+    _reconnectAttempts = 0;
+    _hasNotifiedUser = false;
+    _lastMessageReceived = DateTime.now();
+    _lastHeartbeatReceived = DateTime.now();
+
+    if (_currentCounterId != null) {
+      await _connectWebSocket();
+      _startHealthCheck();
+    } else {
+      debugPrint(
+        '[WS] ${DateTime.now()} [ERROR] Cannot reset and retry: no counter ID set',
+      );
+    }
+  }
+
+  /// Disconnect and cleanup
+  static void disconnect() {
+    debugPrint(
+      '[WS] ${DateTime.now()} [INFO] 🔌 Disconnecting WebSocket service',
+    );
+
+    _shouldReconnect = false;
+    _healthCheckTimer?.cancel();
+    _reconnectionTimer?.cancel();
+    _connectionTimeoutTimer?.cancel();
+    _stompClient?.deactivate();
+
+    _healthCheckTimer = null;
+    _reconnectionTimer = null;
+    _connectionTimeoutTimer = null;
+    _stompClient = null;
+
+    _isWebSocketConnected = false;
+    _isConnecting = false;
+    _currentCounterId = null;
+    _onUpcomingUpdate = null;
+    _onCounterUpdate = null;
+    _onConnectionStatus = null;
+    _reconnectAttempts = 0;
+    _hasNotifiedUser = false;
+
+    debugPrint(
+      '[WS] ${DateTime.now()} [SUCCESS] ✅ WebSocket disconnected and cleaned up',
+    );
+  }
+
+  /// Get connection status information for debugging
+  static Map<String, dynamic> getDebugInfo() {
+    return {
+      'isConnected': _isWebSocketConnected,
+      'isConnecting': _isConnecting,
+      'shouldReconnect': _shouldReconnect,
+      'counterId': _currentCounterId,
+      'reconnectAttempts': _reconnectAttempts,
+      'maxReconnectAttempts': MAX_RECONNECT_ATTEMPTS,
+      'lastMessageReceived': _lastMessageReceived?.toIso8601String(),
+      'lastHeartbeatReceived': _lastHeartbeatReceived?.toIso8601String(),
+      'hasNotifiedUser': _hasNotifiedUser,
+    };
+  }
 }

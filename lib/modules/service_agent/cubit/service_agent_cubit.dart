@@ -59,57 +59,86 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   Future<void> loadInitialData() async {
     emit(state.copyWith(status: ServiceAgentStatus.loading));
     await loadingData();
+    emit(state.copyWith(webSocketStatus: WebSocketStatus.connecting));
 
     // After counter is loaded → initialize WebSocket
     if (state.counter != null) {
-      WebSocketService.connect(
+      await WebSocketService.connect(
         counterId: state.counter!.id,
-        onUpcomingUpdate: (data) {
-          debugPrint("Upcoming queue update received");
-
-          try {
-            final List<TokenModel> queue = data
-                .map<TokenModel>(
-                  (json) => TokenModel.fromJson(json as Map<String, dynamic>),
-                )
-                .toList();
-
-            List<TokenModel> upcomingToken = [];
-            List<TokenModel> holdToken = [];
-            for (var element in queue) {
-              if (element.status == "HOLD") {
-                holdToken.add(element);
-              } else {
-                upcomingToken.add(element);
-              }
-            }
-            emit(state.copyWith(queue: upcomingToken, holdQueue: holdToken));
-
-            debugPrint("Queue updated with ${queue.length} tokens");
-          } catch (e, stackTrace) {
-            debugPrint("Error parsing token data: $e");
-            debugPrint("StackTrace: $stackTrace");
-            debugPrint("Data type: ${data.runtimeType}");
-            debugPrint(
-              "First item type: ${data.isNotEmpty ? data.first.runtimeType : 'empty'}",
-            );
-          }
-        },
-        onCounterUpdate: (json) async {
-          final updatedCounter = CounterModel.fromJson(json);
-
-          final updatedRecentServices = await agentRepository.getRecentTokens();
-
-          emit(
-            state.copyWith(
-              counter: updatedCounter,
-              recentServices: updatedRecentServices,
-            ),
-          );
-
-          debugPrint("Counter status updated: ${updatedCounter.status}");
-        },
+        onUpcomingUpdate: _handleUpcomingUpdate,
+        onCounterUpdate: _handleCounterUpdate,
+        onConnectionStatus: _handleConnectionStatus,
       );
+    }
+  }
+
+  void _handleConnectionStatus(String message, bool isError) {
+    debugPrint("WebSocket connection status: $message (error: $isError)");
+
+    if (isError) {
+      // Emit error state with connection message
+      emit(
+        state.copyWith(
+          webSocketStatus: WebSocketStatus.error,
+          webSocketErrorMessage: message,
+        ),
+      );
+    } else {
+      // Emit connected state
+      emit(
+        state.copyWith(
+          webSocketStatus: WebSocketStatus.connected,
+          webSocketErrorMessage: null,
+        ),
+      );
+    }
+  }
+
+  void _handleUpcomingUpdate(List<dynamic> data) {
+    debugPrint("Upcoming queue update received");
+
+    try {
+      final List<TokenModel> queue = data
+          .map<TokenModel>(
+            (json) => TokenModel.fromJson(json as Map<String, dynamic>),
+          )
+          .toList();
+
+      List<TokenModel> upcomingToken = [];
+      List<TokenModel> holdToken = [];
+
+      for (var element in queue) {
+        if (element.status == "HOLD") {
+          holdToken.add(element);
+        } else {
+          upcomingToken.add(element);
+        }
+      }
+
+      emit(state.copyWith(queue: upcomingToken, holdQueue: holdToken));
+
+      debugPrint("Queue updated with ${queue.length} tokens");
+    } catch (e, stackTrace) {
+      debugPrint("Error parsing token data: $e");
+      debugPrint("StackTrace: $stackTrace");
+    }
+  }
+
+  Future<void> _handleCounterUpdate(Map<String, dynamic> json) async {
+    try {
+      final updatedCounter = CounterModel.fromJson(json);
+      final updatedRecentServices = await agentRepository.getRecentTokens();
+
+      emit(
+        state.copyWith(
+          counter: updatedCounter,
+          recentServices: updatedRecentServices,
+        ),
+      );
+
+      debugPrint("Counter status updated: ${updatedCounter.status}");
+    } catch (e) {
+      debugPrint("Error handling counter update: $e");
     }
   }
 
@@ -131,13 +160,13 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
 
       final counter = results[0] as CounterModel;
       final queue = results[1] as List<TokenModel>;
-
       final recentServices = results[2] as List<ServiceHistory>;
       final allCounter = results[3] as List<CounterModel>;
       final activeToken = results[4] as TokenModel?;
 
       List<TokenModel> upcomingToken = [];
       List<TokenModel> holdToken = [];
+
       for (var element in queue) {
         if (element.status == "HOLD") {
           holdToken.add(element);
@@ -161,23 +190,31 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
         ),
       );
     } catch (e) {
+      debugPrint('Error loading data: $e');
       emit(ServiceAgentState(status: ServiceAgentStatus.error));
     }
   }
 
   Future<void> queueAPI() async {
     if (state.status != ServiceAgentStatus.loaded) return;
-    final queue = await agentRepository.getQueue();
-    List<TokenModel> upcomingToken = [];
-    List<TokenModel> holdToken = [];
-    for (var element in queue) {
-      if (element.status == "HOLD") {
-        holdToken.add(element);
-      } else {
-        upcomingToken.add(element);
+
+    try {
+      final queue = await agentRepository.getQueue();
+      List<TokenModel> upcomingToken = [];
+      List<TokenModel> holdToken = [];
+
+      for (var element in queue) {
+        if (element.status == "HOLD") {
+          holdToken.add(element);
+        } else {
+          upcomingToken.add(element);
+        }
       }
+
+      emit(state.copyWith(queue: upcomingToken, holdQueue: holdToken));
+    } catch (e) {
+      debugPrint('Error fetching queue: $e');
     }
-    emit(state.copyWith(queue: upcomingToken, holdQueue: holdToken));
   }
 
   Future<void> callToken({String? tokenId}) async {
@@ -195,7 +232,6 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
 
       // Start the timer after calling token
       startCompleteButtonTimer();
-      // queueAPI();
     } finally {
       EasyLoading.dismiss();
     }
@@ -221,6 +257,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
         ),
       );
     } catch (e) {
+      debugPrint('Error completing token: $e');
       await loadInitialData();
     } finally {
       EasyLoading.dismiss();
@@ -296,7 +333,6 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
     }
   }
 
-  // New method to check for active token manually
   Future<void> checkActiveToken() async {
     try {
       customLoader();
@@ -306,10 +342,10 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       final activeToken = await agentRepository.counterActiveToken();
 
       if (state.currentToken?.id != activeToken?.id) {
-        // If we have a new active token different from current
         final updatedQueue = await agentRepository.getQueue();
         List<TokenModel> upcomingToken = [];
         List<TokenModel> holdToken = [];
+
         for (var element in updatedQueue) {
           if (element.status == "HOLD") {
             holdToken.add(element);
@@ -317,6 +353,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
             upcomingToken.add(element);
           }
         }
+
         emit(
           state.copyWith(
             queue: upcomingToken,
@@ -324,6 +361,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
             currentToken: activeToken,
           ),
         );
+
         if (activeToken != null) {
           flutterToast(message: 'Active token loaded: ${activeToken.token}');
         }
@@ -331,6 +369,19 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
     } finally {
       EasyLoading.dismiss();
     }
+  }
+
+  /// Handle app resume
+  Future<void> onAppResumed() async {
+    debugPrint('App resumed from background');
+    await WebSocketService.onAppResumed();
+    await loadingData();
+  }
+
+  /// Manual retry for WebSocket connection
+  Future<void> retryWebSocketConnection() async {
+    emit(state.copyWith(webSocketStatus: WebSocketStatus.connecting));
+    await WebSocketService.resetAndRetry();
   }
 
   @override

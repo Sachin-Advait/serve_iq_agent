@@ -1,9 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
+import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/modules/service_agent/pages/components/error_screen.dart';
 import 'package:servelq_agent/modules/service_agent/pages/components/header.dart';
@@ -18,34 +17,25 @@ class ServiceAgentScreen extends StatefulWidget {
   State<ServiceAgentScreen> createState() => _ServiceAgentScreenState();
 }
 
-class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
-  Timer? _pollingTimer;
-
+class _ServiceAgentScreenState extends State<ServiceAgentScreen>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    // Load initial data when screen starts
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ServiceAgentCubit>().loadInitialData();
-      final cubit = context.read<ServiceAgentCubit>();
-
-      _startPolling(cubit);
-    });
+    WidgetsBinding.instance.addObserver(this);
+    context.read<ServiceAgentCubit>().loadInitialData();
   }
 
-  void _startPolling(ServiceAgentCubit cubit) {
-    _pollingTimer?.cancel();
-    _pollingTimer = Timer.periodic(const Duration(minutes: 2), (timer) async {
-      final currentState = cubit.state;
-      if (currentState.status == ServiceAgentStatus.loaded) {
-        await cubit.queueAPI();
-      }
-    });
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      context.read<ServiceAgentCubit>().onAppResumed();
+    }
   }
 
   @override
   void dispose() {
-    _pollingTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -65,9 +55,8 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
           resizeToAvoidBottomInset: false,
           body: BlocListener<ServiceAgentCubit, ServiceAgentState>(
             listener: (context, state) {
-              if (state.status == ServiceAgentStatus.error &&
-                  state.errorMessage != null) {
-                flutterToast(message: state.errorMessage!);
+              if (state.status == ServiceAgentStatus.error) {
+                flutterToast(message: "An error occured");
               }
             },
             child: BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
@@ -80,6 +69,10 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
                 if (state.status == ServiceAgentStatus.loaded) {
                   return Column(
                     children: [
+                      // WebSocket status banner at the very top
+                      const WebSocketStatusBanner(),
+
+                      // Main content
                       Header(state: state),
                       Expanded(
                         child: Row(
@@ -96,7 +89,7 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
 
                 if (state.status == ServiceAgentStatus.error) {
                   return ErrorScreen(
-                    message: state.errorMessage ?? 'An error occurred',
+                    message: 'An error occurred',
                     onRetry: () =>
                         context.read<ServiceAgentCubit>().loadInitialData(),
                   );
@@ -108,6 +101,121 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Widget to display WebSocket connection status
+class WebSocketStatusBanner extends StatelessWidget {
+  const WebSocketStatusBanner({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
+      buildWhen: (previous, current) =>
+          previous.webSocketStatus != current.webSocketStatus ||
+          previous.webSocketErrorMessage != current.webSocketErrorMessage,
+      builder: (context, state) {
+        // Don't show banner if connected
+        if (state.webSocketStatus == WebSocketStatus.connected) {
+          return const SizedBox.shrink();
+        }
+
+        // Show connecting state
+        if (state.webSocketStatus == WebSocketStatus.connecting) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            color: AppColors.brownDark,
+            child: Row(
+              children: [
+                SizedBox(
+                  height: 16,
+                  width: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Connecting to server...',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Show error state
+        if (state.webSocketStatus == WebSocketStatus.error) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            color: Colors.red.shade700,
+            child: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Connection Failed',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (state.webSocketErrorMessage != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          state.webSocketErrorMessage!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () {
+                    context
+                        .read<ServiceAgentCubit>()
+                        .retryWebSocketConnection();
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white.withOpacity(0.2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                  ),
+                  child: const Text(
+                    'Retry',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
     );
   }
 }
