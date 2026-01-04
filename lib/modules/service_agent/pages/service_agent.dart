@@ -56,7 +56,15 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen>
           body: BlocListener<ServiceAgentCubit, ServiceAgentState>(
             listener: (context, state) {
               if (state.status == ServiceAgentStatus.error) {
-                flutterToast(message: "An error occured");
+                flutterToast(message: "An error occurred");
+              }
+              // Handle network connection changes
+              if (!state.isNetworkConnected &&
+                  state.status == ServiceAgentStatus.loaded) {
+                flutterToast(
+                  message: "No internet connection",
+                  color: AppColors.darkRed,
+                );
               }
             },
             child: BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
@@ -69,7 +77,10 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen>
                 if (state.status == ServiceAgentStatus.loaded) {
                   return Column(
                     children: [
-                      // WebSocket status banner at the very top
+                      // Network status banner
+                      const NetworkStatusBanner(),
+
+                      // WebSocket status banner
                       const WebSocketStatusBanner(),
 
                       // Main content
@@ -105,6 +116,66 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen>
   }
 }
 
+/// Widget to display network connection status
+class NetworkStatusBanner extends StatelessWidget {
+  const NetworkStatusBanner({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
+      buildWhen: (previous, current) =>
+          previous.isNetworkConnected != current.isNetworkConnected,
+      builder: (context, state) {
+        // Don't show banner if connected
+        if (state.isNetworkConnected) {
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          color: Colors.orange.shade700,
+          child: Row(
+            children: [
+              const Icon(Icons.wifi_off, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'No Internet Connection',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: () {
+                  context.read<ServiceAgentCubit>().checkNetworkStatus();
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.white.withOpacity(0.2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                ),
+                child: const Text(
+                  'Check Again',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
 /// Widget to display WebSocket connection status
 class WebSocketStatusBanner extends StatelessWidget {
   const WebSocketStatusBanner({super.key});
@@ -114,10 +185,16 @@ class WebSocketStatusBanner extends StatelessWidget {
     return BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
       buildWhen: (previous, current) =>
           previous.webSocketStatus != current.webSocketStatus ||
-          previous.webSocketErrorMessage != current.webSocketErrorMessage,
+          previous.webSocketErrorMessage != current.webSocketErrorMessage ||
+          previous.isNetworkConnected != current.isNetworkConnected,
       builder: (context, state) {
         // Don't show banner if connected
         if (state.webSocketStatus == WebSocketStatus.connected) {
+          return const SizedBox.shrink();
+        }
+
+        // Don't show WebSocket banner if there's no network
+        if (!state.isNetworkConnected) {
           return const SizedBox.shrink();
         }
 
@@ -167,7 +244,7 @@ class WebSocketStatusBanner extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Text(
-                        'Connection Failed',
+                        'Server Connection Failed',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,

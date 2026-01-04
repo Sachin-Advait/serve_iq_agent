@@ -112,13 +112,13 @@ class WebSocketService {
   static Future<void> _connectWebSocket() async {
     if (_isConnecting) {
       debugPrint(
-        '[WS] ${DateTime.now()} [DEBUG] WebSocket connection already in progress',
+        '[WS] ${DateTime.now()} [DEBUG] WebSocket connection already in progress, skipping',
       );
       return;
     }
 
     _isConnecting = true;
-    _reconnectionTimer?.cancel();
+    _reconnectionTimer?.cancel(); // Cancel any pending reconnection
     _connectionTimeoutTimer?.cancel();
 
     // Set connection timeout
@@ -141,7 +141,7 @@ class WebSocketService {
       );
       try {
         _stompClient?.deactivate();
-        await Future.delayed(Duration(milliseconds: 100));
+        await Future.delayed(Duration(milliseconds: 300)); // Give time to close
       } catch (e) {
         debugPrint(
           '[WS] ${DateTime.now()} [ERROR] Error during WebSocket deactivation: $e',
@@ -278,23 +278,21 @@ class WebSocketService {
         heartbeatIncoming: Duration(seconds: 60),
         heartbeatOutgoing: Duration(seconds: 60),
         reconnectDelay: Duration.zero,
+        connectionTimeout: CONNECTION_TIMEOUT, // Add this
       ),
     );
 
     debugPrint('[WS] ${DateTime.now()} [INFO] Activating STOMP client...');
-    _stompClient?.activate();
 
-    // Log current state for debugging
-    debugPrint(
-      '[WS] ${DateTime.now()} [DEBUG] WebSocket State:\n'
-      '  Connected: $_isWebSocketConnected\n'
-      '  Connecting: $_isConnecting\n'
-      '  Counter ID: $_currentCounterId\n'
-      '  Reconnect Attempts: $_reconnectAttempts\n'
-      '  Last Message: $_lastMessageReceived\n'
-      '  Last Heartbeat: $_lastHeartbeatReceived\n'
-      '  Should Reconnect: $_shouldReconnect',
-    );
+    try {
+      _stompClient?.activate();
+    } catch (e) {
+      debugPrint(
+        '[WS] ${DateTime.now()} [ERROR] Failed to activate STOMP client: $e',
+      );
+      _isConnecting = false;
+      _scheduleReconnection();
+    }
   }
 
   static Future<void> _reconnectWebSocket() async {
@@ -311,12 +309,15 @@ class WebSocketService {
       return;
     }
 
+    // Cancel any existing reconnection timer
+    _reconnectionTimer?.cancel();
+
     if (_reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
       debugPrint(
         '[WS] ${DateTime.now()} [ERROR] ⛔ MAX reconnection attempts ($MAX_RECONNECT_ATTEMPTS) reached',
       );
 
-      // Stop health check timer to prevent further reconnection attempts
+      // Stop health check timer
       _healthCheckTimer?.cancel();
       _healthCheckTimer = null;
 
@@ -349,7 +350,6 @@ class WebSocketService {
       '[WS] ${DateTime.now()} [INFO] ⏰ Scheduling reconnection attempt $_reconnectAttempts in ${delay.inSeconds}s',
     );
 
-    _reconnectionTimer?.cancel();
     _reconnectionTimer = Timer(delay, () async {
       if (_shouldReconnect && !_isConnecting) {
         await _connectWebSocket();
@@ -404,12 +404,41 @@ class WebSocketService {
       '[WS] ${DateTime.now()} [INFO] 🔄 Reset and retry - clearing reconnection state',
     );
 
+    // CRITICAL: Cancel ALL timers first
+    _reconnectionTimer?.cancel();
+    _reconnectionTimer = null;
+    _connectionTimeoutTimer?.cancel();
+    _connectionTimeoutTimer = null;
+    _healthCheckTimer?.cancel();
+    _healthCheckTimer = null;
+
+    // Reset state
     _reconnectAttempts = 0;
     _hasNotifiedUser = false;
     _lastMessageReceived = DateTime.now();
     _lastHeartbeatReceived = DateTime.now();
+    _isConnecting = false;
+    _isWebSocketConnected = false;
+
+    // Clean up existing connection
+    if (_stompClient != null) {
+      try {
+        _stompClient?.deactivate();
+        await Future.delayed(
+          Duration(milliseconds: 500),
+        ); // Give time to deactivate
+      } catch (e) {
+        debugPrint(
+          '[WS] ${DateTime.now()} [WARN] Error during deactivation: $e',
+        );
+      }
+      _stompClient = null;
+    }
 
     if (_currentCounterId != null) {
+      // Add a small delay to ensure cleanup is complete
+      await Future.delayed(Duration(milliseconds: 300));
+
       await _connectWebSocket();
       _startHealthCheck();
     } else {

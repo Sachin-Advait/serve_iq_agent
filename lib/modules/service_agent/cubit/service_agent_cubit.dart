@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:servelq_agent/common/widgets/custom_loader.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
+import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
 import 'package:servelq_agent/models/token_model.dart';
@@ -16,8 +18,120 @@ part 'service_agent_state.dart';
 class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   final AgentRepository agentRepository;
   Timer? _completeButtonTimer;
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+  final Connectivity _connectivity = Connectivity();
 
-  ServiceAgentCubit(this.agentRepository) : super(const ServiceAgentState());
+  ServiceAgentCubit(this.agentRepository) : super(const ServiceAgentState()) {
+    _initializeConnectivityListener();
+  }
+
+  void _initializeConnectivityListener() {
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen((
+      List<ConnectivityResult> results,
+    ) {
+      final result = results.isNotEmpty
+          ? results.last
+          : ConnectivityResult.none;
+      _handleConnectivityChange(result);
+    });
+
+    // Check initial connectivity
+    _checkInitialConnectivity();
+  }
+
+  Future<void> _checkInitialConnectivity() async {
+    try {
+      final connectivityResults = await _connectivity.checkConnectivity();
+      final result = connectivityResults.isNotEmpty
+          ? connectivityResults.last
+          : ConnectivityResult.none;
+      _handleConnectivityChange(result);
+    } catch (e) {
+      debugPrint('Error checking initial connectivity: $e');
+    }
+  }
+
+  void _handleConnectivityChange(ConnectivityResult result) {
+    debugPrint('Connectivity changed: $result');
+
+    final isConnected = result != ConnectivityResult.none;
+    final previouslyConnected = state.isNetworkConnected;
+
+    emit(
+      state.copyWith(
+        isNetworkConnected: isConnected,
+        connectivityStatus: result,
+      ),
+    );
+
+    // Handle network state changes
+    if (isConnected && !previouslyConnected) {
+      debugPrint('Network connection restored');
+
+      // Update state to track network restoration
+      emit(state.copyWith(wasNetworkRestored: true));
+
+      // Refresh data when network comes back
+      _refreshDataOnNetworkRestore();
+
+      // Check if WebSocket needs reconnection
+      if (state.counter != null && !WebSocketService.isConnected) {
+        Future.delayed(const Duration(seconds: 2), () {
+          if (state.isNetworkConnected && !WebSocketService.isConnected) {
+            _retryWebSocketWithNetworkCheck();
+          }
+        });
+      }
+    } else if (!isConnected && previouslyConnected) {
+      debugPrint('Network connection lost');
+
+      // Update state to show offline mode
+      emit(
+        state.copyWith(
+          wasNetworkRestored: false,
+          webSocketStatus: WebSocketStatus.error,
+          webSocketErrorMessage: 'No internet connection',
+        ),
+      );
+
+      // Show toast notification
+      if (state.status == ServiceAgentStatus.loaded) {
+        flutterToast(
+          message: 'No internet connection',
+          color: AppColors.darkRed,
+        );
+      }
+    }
+  }
+
+  Future<void> _refreshDataOnNetworkRestore() async {
+    try {
+      // Give a small delay for network to stabilize
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Refresh only if we're in loaded state
+      if (state.status == ServiceAgentStatus.loaded) {
+        await loadingData();
+        flutterToast(message: 'Connection restored');
+      }
+    } catch (e) {
+      debugPrint('Error refreshing data after network restore: $e');
+    }
+  }
+
+  Future<void> _retryWebSocketWithNetworkCheck() async {
+    if (!state.isNetworkConnected) {
+      debugPrint('Cannot retry WebSocket: No network connection');
+      return;
+    }
+
+    emit(state.copyWith(webSocketStatus: WebSocketStatus.connecting));
+
+    // Add a small delay to ensure network is stable
+    await Future.delayed(const Duration(seconds: 1));
+
+    await WebSocketService.resetAndRetry();
+  }
 
   void startCompleteButtonTimer() {
     _completeButtonTimer?.cancel();
@@ -57,18 +171,53 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   }
 
   Future<void> loadInitialData() async {
-    emit(state.copyWith(status: ServiceAgentStatus.loading));
-    await loadingData();
-    emit(state.copyWith(webSocketStatus: WebSocketStatus.connecting));
-
-    // After counter is loaded → initialize WebSocket
-    if (state.counter != null) {
-      await WebSocketService.connect(
-        counterId: state.counter!.id,
-        onUpcomingUpdate: _handleUpcomingUpdate,
-        onCounterUpdate: _handleCounterUpdate,
-        onConnectionStatus: _handleConnectionStatus,
+    // Check network connectivity first
+    if (!state.isNetworkConnected) {
+      emit(
+        state.copyWith(
+          status: ServiceAgentStatus.loaded,
+          webSocketStatus: WebSocketStatus.error,
+          webSocketErrorMessage: 'No internet connection',
+        ),
       );
+
+      flutterToast(
+        message: 'No internet connection. Please check your network.',
+        color: AppColors.darkRed,
+      );
+      return;
+    }
+
+    emit(state.copyWith(status: ServiceAgentStatus.loading));
+
+    try {
+      await loadingData();
+      emit(state.copyWith(webSocketStatus: WebSocketStatus.connecting));
+
+      // After counter is loaded → initialize WebSocket
+      if (state.counter != null) {
+        await WebSocketService.connect(
+          counterId: state.counter!.id,
+          onUpcomingUpdate: _handleUpcomingUpdate,
+          onCounterUpdate: _handleCounterUpdate,
+          onConnectionStatus: _handleConnectionStatus,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error in loadInitialData: $e');
+
+      // Check if error is network-related
+      if (!state.isNetworkConnected) {
+        emit(
+          state.copyWith(
+            status: ServiceAgentStatus.loaded,
+            webSocketStatus: WebSocketStatus.error,
+            webSocketErrorMessage: 'No internet connection',
+          ),
+        );
+      } else {
+        emit(state.copyWith(status: ServiceAgentStatus.error));
+      }
     }
   }
 
@@ -76,19 +225,29 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
     debugPrint("WebSocket connection status: $message (error: $isError)");
 
     if (isError) {
-      // Emit error state with connection message
-      emit(
-        state.copyWith(
-          webSocketStatus: WebSocketStatus.error,
-          webSocketErrorMessage: message,
-        ),
-      );
+      // Check if error is due to network
+      if (!state.isNetworkConnected) {
+        emit(
+          state.copyWith(
+            webSocketStatus: WebSocketStatus.error,
+            webSocketErrorMessage: 'No internet connection',
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            webSocketStatus: WebSocketStatus.error,
+            webSocketErrorMessage: message,
+          ),
+        );
+      }
     } else {
       // Emit connected state
       emit(
         state.copyWith(
           webSocketStatus: WebSocketStatus.connected,
           webSocketErrorMessage: null,
+          wasNetworkRestored: false,
         ),
       );
     }
@@ -143,6 +302,18 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   }
 
   Future<void> loadingData() async {
+    // Check network before making API calls
+    if (!state.isNetworkConnected) {
+      emit(
+        state.copyWith(
+          status: ServiceAgentStatus.loaded,
+          webSocketStatus: WebSocketStatus.error,
+          webSocketErrorMessage: 'No internet connection',
+        ),
+      );
+      return;
+    }
+
     try {
       final counterFuture = agentRepository.getCounter();
       final queueFuture = agentRepository.getQueue();
@@ -187,16 +358,43 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
           recentServices: recentServices,
           currentToken: activeToken,
           allCounter: allCounter,
+          isNetworkConnected: state.isNetworkConnected,
+          connectivityStatus: state.connectivityStatus,
+          webSocketStatus: state.webSocketStatus,
+          webSocketErrorMessage: state.webSocketErrorMessage,
         ),
       );
     } catch (e) {
       debugPrint('Error loading data: $e');
-      emit(ServiceAgentState(status: ServiceAgentStatus.error));
+
+      // Check if error is network-related
+      final isNetworkError =
+          e.toString().toLowerCase().contains('socket') ||
+          e.toString().toLowerCase().contains('network') ||
+          e.toString().toLowerCase().contains('connect');
+
+      if (isNetworkError || !state.isNetworkConnected) {
+        emit(
+          state.copyWith(
+            status: ServiceAgentStatus.loaded,
+            webSocketStatus: WebSocketStatus.error,
+            webSocketErrorMessage: 'Network connection issue',
+          ),
+        );
+      } else {
+        emit(state.copyWith(status: ServiceAgentStatus.error));
+      }
     }
   }
 
   Future<void> queueAPI() async {
     if (state.status != ServiceAgentStatus.loaded) return;
+
+    // Check network
+    if (!state.isNetworkConnected) {
+      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      return;
+    }
 
     try {
       final queue = await agentRepository.getQueue();
@@ -218,6 +416,12 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   }
 
   Future<void> callToken({String? tokenId}) async {
+    // Check network
+    if (!state.isNetworkConnected) {
+      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      return;
+    }
+
     try {
       customLoader();
 
@@ -232,12 +436,23 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
 
       // Start the timer after calling token
       startCompleteButtonTimer();
+    } catch (e) {
+      flutterToast(
+        message: 'Failed to call token. Please try again.',
+        color: AppColors.darkRed,
+      );
     } finally {
       EasyLoading.dismiss();
     }
   }
 
   Future<void> completeToken() async {
+    // Check network
+    if (!state.isNetworkConnected) {
+      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      return;
+    }
+
     try {
       customLoader();
       final tokenId = state.currentToken!.id;
@@ -258,6 +473,14 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       );
     } catch (e) {
       debugPrint('Error completing token: $e');
+
+      if (!state.isNetworkConnected) {
+        flutterToast(
+          message: 'Operation failed due to network issue',
+          color: AppColors.darkRed,
+        );
+      }
+
       await loadInitialData();
     } finally {
       EasyLoading.dismiss();
@@ -265,6 +488,12 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   }
 
   Future<void> recallToken() async {
+    // Check network
+    if (!state.isNetworkConnected) {
+      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      return;
+    }
+
     try {
       customLoader();
       final tokenId = state.currentToken!.id;
@@ -277,12 +506,23 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       startCompleteButtonTimer();
 
       flutterToast(message: 'Token successfully recalled');
+    } catch (e) {
+      flutterToast(
+        message: 'Failed to recall token. Please try again.',
+        color: AppColors.darkRed,
+      );
     } finally {
       EasyLoading.dismiss();
     }
   }
 
   Future<void> transferToken(String counterId) async {
+    // Check network
+    if (!state.isNetworkConnected) {
+      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      return;
+    }
+
     try {
       customLoader();
 
@@ -302,13 +542,19 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       flutterToast(message: 'Token successfully transferred');
       await queueAPI();
     } catch (e) {
-      flutterToast(message: 'Error while transfering. Please try again');
+      flutterToast(message: 'Error while transferring. Please try again');
     } finally {
       EasyLoading.dismiss();
     }
   }
 
   Future<void> holdToken() async {
+    // Check network
+    if (!state.isNetworkConnected) {
+      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      return;
+    }
+
     try {
       customLoader();
 
@@ -334,6 +580,12 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   }
 
   Future<void> checkActiveToken() async {
+    // Check network
+    if (!state.isNetworkConnected) {
+      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      return;
+    }
+
     try {
       customLoader();
 
@@ -374,19 +626,50 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
   /// Handle app resume
   Future<void> onAppResumed() async {
     debugPrint('App resumed from background');
+
+    // Check connectivity first
+    await _checkInitialConnectivity();
+
     await WebSocketService.onAppResumed();
     await loadingData();
   }
 
   /// Manual retry for WebSocket connection
   Future<void> retryWebSocketConnection() async {
+    // Check network first
+    if (!state.isNetworkConnected) {
+      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+
+      emit(
+        state.copyWith(
+          webSocketStatus: WebSocketStatus.error,
+          webSocketErrorMessage: 'No internet connection',
+        ),
+      );
+      return;
+    }
+
     emit(state.copyWith(webSocketStatus: WebSocketStatus.connecting));
     await WebSocketService.resetAndRetry();
+  }
+
+  /// Check current network status
+  Future<void> checkNetworkStatus() async {
+    try {
+      final results = await _connectivity.checkConnectivity();
+      final result = results.isNotEmpty
+          ? results.last
+          : ConnectivityResult.none;
+      _handleConnectivityChange(result);
+    } catch (e) {
+      debugPrint('Error checking network status: $e');
+    }
   }
 
   @override
   Future<void> close() {
     _completeButtonTimer?.cancel();
+    _connectivitySubscription.cancel();
     WebSocketService.disconnect();
     return super.close();
   }

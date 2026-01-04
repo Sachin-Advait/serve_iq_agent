@@ -1,10 +1,11 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 part of 'service_agent_cubit.dart';
 
-enum ServiceAgentStatus { initial, loading, loaded, error }
+enum ServiceAgentStatus { initial, loading, loaded, error, offline }
 
 enum CurrentTokenStatus { initial, loaded }
 
-enum WebSocketStatus { initial, connecting, connected, error }
+enum WebSocketStatus { initial, connecting, connected, error, disconnected }
 
 class ServiceAgentState {
   final ServiceAgentStatus status;
@@ -19,6 +20,9 @@ class ServiceAgentState {
   final List<CounterModel> allCounter;
   final int completeButtonRemainingSeconds;
   final bool isCompleteButtonDisabled;
+  final bool isNetworkConnected;
+  final ConnectivityResult connectivityStatus;
+  final bool wasNetworkRestored;
 
   const ServiceAgentState({
     this.status = ServiceAgentStatus.initial,
@@ -33,6 +37,9 @@ class ServiceAgentState {
     this.allCounter = const [],
     this.completeButtonRemainingSeconds = 0,
     this.isCompleteButtonDisabled = false,
+    this.isNetworkConnected = true,
+    this.connectivityStatus = ConnectivityResult.none,
+    this.wasNetworkRestored = false,
   });
 
   ServiceAgentState copyWith({
@@ -48,6 +55,9 @@ class ServiceAgentState {
     List<CounterModel>? allCounter,
     int? completeButtonRemainingSeconds,
     bool? isCompleteButtonDisabled,
+    bool? isNetworkConnected,
+    ConnectivityResult? connectivityStatus,
+    bool? wasNetworkRestored,
   }) {
     return ServiceAgentState(
       status: status ?? this.status,
@@ -65,6 +75,9 @@ class ServiceAgentState {
           completeButtonRemainingSeconds ?? this.completeButtonRemainingSeconds,
       isCompleteButtonDisabled:
           isCompleteButtonDisabled ?? this.isCompleteButtonDisabled,
+      isNetworkConnected: isNetworkConnected ?? this.isNetworkConnected,
+      connectivityStatus: connectivityStatus ?? this.connectivityStatus,
+      wasNetworkRestored: wasNetworkRestored ?? this.wasNetworkRestored,
     );
   }
 }
