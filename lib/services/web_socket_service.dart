@@ -201,7 +201,7 @@ class WebSocketService {
 
           // Subscribe to counter status updates
           _stompClient?.subscribe(
-            destination: '/topic/counter-display/$_currentCounterId',
+            destination: '/topic/counter/$_currentCounterId',
             callback: (StompFrame frame) {
               _lastMessageReceived = DateTime.now();
               _reconnectAttempts = 0;
