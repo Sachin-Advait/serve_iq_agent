@@ -2,11 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:servelq_agent/common/constants/api_constants.dart';
+import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
+import 'package:servelq_agent/modules/home/repository/home_repo.dart';
 import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
 import 'package:servelq_agent/modules/login/repository/auth_repo.dart';
 import 'package:servelq_agent/modules/quiz/cubit/quiz_cubit.dart';
-import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
-import 'package:servelq_agent/modules/service_agent/repository/agent_repo.dart';
 import 'package:servelq_agent/modules/training/cubit/training_cubit.dart';
 import 'package:servelq_agent/services/api_client.dart';
 
@@ -61,13 +61,11 @@ void getItSetup() {
 
   getIt.registerFactory<LoginBloc>(() => LoginBloc(getIt<AuthRepository>()));
 
-  getIt.registerLazySingleton<AgentRepository>(
-    () => AgentRepository(getIt<ApiClient>()),
+  getIt.registerLazySingleton<HomeRepository>(
+    () => HomeRepository(getIt<ApiClient>()),
   );
 
-  getIt.registerFactory<ServiceAgentCubit>(
-    () => ServiceAgentCubit(getIt<AgentRepository>()),
-  );
+  getIt.registerFactory<HomeCubit>(() => HomeCubit(getIt<HomeRepository>()));
 
   getIt.registerFactory<QuizCubit>(() => QuizCubit());
 

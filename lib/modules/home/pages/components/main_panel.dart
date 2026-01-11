@@ -4,12 +4,12 @@ import 'package:servelq_agent/common/utils/app_screen_util.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/configs/theme/app_theme.dart';
-import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/action_buttons.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/widgets.dart';
+import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
+import 'package:servelq_agent/modules/home/pages/components/action_buttons.dart';
+import 'package:servelq_agent/modules/home/pages/components/widgets.dart';
 
 class MainPanel extends StatelessWidget {
-  final ServiceAgentState state;
+  final HomeState state;
 
   const MainPanel({super.key, required this.state});
 
@@ -35,7 +35,7 @@ class MainPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, ServiceAgentState state) {
+  Widget _buildEmptyState(BuildContext context, HomeState state) {
     String message;
 
     if (state.counter?.status == "COMPLETE") {
@@ -76,7 +76,7 @@ class MainPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildCurrentTokenInfo(ServiceAgentState state, BuildContext context) {
+  Widget _buildCurrentTokenInfo(HomeState state, BuildContext context) {
     final token = state.currentToken!;
     return Container(
       padding: const EdgeInsets.all(28),
@@ -160,7 +160,7 @@ class MainPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildHistoryPanel(ServiceAgentState state) {
+  Widget _buildHistoryPanel(HomeState state) {
     return Container(
       padding: const EdgeInsets.fromLTRB(28, 28, 28, 0),
       decoration: BoxDecoration(

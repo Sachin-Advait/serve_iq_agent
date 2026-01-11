@@ -5,15 +5,15 @@ import 'package:flutter_svg/svg.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/configs/theme/app_theme.dart';
-import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/widgets.dart';
+import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
+import 'package:servelq_agent/modules/home/pages/components/widgets.dart';
 
 class LeftPane extends StatelessWidget {
   const LeftPane({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
+    return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
         return Column(
           children: [
@@ -54,7 +54,7 @@ class LeftPane extends StatelessWidget {
     );
   }
 
-  Widget _buildCurrentTokenCard(ServiceAgentState state) {
+  Widget _buildCurrentTokenCard(HomeState state) {
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.all(16),
@@ -92,7 +92,7 @@ class LeftPane extends StatelessWidget {
     );
   }
 
-  Widget _buildHoldTokens(ServiceAgentState state, BuildContext context) {
+  Widget _buildHoldTokens(HomeState state, BuildContext context) {
     if (state.holdQueue.isNotEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,9 +140,7 @@ class LeftPane extends StatelessWidget {
                               state.currentTokenStatus ==
                                   CurrentTokenStatus.initial) &&
                           state.counter!.status == 'IDLE') {
-                        context.read<ServiceAgentCubit>().callToken(
-                          tokenId: token.id,
-                        );
+                        context.read<HomeCubit>().callToken(tokenId: token.id);
                       }
                     },
                     child: Container(
@@ -186,7 +184,7 @@ class LeftPane extends StatelessWidget {
     return SizedBox();
   }
 
-  Widget _buildUpcomingTokens(ServiceAgentState state, BuildContext context) {
+  Widget _buildUpcomingTokens(HomeState state, BuildContext context) {
     // Filter out transferred tokens
     final upcomingTokens = state.queue
         .where((token) => !token.isTransfer)
@@ -291,10 +289,7 @@ class LeftPane extends StatelessWidget {
     );
   }
 
-  Widget _buildTransferredTokens(
-    ServiceAgentState state,
-    BuildContext context,
-  ) {
+  Widget _buildTransferredTokens(HomeState state, BuildContext context) {
     // Filter only transferred tokens
     final transferredTokens = state.queue
         .where((token) => token.isTransfer)

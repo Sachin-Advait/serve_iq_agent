@@ -12,6 +12,8 @@ class SessionManager {
   static const String _username = 'UserName';
   static const String _branch = 'Branch ID';
   static const String _counter = 'counter ID';
+  static const String _quizTime = 'Quiz Time';
+  static const String _userId = 'User ID';
 
   static Future<void> saveToken(String token) async {
     await _userStorage.write(_tokenKey, token);
@@ -34,6 +36,17 @@ class SessionManager {
     return username;
   }
 
+  static Future<void> saveUserId(String userId) async {
+    await _userStorage.write(_userId, userId);
+    debugPrint("User ID saved ==> $userId.");
+  }
+
+  static String getUserId() {
+    String userId = _userStorage.read<String?>(_userId) ?? '';
+    debugPrint("User ID ==> $userId.");
+    return userId;
+  }
+
   static Future<void> savebranch(String branch) async {
     await _userStorage.write(_branch, branch);
     debugPrint("Branch saved ==> $branch.");
@@ -53,6 +66,24 @@ class SessionManager {
   static String getCounter() {
     String counter = _userStorage.read<String?>(_counter) ?? '';
     return counter;
+  }
+
+  static Future<void> saveQuizStartTime(
+    String quizId,
+    DateTime startTime,
+  ) async {
+    await _userStorage.write('$_quizTime$quizId', startTime.toIso8601String());
+    debugPrint("Quiz start time saved for $quizId ==> $startTime");
+  }
+
+  static DateTime? getQuizStartTime(String quizId) {
+    final value = _userStorage.read<String?>('$_quizTime$quizId');
+    if (value == null) return null;
+    return DateTime.tryParse(value);
+  }
+
+  static Future<void> clearQuizStartTime(String quizId) async {
+    await _userStorage.remove('$_quizTime$quizId');
   }
 
   static void clearSession() {

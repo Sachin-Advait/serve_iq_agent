@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/configs/theme/app_theme.dart';
-import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
+import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
 import 'package:servelq_agent/routes/pages.dart';
 import 'package:servelq_agent/services/session_manager.dart';
 
@@ -15,7 +15,7 @@ class Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
+    return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
         final branch = state.counter;
         final displayText = '${branch?.name} - ${branch?.code}';

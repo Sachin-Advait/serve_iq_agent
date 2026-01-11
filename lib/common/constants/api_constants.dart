@@ -28,8 +28,8 @@ class ApiConstants {
 
   // ---------- Quiz and Training ----------
   static const String quiz = '/user/quiz-survey';
-  static const String submit = 'user/submit/';
-  static const String result = 'user/quiz-result';
+  static const String submit = 'user/quiz-survey/user/submit/';
+  static const String result = 'user/quiz-result/';
   static const String topScorer = 'user/quiz-survey/summary/';
 
   static const String training = 'user/training/user/id/details';

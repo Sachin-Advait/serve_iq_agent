@@ -3,33 +3,32 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
-import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/error_screen.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/header.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/left_pane.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/loading_screen.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/main_panel.dart';
+import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
+import 'package:servelq_agent/modules/home/pages/components/error_screen.dart';
+import 'package:servelq_agent/modules/home/pages/components/header.dart';
+import 'package:servelq_agent/modules/home/pages/components/left_pane.dart';
+import 'package:servelq_agent/modules/home/pages/components/loading_screen.dart';
+import 'package:servelq_agent/modules/home/pages/components/main_panel.dart';
 
-class ServiceAgentScreen extends StatefulWidget {
-  const ServiceAgentScreen({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<ServiceAgentScreen> createState() => _ServiceAgentScreenState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _ServiceAgentScreenState extends State<ServiceAgentScreen>
-    with WidgetsBindingObserver {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    context.read<ServiceAgentCubit>().loadInitialData();
+    context.read<HomeCubit>().loadInitialData();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      context.read<ServiceAgentCubit>().onAppResumed();
+      context.read<HomeCubit>().onAppResumed();
     }
   }
 
@@ -53,28 +52,28 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen>
         child: Scaffold(
           backgroundColor: Colors.transparent,
           resizeToAvoidBottomInset: false,
-          body: BlocListener<ServiceAgentCubit, ServiceAgentState>(
+          body: BlocListener<HomeCubit, HomeState>(
             listener: (context, state) {
-              if (state.status == ServiceAgentStatus.error) {
+              if (state.status == HomeStatus.error) {
                 flutterToast(message: "An error occurred");
               }
               // Handle network connection changes
               if (!state.isNetworkConnected &&
-                  state.status == ServiceAgentStatus.loaded) {
+                  state.status == HomeStatus.loaded) {
                 flutterToast(
                   message: "No internet connection",
                   color: AppColors.darkRed,
                 );
               }
             },
-            child: BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
+            child: BlocBuilder<HomeCubit, HomeState>(
               builder: (context, state) {
-                if (state.status == ServiceAgentStatus.initial ||
-                    state.status == ServiceAgentStatus.loading) {
+                if (state.status == HomeStatus.initial ||
+                    state.status == HomeStatus.loading) {
                   return LoadingScreen(title: 'Loading Agent Dashboard...');
                 }
 
-                if (state.status == ServiceAgentStatus.loaded) {
+                if (state.status == HomeStatus.loaded) {
                   return Column(
                     children: [
                       // Network status banner
@@ -98,11 +97,10 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen>
                   );
                 }
 
-                if (state.status == ServiceAgentStatus.error) {
+                if (state.status == HomeStatus.error) {
                   return ErrorScreen(
                     message: 'An error occurred',
-                    onRetry: () =>
-                        context.read<ServiceAgentCubit>().loadInitialData(),
+                    onRetry: () => context.read<HomeCubit>().loadInitialData(),
                   );
                 }
 
@@ -122,7 +120,7 @@ class NetworkStatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
+    return BlocBuilder<HomeCubit, HomeState>(
       buildWhen: (previous, current) =>
           previous.isNetworkConnected != current.isNetworkConnected,
       builder: (context, state) {
@@ -151,7 +149,7 @@ class NetworkStatusBanner extends StatelessWidget {
               const SizedBox(width: 8),
               TextButton(
                 onPressed: () {
-                  context.read<ServiceAgentCubit>().checkNetworkStatus();
+                  context.read<HomeCubit>().checkNetworkStatus();
                 },
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.white.withOpacity(0.2),
@@ -182,7 +180,7 @@ class WebSocketStatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ServiceAgentCubit, ServiceAgentState>(
+    return BlocBuilder<HomeCubit, HomeState>(
       buildWhen: (previous, current) =>
           previous.webSocketStatus != current.webSocketStatus ||
           previous.webSocketErrorMessage != current.webSocketErrorMessage ||
@@ -267,9 +265,7 @@ class WebSocketStatusBanner extends StatelessWidget {
                 const SizedBox(width: 8),
                 TextButton(
                   onPressed: () {
-                    context
-                        .read<ServiceAgentCubit>()
-                        .retryWebSocketConnection();
+                    context.read<HomeCubit>().retryWebSocketConnection();
                   },
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.white.withOpacity(0.2),

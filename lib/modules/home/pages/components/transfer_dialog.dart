@@ -5,10 +5,10 @@ import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/models/counter_model.dart';
-import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
+import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
 
 class TransferDialog extends StatefulWidget {
-  final ServiceAgentState state;
+  final HomeState state;
 
   const TransferDialog({super.key, required this.state});
 
@@ -303,7 +303,7 @@ class _TransferDialogState extends State<TransferDialog> {
 
     try {
       // Call your transfer method from the cubit
-      await context.read<ServiceAgentCubit>().transferToken(selectedCounterId!);
+      await context.read<HomeCubit>().transferToken(selectedCounterId!);
 
       if (mounted) {
         Navigator.of(context).pop();

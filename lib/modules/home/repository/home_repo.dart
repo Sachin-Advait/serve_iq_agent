@@ -5,10 +5,10 @@ import 'package:servelq_agent/models/token_model.dart';
 import 'package:servelq_agent/services/api_client.dart';
 import 'package:servelq_agent/services/session_manager.dart';
 
-class AgentRepository {
+class HomeRepository {
   final ApiClient _apiClient;
 
-  AgentRepository(this._apiClient);
+  HomeRepository(this._apiClient);
 
   Future<List<TokenModel>> getQueue() async {
     try {

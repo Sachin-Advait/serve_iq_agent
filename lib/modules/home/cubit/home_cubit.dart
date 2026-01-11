@@ -10,18 +10,18 @@ import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
 import 'package:servelq_agent/models/token_model.dart';
-import 'package:servelq_agent/modules/service_agent/repository/agent_repo.dart';
+import 'package:servelq_agent/modules/home/repository/home_repo.dart';
 import 'package:servelq_agent/services/web_socket_service.dart';
 
-part 'service_agent_state.dart';
+part 'home_state.dart';
 
-class ServiceAgentCubit extends Cubit<ServiceAgentState> {
-  final AgentRepository agentRepository;
+class HomeCubit extends Cubit<HomeState> {
+  final HomeRepository agentRepository;
   Timer? _completeButtonTimer;
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
   final Connectivity _connectivity = Connectivity();
 
-  ServiceAgentCubit(this.agentRepository) : super(const ServiceAgentState()) {
+  HomeCubit(this.agentRepository) : super(const HomeState()) {
     _initializeConnectivityListener();
   }
 
@@ -95,7 +95,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       );
 
       // Show toast notification
-      if (state.status == ServiceAgentStatus.loaded) {
+      if (state.status == HomeStatus.loaded) {
         flutterToast(
           message: 'No internet connection',
           color: AppColors.darkRed,
@@ -110,7 +110,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       await Future.delayed(const Duration(seconds: 2));
 
       // Refresh only if we're in loaded state
-      if (state.status == ServiceAgentStatus.loaded) {
+      if (state.status == HomeStatus.loaded) {
         await loadingData();
         flutterToast(message: 'Connection restored');
       }
@@ -175,7 +175,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
     if (!state.isNetworkConnected) {
       emit(
         state.copyWith(
-          status: ServiceAgentStatus.loaded,
+          status: HomeStatus.loaded,
           webSocketStatus: WebSocketStatus.error,
           webSocketErrorMessage: 'No internet connection',
         ),
@@ -188,7 +188,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       return;
     }
 
-    emit(state.copyWith(status: ServiceAgentStatus.loading));
+    emit(state.copyWith(status: HomeStatus.loading));
 
     try {
       await loadingData();
@@ -210,13 +210,13 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       if (!state.isNetworkConnected) {
         emit(
           state.copyWith(
-            status: ServiceAgentStatus.loaded,
+            status: HomeStatus.loaded,
             webSocketStatus: WebSocketStatus.error,
             webSocketErrorMessage: 'No internet connection',
           ),
         );
       } else {
-        emit(state.copyWith(status: ServiceAgentStatus.error));
+        emit(state.copyWith(status: HomeStatus.error));
       }
     }
   }
@@ -305,7 +305,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
     if (!state.isNetworkConnected) {
       emit(
         state.copyWith(
-          status: ServiceAgentStatus.loaded,
+          status: HomeStatus.loaded,
           webSocketStatus: WebSocketStatus.error,
           webSocketErrorMessage: 'No internet connection',
         ),
@@ -346,8 +346,8 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       }
 
       emit(
-        ServiceAgentState(
-          status: ServiceAgentStatus.loaded,
+        HomeState(
+          status: HomeStatus.loaded,
           currentTokenStatus: activeToken?.id != null
               ? CurrentTokenStatus.loaded
               : CurrentTokenStatus.initial,
@@ -377,19 +377,19 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       if (isNetworkError || !state.isNetworkConnected) {
         emit(
           state.copyWith(
-            status: ServiceAgentStatus.loaded,
+            status: HomeStatus.loaded,
             webSocketStatus: WebSocketStatus.error,
             webSocketErrorMessage: 'Network connection issue',
           ),
         );
       } else {
-        emit(state.copyWith(status: ServiceAgentStatus.error));
+        emit(state.copyWith(status: HomeStatus.error));
       }
     }
   }
 
   Future<void> queueAPI() async {
-    if (state.status != ServiceAgentStatus.loaded) return;
+    if (state.status != HomeStatus.loaded) return;
 
     // Check network
     if (!state.isNetworkConnected) {
@@ -429,7 +429,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
       final nextToken = await agentRepository.callToken(tokenId: tokenId);
       emit(
         state.copyWith(
-          status: ServiceAgentStatus.loaded,
+          status: HomeStatus.loaded,
           currentToken: nextToken,
           currentTokenStatus: CurrentTokenStatus.loaded,
         ),
@@ -629,7 +629,7 @@ class ServiceAgentCubit extends Cubit<ServiceAgentState> {
     try {
       customLoader();
 
-      if (state.status != ServiceAgentStatus.loaded) return;
+      if (state.status != HomeStatus.loaded) return;
 
       final activeToken = await agentRepository.counterActiveToken();
 

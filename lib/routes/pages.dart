@@ -3,14 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servelq_agent/common/utils/get_it.dart';
 import 'package:servelq_agent/common/utils/global_keys.dart';
+import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
+import 'package:servelq_agent/modules/home/pages/home_page.dart';
 import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
-import 'package:servelq_agent/modules/login/pages/login.dart';
+import 'package:servelq_agent/modules/login/pages/login_page.dart';
 import 'package:servelq_agent/modules/quiz/cubit/quiz_cubit.dart';
-import 'package:servelq_agent/modules/quiz/pages/quiz.dart';
-import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
-import 'package:servelq_agent/modules/service_agent/pages/service_agent.dart';
+import 'package:servelq_agent/modules/quiz/pages/quiz_page.dart';
 import 'package:servelq_agent/modules/training/cubit/training_cubit.dart';
-import 'package:servelq_agent/modules/training/page/training.dart';
+import 'package:servelq_agent/modules/training/pages/training.dart';
 import 'package:servelq_agent/routes/not_found.dart';
 import 'package:servelq_agent/services/session_manager.dart';
 
@@ -42,36 +42,36 @@ class Pages {
         name: Routes.login,
         builder: (_, state) => BlocProvider(
           create: (context) => getIt<LoginBloc>(),
-          child: const LoginScreen(),
+          child: const LoginPage(),
         ),
       ),
       GoRoute(
         path: Routes.agent,
         name: Routes.agent,
-        builder: (_, state) => const ServiceAgentScreen(),
+        builder: (_, state) => const HomePage(),
         routes: [
           GoRoute(
             path: Routes.quiz,
             name: Routes.quiz,
             builder: (_, state) => BlocProvider(
               create: (context) => getIt<QuizCubit>(),
-              child: const Quiz(),
+              child: const QuizPage(),
             ),
           ),
           GoRoute(
             path: Routes.participate,
             name: Routes.participate,
             builder: (_, state) => BlocProvider(
-              create: (context) => getIt<ServiceAgentCubit>(),
-              child: const ServiceAgentScreen(),
+              create: (context) => getIt<HomeCubit>(),
+              child: const HomePage(),
             ),
           ),
           GoRoute(
             path: Routes.result,
             name: Routes.result,
             builder: (_, state) => BlocProvider(
-              create: (context) => getIt<ServiceAgentCubit>(),
-              child: const ServiceAgentScreen(),
+              create: (context) => getIt<HomeCubit>(),
+              child: const HomePage(),
             ),
           ),
           GoRoute(

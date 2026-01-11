@@ -4,18 +4,18 @@ import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/modules/quiz/components/filter_bar.dart';
 import 'package:servelq_agent/modules/quiz/components/quiz_card.dart';
 import 'package:servelq_agent/modules/quiz/cubit/quiz_cubit.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/error_screen.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/header.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/loading_screen.dart';
+import 'package:servelq_agent/modules/home/pages/components/error_screen.dart';
+import 'package:servelq_agent/modules/home/pages/components/header.dart';
+import 'package:servelq_agent/modules/home/pages/components/loading_screen.dart';
 
-class Quiz extends StatefulWidget {
-  const Quiz({super.key});
+class QuizPage extends StatefulWidget {
+  const QuizPage({super.key});
 
   @override
-  State<Quiz> createState() => _QuizState();
+  State<QuizPage> createState() => _QuizPageState();
 }
 
-class _QuizState extends State<Quiz> {
+class _QuizPageState extends State<QuizPage> {
   final searchController = TextEditingController();
 
   @override

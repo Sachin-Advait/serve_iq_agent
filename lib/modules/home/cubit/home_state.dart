@@ -1,14 +1,14 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-part of 'service_agent_cubit.dart';
+part of 'home_cubit.dart';
 
-enum ServiceAgentStatus { initial, loading, loaded, error, offline }
+enum HomeStatus { initial, loading, loaded, error, offline }
 
 enum CurrentTokenStatus { initial, loaded }
 
 enum WebSocketStatus { initial, connecting, connected, error, disconnected }
 
-class ServiceAgentState {
-  final ServiceAgentStatus status;
+class HomeState {
+  final HomeStatus status;
   final CurrentTokenStatus currentTokenStatus;
   final WebSocketStatus webSocketStatus;
   final String? webSocketErrorMessage;
@@ -24,8 +24,8 @@ class ServiceAgentState {
   final ConnectivityResult connectivityStatus;
   final bool wasNetworkRestored;
 
-  const ServiceAgentState({
-    this.status = ServiceAgentStatus.initial,
+  const HomeState({
+    this.status = HomeStatus.initial,
     this.currentTokenStatus = CurrentTokenStatus.initial,
     this.webSocketStatus = WebSocketStatus.initial,
     this.webSocketErrorMessage,
@@ -42,8 +42,8 @@ class ServiceAgentState {
     this.wasNetworkRestored = false,
   });
 
-  ServiceAgentState copyWith({
-    ServiceAgentStatus? status,
+  HomeState copyWith({
+    HomeStatus? status,
     CurrentTokenStatus? currentTokenStatus,
     WebSocketStatus? webSocketStatus,
     String? webSocketErrorMessage,
@@ -59,7 +59,7 @@ class ServiceAgentState {
     ConnectivityResult? connectivityStatus,
     bool? wasNetworkRestored,
   }) {
-    return ServiceAgentState(
+    return HomeState(
       status: status ?? this.status,
       currentTokenStatus: currentTokenStatus ?? this.currentTokenStatus,
       webSocketStatus: webSocketStatus ?? this.webSocketStatus,

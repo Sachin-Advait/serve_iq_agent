@@ -1,12 +1,12 @@
-class QuizSurveyResponse {
+class QuizDetailsModel {
   final bool success;
   final String message;
   final QuizDetails? data;
 
-  QuizSurveyResponse({required this.success, required this.message, this.data});
+  QuizDetailsModel({required this.success, required this.message, this.data});
 
-  factory QuizSurveyResponse.fromJson(Map<String, dynamic> json) {
-    return QuizSurveyResponse(
+  factory QuizDetailsModel.fromJson(Map<String, dynamic> json) {
+    return QuizDetailsModel(
       success: json['success'] ?? false,
       message: json['message'] ?? '',
       data: json['data'] != null ? QuizDetails.fromJson(json['data']) : null,

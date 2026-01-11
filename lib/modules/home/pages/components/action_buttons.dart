@@ -4,11 +4,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
-import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/transfer_dialog.dart';
+import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
+import 'package:servelq_agent/modules/home/pages/components/transfer_dialog.dart';
 
 class ActionButtons extends StatelessWidget {
-  final ServiceAgentState state;
+  final HomeState state;
 
   const ActionButtons({super.key, required this.state});
 
@@ -22,7 +22,7 @@ class ActionButtons extends StatelessWidget {
             'Call Next',
             AppImages.callNext,
             AppColors.green,
-            () => context.read<ServiceAgentCubit>().callToken(),
+            () => context.read<HomeCubit>().callToken(),
             enabled:
                 state.queue.isNotEmpty &&
                 (state.currentToken?.id == null ||
@@ -39,7 +39,7 @@ class ActionButtons extends StatelessWidget {
                 : 'Complete',
             AppImages.complete,
             AppColors.green,
-            () => context.read<ServiceAgentCubit>().completeToken(),
+            () => context.read<HomeCubit>().completeToken(),
             enabled:
                 !state.isCompleteButtonDisabled &&
                 state.currentToken?.id != null &&
@@ -53,7 +53,7 @@ class ActionButtons extends StatelessWidget {
             'Recall',
             AppImages.recall,
             AppColors.brownDark,
-            () => context.read<ServiceAgentCubit>().recallToken(),
+            () => context.read<HomeCubit>().recallToken(),
             enabled:
                 state.currentToken?.id != null &&
                 state.currentTokenStatus == CurrentTokenStatus.loaded,
@@ -74,7 +74,7 @@ class ActionButtons extends StatelessWidget {
                 barrierDismissible: false,
                 builder: (BuildContext dialogContext) {
                   return BlocProvider.value(
-                    value: context.read<ServiceAgentCubit>(),
+                    value: context.read<HomeCubit>(),
                     child: TransferDialog(state: state),
                   );
                 },
@@ -95,7 +95,7 @@ class ActionButtons extends StatelessWidget {
                 : 'Hold',
             AppImages.hold,
             AppColors.blue,
-            () => context.read<ServiceAgentCubit>().holdToken(),
+            () => context.read<HomeCubit>().holdToken(),
             enabled:
                 !state.isCompleteButtonDisabled &&
                 state.currentToken?.id != null &&
@@ -111,7 +111,7 @@ class ActionButtons extends StatelessWidget {
                 : 'No Show',
             AppImages.noShow,
             AppColors.brownVeryDark,
-            () => context.read<ServiceAgentCubit>().noShow(),
+            () => context.read<HomeCubit>().noShow(),
             enabled:
                 !state.isCompleteButtonDisabled &&
                 state.currentToken?.id != null &&

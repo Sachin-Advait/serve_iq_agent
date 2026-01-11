@@ -12,7 +12,7 @@ import 'package:servelq_agent/common/constants/app_strings.dart';
 import 'package:servelq_agent/common/utils/app_screen_util.dart';
 import 'package:servelq_agent/common/utils/get_it.dart';
 import 'package:servelq_agent/configs/theme/app_theme.dart';
-import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
+import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
 import 'package:servelq_agent/routes/pages.dart';
 
 Future<void> main() async {
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<ServiceAgentCubit>(),
+      create: (context) => getIt<HomeCubit>(),
       child: LayoutBuilder(
         builder: (context, constraints) => ScreenUtilInit(
           designSize: Size(constraints.maxWidth, constraints.maxHeight),

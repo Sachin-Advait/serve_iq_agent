@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/models/training_model.dart';
-import 'package:servelq_agent/modules/service_agent/pages/components/header.dart';
+import 'package:servelq_agent/modules/home/pages/components/header.dart';
 import 'package:servelq_agent/modules/training/components/filter_chip.dart';
 import 'package:servelq_agent/modules/training/components/material_card.dart';
 import 'package:servelq_agent/modules/training/cubit/training_cubit.dart';
