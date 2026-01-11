@@ -14,6 +14,7 @@ class SessionManager {
   static const String _counter = 'counter ID';
   static const String _quizTime = 'Quiz Time';
   static const String _userId = 'User ID';
+  static const String _fcmToken = 'FCM Token';
 
   static Future<void> saveToken(String token) async {
     await _userStorage.write(_tokenKey, token);
@@ -84,6 +85,19 @@ class SessionManager {
 
   static Future<void> clearQuizStartTime(String quizId) async {
     await _userStorage.remove('$_quizTime$quizId');
+  }
+
+  static Future<void> saveFcmToken(String token) async {
+    await _userStorage.write(_fcmToken, token);
+    debugPrint("FCM Token saved ==> $token");
+  }
+
+  static String getFcmToken() {
+    return _userStorage.read<String?>(_fcmToken) ?? '';
+  }
+
+  static Future<void> clearFcmToken() async {
+    await _userStorage.remove(_fcmToken);
   }
 
   static void clearSession() {

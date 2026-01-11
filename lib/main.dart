@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,6 +14,7 @@ import 'package:servelq_agent/common/utils/get_it.dart';
 import 'package:servelq_agent/configs/theme/app_theme.dart';
 import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
 import 'package:servelq_agent/routes/pages.dart';
+import 'package:servelq_agent/services/firebase_config.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,10 +24,8 @@ Future<void> main() async {
   GetStorage.init();
   getItSetup();
 
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.landscapeRight,
-    DeviceOrientation.landscapeLeft,
-  ]);
+  // Adding Firebase configuration utils
+  await Firebase.initializeApp(options: FirebaseConfig.web);
 
   runApp(const MyApp());
 }

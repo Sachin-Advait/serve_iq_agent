@@ -9,6 +9,7 @@ import 'package:servelq_agent/modules/home/pages/components/header.dart';
 import 'package:servelq_agent/modules/home/pages/components/left_pane.dart';
 import 'package:servelq_agent/modules/home/pages/components/loading_screen.dart';
 import 'package:servelq_agent/modules/home/pages/components/main_panel.dart';
+import 'package:servelq_agent/services/notification_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,9 +21,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void initState() {
-    super.initState();
+    initialize();
     WidgetsBinding.instance.addObserver(this);
     context.read<HomeCubit>().loadInitialData();
+    super.initState();
+  }
+
+  void initialize() async {
+    await NotificationService.instance.init();
   }
 
   @override

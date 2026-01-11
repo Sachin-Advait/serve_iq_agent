@@ -26,7 +26,7 @@ class ApiConstants {
   static const String counters = 'counters';
   static const String singleCounter = 'counters/';
 
-  // ---------- Quiz and Training ----------
+  // ---------- QUIZ and TRAINING ----------
   static const String quiz = '/user/quiz-survey';
   static const String submit = 'user/quiz-survey/user/submit/';
   static const String result = 'user/quiz-result/';
@@ -34,4 +34,7 @@ class ApiConstants {
 
   static const String training = 'user/training/user/id/details';
   static const String trainingProgess = 'user/training/progress';
+
+  // ---------- USERS ----------
+  static const String fcmToken = 'users/update-fcm-token/';
 }
