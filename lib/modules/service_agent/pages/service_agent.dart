@@ -71,7 +71,7 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen>
               builder: (context, state) {
                 if (state.status == ServiceAgentStatus.initial ||
                     state.status == ServiceAgentStatus.loading) {
-                  return const LoadingScreen();
+                  return LoadingScreen(title: 'Loading Agent Dashboard...');
                 }
 
                 if (state.status == ServiceAgentStatus.loaded) {
@@ -84,7 +84,7 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen>
                       const WebSocketStatusBanner(),
 
                       // Main content
-                      Header(state: state),
+                      Header(),
                       Expanded(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,7 +106,7 @@ class _ServiceAgentScreenState extends State<ServiceAgentScreen>
                   );
                 }
 
-                return const LoadingScreen();
+                return LoadingScreen(title: "Loading Agent Dashboard...");
               },
             ),
           ),

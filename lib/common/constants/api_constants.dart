@@ -25,4 +25,13 @@ class ApiConstants {
   // ---------- COUNTERS ----------
   static const String counters = 'counters';
   static const String singleCounter = 'counters/';
+
+  // ---------- Quiz and Training ----------
+  static const String quiz = '/user/quiz-survey';
+  static const String submit = 'user/submit/';
+  static const String result = 'user/quiz-result';
+  static const String topScorer = 'user/quiz-survey/summary/';
+
+  static const String training = 'user/training/user/id/details';
+  static const String trainingProgess = 'user/training/progress';
 }

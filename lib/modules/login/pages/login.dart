@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
+import 'package:servelq_agent/common/widgets/primary_button.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
+import 'package:servelq_agent/routes/pages.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -64,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
       listener: (context, state) {
         if (state is LoginSuccess) {
           _handleLoginSuccess();
-          context.go('/agent');
+          context.goNamed(Routes.agent);
         } else if (state is LoginError) {
           _handleLoginError(state.message);
         }
@@ -79,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
+                  color: Colors.black.withValues(alpha: 0.15),
                   blurRadius: 25,
                   offset: const Offset(0, 10),
                 ),
@@ -118,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 40),
-                _buildLoginButton(
+                PrimaryButton(
                   label: 'Login',
                   color: AppColors.primary,
                   isLoading: _isLoading,
@@ -173,47 +175,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
       style: const TextStyle(fontSize: 18),
-    );
-  }
-
-  // Common Button
-  Widget _buildLoginButton({
-    required String label,
-    required Color color,
-    required bool isLoading,
-    required VoidCallback onPressed,
-  }) {
-    return SizedBox(
-      width: double.infinity,
-      height: 64,
-      child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 4,
-          disabledBackgroundColor: color.withOpacity(0.6),
-        ),
-        child: isLoading
-            ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
-                ),
-              )
-            : Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.white,
-                ),
-              ),
-      ),
     );
   }
 }

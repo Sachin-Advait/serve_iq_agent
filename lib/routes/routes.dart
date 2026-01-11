@@ -1,50 +1,12 @@
-// Router Configuration
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:servelq_agent/common/utils/get_it.dart';
-import 'package:servelq_agent/common/utils/global_keys.dart';
-import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
-import 'package:servelq_agent/modules/login/pages/login.dart';
-import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
-import 'package:servelq_agent/modules/service_agent/pages/service_agent.dart';
-import 'package:servelq_agent/routes/not_found.dart';
-import 'package:servelq_agent/services/session_manager.dart';
+part of 'pages.dart';
 
-class AppRoutes {
-  static GoRouter router = GoRouter(
-    initialLocation: '/',
-    navigatorKey: GlobalKeys.navigatorKey,
-    errorBuilder: (context, state) => NotFound(state: state),
-    redirect: (context, state) {
-      final token = SessionManager.getToken();
+abstract class Routes {
+  static const noInternet = '/no-internet';
 
-      // If user already logged in, redirect from login to agent
-      if (token.isNotEmpty && state.matchedLocation == '/') {
-        return '/agent';
-      }
-
-      // If user is not logged in, block access to /agent
-      if (token.isEmpty && state.matchedLocation == '/agent') {
-        return '/';
-      }
-
-      return null; // no redirect
-    },
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (_, state) => BlocProvider(
-          create: (context) => getIt<LoginBloc>(),
-          child: const LoginScreen(),
-        ),
-      ),
-      GoRoute(
-        path: '/agent',
-        builder: (_, state) => BlocProvider(
-          create: (context) => getIt<ServiceAgentCubit>(),
-          child: const ServiceAgentScreen(),
-        ),
-      ),
-    ],
-  );
+  static const login = '/login';
+  static const agent = '/agent';
+  static const quiz = 'quiz';
+  static const participate = 'participate';
+  static const result = 'result';
+  static const training = 'training';
 }

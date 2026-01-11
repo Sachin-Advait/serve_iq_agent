@@ -189,13 +189,14 @@ class MainPanel extends StatelessWidget {
           Expanded(
             child: state.recentServices.isEmpty
                 ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: ListView(
                       children: [
-                        Icon(
-                          Icons.history,
-                          size: 64,
-                          color: AppColors.brownDarker.withOpacity(0.3),
+                        Center(
+                          child: Icon(
+                            Icons.history,
+                            size: 64,
+                            color: AppColors.brownDarker.withOpacity(0.3),
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -205,6 +206,7 @@ class MainPanel extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                             color: AppColors.brownDarker.withOpacity(0.6),
                           ),
+                          textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -213,6 +215,7 @@ class MainPanel extends StatelessWidget {
                             fontSize: 14,
                             color: AppColors.brownDarker.withOpacity(0.4),
                           ),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),

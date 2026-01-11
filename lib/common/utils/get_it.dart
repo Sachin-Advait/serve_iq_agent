@@ -4,8 +4,10 @@ import 'package:get_it/get_it.dart';
 import 'package:servelq_agent/common/constants/api_constants.dart';
 import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
 import 'package:servelq_agent/modules/login/repository/auth_repo.dart';
+import 'package:servelq_agent/modules/quiz/cubit/quiz_cubit.dart';
 import 'package:servelq_agent/modules/service_agent/cubit/service_agent_cubit.dart';
 import 'package:servelq_agent/modules/service_agent/repository/agent_repo.dart';
+import 'package:servelq_agent/modules/training/cubit/training_cubit.dart';
 import 'package:servelq_agent/services/api_client.dart';
 
 final getIt = GetIt.instance;
@@ -66,6 +68,10 @@ void getItSetup() {
   getIt.registerFactory<ServiceAgentCubit>(
     () => ServiceAgentCubit(getIt<AgentRepository>()),
   );
+
+  getIt.registerFactory<QuizCubit>(() => QuizCubit());
+
+  getIt.registerFactory<TrainingCubit>(() => TrainingCubit());
 }
 
 void resetGetIt() {

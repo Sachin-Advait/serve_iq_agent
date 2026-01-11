@@ -45,29 +45,6 @@ class ApiClient {
     return response;
   }
 
-  Future<Response?> postMultipartApi(
-    String path, {
-    FormData? formData,
-    void Function(int, int)? onSendProgress,
-    Options? options,
-    bool showLoader = true,
-    bool showToast = true,
-  }) async {
-    Response? response;
-
-    try {
-      response = await _dio.post(
-        path,
-        options: options,
-        data: formData,
-        onSendProgress: onSendProgress,
-      );
-    } on DioException catch (e) {
-      _showErrorSnackbar(e);
-    }
-    return response;
-  }
-
   // 🔹 Error handlers
   String? _showErrorSnackbar(DioException e) {
     debugPrint('API ERROR ===> $e');
