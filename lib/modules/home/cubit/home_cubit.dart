@@ -11,6 +11,7 @@ import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
 import 'package:servelq_agent/models/token_model.dart';
 import 'package:servelq_agent/modules/home/repository/home_repo.dart';
+import 'package:servelq_agent/services/session_manager.dart';
 import 'package:servelq_agent/services/web_socket_service.dart';
 
 part 'home_state.dart';
@@ -333,6 +334,9 @@ class HomeCubit extends Cubit<HomeState> {
       final recentServices = results[2] as List<ServiceHistory>;
       final allCounter = results[3] as List<CounterModel>;
       final activeToken = results[4] as TokenModel?;
+
+      SessionManager.saveCounterName(counter.name);
+      SessionManager.saveCounterCode(counter.code);
 
       List<TokenModel> upcomingToken = [];
       List<TokenModel> holdToken = [];

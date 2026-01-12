@@ -58,16 +58,16 @@ class TrainingAssignment {
 
   factory TrainingAssignment.fromJson(Map<String, dynamic> json) =>
       TrainingAssignment(
-        assignmentId: json["assignmentId"],
-        trainingId: json["trainingId"],
-        title: json["title"],
-        type: json["type"],
+        assignmentId: json["assignmentId"]?.toString() ?? '',
+        trainingId: json["trainingId"]?.toString() ?? '',
+        title: json["title"] ?? '',
+        type: json["type"] ?? '',
         duration: json["duration"],
-        cloudinaryUrl: json["cloudinaryUrl"],
-        cloudinaryFormat: json["cloudinaryFormat"],
-        cloudinaryResourceType: json["cloudinaryResourceType"],
-        progress: json["progress"],
-        status: json["status"],
+        cloudinaryUrl: json["cloudinaryUrl"] ?? '',
+        cloudinaryFormat: json["cloudinaryFormat"] ?? '',
+        cloudinaryResourceType: json["cloudinaryResourceType"] ?? '',
+        progress: json["progress"] ?? 0,
+        status: json["status"] ?? false,
         dueDate: json["dueDate"] == null
             ? null
             : DateTime.parse(json["dueDate"]),

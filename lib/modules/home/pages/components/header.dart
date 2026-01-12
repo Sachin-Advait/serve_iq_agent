@@ -17,8 +17,8 @@ class Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
-        final branch = state.counter;
-        final displayText = '${branch?.name} - ${branch?.code}';
+        final displayText =
+            '${SessionManager.getCounterName()} - ${SessionManager.getCounterCode()}';
 
         return Container(
           padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),

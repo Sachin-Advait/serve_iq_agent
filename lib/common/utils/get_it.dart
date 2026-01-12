@@ -6,7 +6,9 @@ import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
 import 'package:servelq_agent/modules/home/repository/home_repo.dart';
 import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
 import 'package:servelq_agent/modules/login/repository/auth_repo.dart';
+import 'package:servelq_agent/modules/participate/cubit/participate_cubit.dart';
 import 'package:servelq_agent/modules/quiz/cubit/quiz_cubit.dart';
+import 'package:servelq_agent/modules/quiz_result/bloc/quiz_result_bloc.dart';
 import 'package:servelq_agent/modules/training/cubit/training_cubit.dart';
 import 'package:servelq_agent/services/api_client.dart';
 
@@ -68,6 +70,10 @@ void getItSetup() {
   getIt.registerFactory<HomeCubit>(() => HomeCubit(getIt<HomeRepository>()));
 
   getIt.registerFactory<QuizCubit>(() => QuizCubit());
+
+  getIt.registerFactory<ParticipateCubit>(() => ParticipateCubit());
+
+  getIt.registerFactory<QuizResultBloc>(() => QuizResultBloc());
 
   getIt.registerFactory<TrainingCubit>(() => TrainingCubit());
 }

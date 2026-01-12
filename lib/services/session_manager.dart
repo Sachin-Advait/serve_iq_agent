@@ -12,6 +12,8 @@ class SessionManager {
   static const String _username = 'UserName';
   static const String _branch = 'Branch ID';
   static const String _counter = 'counter ID';
+  static const String _counterName = 'Counter Name';
+  static const String _counterCode = 'Counter Code';
   static const String _quizTime = 'Quiz Time';
   static const String _userId = 'User ID';
   static const String _fcmToken = 'FCM Token';
@@ -67,6 +69,28 @@ class SessionManager {
   static String getCounter() {
     String counter = _userStorage.read<String?>(_counter) ?? '';
     return counter;
+  }
+
+  // Save Counter Name
+  static Future<void> saveCounterName(String counterName) async {
+    await _userStorage.write(_counterName, counterName);
+    debugPrint("Counter Name saved ==> $counterName.");
+  }
+
+  // Get Counter Name
+  static String getCounterName() {
+    return _userStorage.read<String?>(_counterName) ?? '';
+  }
+
+  // Save Counter Code
+  static Future<void> saveCounterCode(String counterCode) async {
+    await _userStorage.write(_counterCode, counterCode);
+    debugPrint("Counter Code saved ==> $counterCode.");
+  }
+
+  // Get Counter Code
+  static String getCounterCode() {
+    return _userStorage.read<String?>(_counterCode) ?? '';
   }
 
   static Future<void> saveQuizStartTime(

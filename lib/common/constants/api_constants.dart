@@ -32,7 +32,7 @@ class ApiConstants {
   static const String result = 'user/quiz-result/';
   static const String topScorer = 'user/quiz-survey/summary/';
 
-  static const String training = 'user/training/user/id/details';
+  static const String training = 'user/training/user/';
   static const String trainingProgess = 'user/training/progress';
 
   // ---------- USERS ----------

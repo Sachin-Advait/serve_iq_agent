@@ -26,6 +26,7 @@ class AuthRepository {
           SessionManager.saveUsername(user.name);
           SessionManager.saveToken(user.id);
           SessionManager.savebranch(user.branchId);
+          SessionManager.saveUserId(user.id);
           SessionManager.saveCounter(user.counterId);
           return user;
         }

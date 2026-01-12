@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:servelq_agent/common/constants/api_constants.dart';
 import 'package:servelq_agent/common/utils/get_it.dart';
+import 'package:servelq_agent/common/widgets/custom_loader.dart';
 import 'package:servelq_agent/models/quiz_details_model.dart';
 import 'package:servelq_agent/models/submit_quiz_model.dart';
 import 'package:servelq_agent/services/api_client.dart';
@@ -21,15 +22,12 @@ class ParticipateCubit extends Cubit<ParticipateState> {
   late DateTime _quizStartTime;
 
   int timeLeft = 0;
-  int currentIndex = 0;
-  dynamic selectedAnswer;
-  Map<String, dynamic> userAnswers = {};
-
   QuizDetails? quizSurveyData;
 
   /// Fetch quiz details
   Future<void> getQuizSurveyDetails(String quizId) async {
     emit(ParticipateLoading());
+
     try {
       final response = await apiClient.getApi('${ApiConstants.quiz}/$quizId');
 
@@ -37,12 +35,12 @@ class ParticipateCubit extends Cubit<ParticipateState> {
         final responseData = QuizDetailsModel.fromJson(response.data);
         quizSurveyData = responseData.data;
         _emitProgress();
-        startQuiz(response.data!.quizDuration ?? '10', quizId);
+        startQuiz(quizSurveyData?.quizDuration ?? '10', quizId);
       } else {
         emit(ParticipateValidationError("Failed to load quiz details"));
       }
     } catch (err) {
-      emit(ParticipateValidationError("Failed to fetch quizzes: $err"));
+      emit(ParticipateValidationError("Failed to fetch quiz: $err"));
     }
   }
 
@@ -65,7 +63,7 @@ class ParticipateCubit extends Cubit<ParticipateState> {
 
       if (timeLeft <= 0) {
         timeLeft = 0;
-        submitQuiz(quizId);
+        submitAllAnswers(quizId, {}, {});
       } else {
         _emitProgress();
       }
@@ -77,106 +75,121 @@ class ParticipateCubit extends Cubit<ParticipateState> {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => updateTime());
   }
 
-  void nextQuestion(
-    List<QuestionElement> questions,
-    String quizSurveyId, {
-    String? textAnswer,
-  }) {
-    final currentQ = questions[currentIndex];
-
-    // Validation & save answer
-    if (currentQ.type == "text" || currentQ.type == "comment") {
-      if (textAnswer == null || textAnswer.trim().isEmpty) {
-        emit(
-          ParticipateValidationError("Please enter your answer or press Skip"),
-        );
-        return;
-      }
-      userAnswers[currentQ.name] = textAnswer.trim();
-    } else {
-      if (selectedAnswer == null) {
-        emit(
-          ParticipateValidationError("Please select an answer or press Skip"),
-        );
-        return;
-      }
-      userAnswers[currentQ.name] = selectedAnswer;
-    }
-
-    // Move to next or submit
-    if (currentIndex < questions.length - 1) {
-      currentIndex++;
-      selectedAnswer = null;
-      _emitProgress();
-    } else {
-      submitQuiz(quizSurveyId);
-    }
-  }
-
-  void prevQuestion() {
-    if (currentIndex > 0) {
-      currentIndex--;
-      selectedAnswer = null;
-      _emitProgress();
-    }
-  }
-
-  void skipQuestion(int total, String quizSurveyId) {
-    if (currentIndex < total - 1) {
-      currentIndex++;
-      selectedAnswer = null;
-      _emitProgress();
-    } else {
-      submitQuiz(quizSurveyId);
-    }
-  }
-
-  void selectAnswer(dynamic choice) {
-    selectedAnswer = choice;
-    _emitProgress();
-  }
-
-  void toggleAnswer(String choice) {
-    if (selectedAnswer == null || selectedAnswer is! List) {
-      selectedAnswer = <String>[];
-    }
-    final list = List<String>.from(selectedAnswer as List);
-
-    if (list.contains(choice)) {
-      list.remove(choice);
-    } else {
-      list.add(choice);
-    }
-    selectedAnswer = list;
-
-    _emitProgress();
-  }
-
-  Future<void> submitQuiz(String quizSurveyId) async {
+  /// Submit all answers at once (for web list view)
+  Future<void> submitAllAnswers(
+    String quizId,
+    Map<String, dynamic> answers,
+    Map<String, TextEditingController> textControllers,
+  ) async {
     try {
       _timer?.cancel();
-      EasyLoading.show();
+      customLoader();
 
+      if (quizSurveyData == null) {
+        emit(ParticipateValidationError("Quiz data not loaded"));
+        return;
+      }
+
+      final questions = quizSurveyData!.definitionJson.pages[0].elements;
+      final isSurvey = quizSurveyData!.type.toLowerCase() == "survey";
+
+      // Validate for surveys - all questions must be answered
+      if (isSurvey) {
+        for (final question in questions) {
+          if (!answers.containsKey(question.name) ||
+              answers[question.name] == null) {
+            EasyLoading.dismiss();
+            emit(
+              ParticipateValidationError(
+                "Please answer all questions before submitting",
+              ),
+            );
+            _emitProgress();
+            return;
+          }
+
+          // Check for empty text answers
+          if (question.type == "text" || question.type == "comment") {
+            final textAnswer = textControllers[question.name]?.text ?? '';
+            if (textAnswer.trim().isEmpty) {
+              EasyLoading.dismiss();
+              emit(
+                ParticipateValidationError(
+                  "Please answer all questions before submitting",
+                ),
+              );
+              _emitProgress();
+              return;
+            }
+          }
+        }
+      }
+
+      // Build the final answers map
+      final Map<String, dynamic> finalAnswers = {};
+
+      for (final question in questions) {
+        final answer = answers[question.name];
+
+        // Skip unanswered questions for quizzes (not surveys)
+        if (answer == null && !isSurvey) {
+          continue;
+        }
+
+        // Format the answer based on question type
+        if (question.type == "text" || question.type == "comment") {
+          finalAnswers[question.name] =
+              textControllers[question.name]?.text ?? '';
+        } else if (question.type == "checkbox") {
+          // Convert list to comma-separated string or keep as list based on your API
+          finalAnswers[question.name] =
+              (answer as List<String>?)?.join(',') ?? '';
+        } else if (question.type == "rating") {
+          finalAnswers[question.name] = (answer as double?)?.toString() ?? '0';
+        } else if (question.type == "boolean") {
+          if (isSurvey) {
+            finalAnswers[question.name] = (answer as bool?) == true
+                ? "Yes"
+                : "No";
+          } else {
+            finalAnswers[question.name] = answer?.toString() ?? '';
+          }
+        } else {
+          finalAnswers[question.name] = answer?.toString() ?? '';
+        }
+      }
+
+      // Calculate elapsed time
       final elapsed = DateTime.now().difference(_quizStartTime);
-      final finishTime = "PT${elapsed.inMinutes}M${elapsed.inSeconds % 60}S";
 
+      // Submit to API
       final response = await apiClient.postApi(
-        '${ApiConstants.submit}$quizSurveyId',
+        '${ApiConstants.submit}$quizId',
         body: {
           "userId": SessionManager.getUserId(),
-          "finishTime": finishTime,
-          "answers": userAnswers,
+          "finishTime": elapsed.inSeconds,
+          "answers": finalAnswers,
         },
       );
 
       if (response != null && response.statusCode == 200) {
         final responseData = SubmitQuizModel.fromJson(response.data);
-        await SessionManager.clearQuizStartTime(quizSurveyId);
+        await SessionManager.clearQuizStartTime(quizId);
 
         emit(ParticipateSubmitted(submitQuizDetails: responseData.data));
+      } else {
+        emit(
+          ParticipateValidationError(
+            "Failed to submit quiz. Please try again.",
+          ),
+        );
+        _emitProgress();
       }
     } catch (e) {
-      emit(ParticipateAPIError());
+      emit(
+        ParticipateValidationError("Error submitting quiz: ${e.toString()}"),
+      );
+      _emitProgress();
     } finally {
       EasyLoading.dismiss();
     }
@@ -184,13 +197,7 @@ class ParticipateCubit extends Cubit<ParticipateState> {
 
   void _emitProgress() {
     emit(
-      ParticipateInProgress(
-        currentIndex: currentIndex,
-        timeLeft: timeLeft,
-        userAnswers: userAnswers,
-        selectedAnswer: selectedAnswer,
-        quizDetails: quizSurveyData,
-      ),
+      ParticipateInProgress(timeLeft: timeLeft, quizDetails: quizSurveyData),
     );
   }
 

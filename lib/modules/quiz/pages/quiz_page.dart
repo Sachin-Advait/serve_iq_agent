@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
-import 'package:servelq_agent/modules/quiz/components/filter_bar.dart';
-import 'package:servelq_agent/modules/quiz/components/quiz_card.dart';
-import 'package:servelq_agent/modules/quiz/cubit/quiz_cubit.dart';
 import 'package:servelq_agent/modules/home/pages/components/error_screen.dart';
 import 'package:servelq_agent/modules/home/pages/components/header.dart';
 import 'package:servelq_agent/modules/home/pages/components/loading_screen.dart';
+import 'package:servelq_agent/modules/quiz/components/filter_bar.dart';
+import 'package:servelq_agent/modules/quiz/components/quiz_card.dart';
+import 'package:servelq_agent/modules/quiz/cubit/quiz_cubit.dart';
 
 class QuizPage extends StatefulWidget {
   const QuizPage({super.key});
@@ -30,16 +30,16 @@ class _QuizPageState extends State<QuizPage> {
     final isWideScreen = size.width > 1200;
     final isMediumScreen = size.width > 800 && size.width <= 1200;
 
-    return Container(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage(AppImages.bg01Png),
-          fit: BoxFit.cover,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(AppImages.bg01Png),
+            fit: BoxFit.cover,
+          ),
         ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Column(
+        child: Column(
           children: [
             Header(),
 

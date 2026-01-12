@@ -181,7 +181,10 @@ class QuizSurveryCard extends StatelessWidget {
                         (quiz.isParticipated == true && quiz.maxRetake > 1))) {
                   context.pushNamed(
                     Routes.participate,
-                    extra: {"quizId": quiz.id, "isMandatory": quiz.isMandatory},
+                    pathParameters: {
+                      'quizId': quiz.id,
+                      'isMandatory': quiz.isMandatory.toString(),
+                    },
                   );
                 }
               },

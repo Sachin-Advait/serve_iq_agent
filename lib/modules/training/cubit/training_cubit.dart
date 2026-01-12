@@ -3,6 +3,7 @@ import 'package:servelq_agent/common/constants/api_constants.dart';
 import 'package:servelq_agent/common/utils/get_it.dart';
 import 'package:servelq_agent/models/training_model.dart';
 import 'package:servelq_agent/services/api_client.dart';
+import 'package:servelq_agent/services/session_manager.dart';
 
 part 'training_state.dart';
 
@@ -16,7 +17,9 @@ class TrainingCubit extends Cubit<TrainingState> {
 
   Future<void> loadTrainings() async {
     emit(TrainingLoading());
-    final response = await apiClient.getApi(ApiConstants.training);
+    final response = await apiClient.getApi(
+      '${ApiConstants.training}${SessionManager.getUserId()}/details',
+    );
 
     if (response != null && response.statusCode == 200) {
       final resposneData = TrainingModel.fromJson(response.data!);
