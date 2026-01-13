@@ -30,4 +30,6 @@ class AppImages {
   static const String id = 'assets/images/ID.svg';
   static const String notification = 'assets/images/Notification.svg';
   static const String logout = 'assets/images/Logout.svg';
+  static const String translation = 'assets/images/translation.png';
+  static const String home = 'assets/images/home.png';
 }

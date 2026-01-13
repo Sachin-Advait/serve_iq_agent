@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:servelq_agent/common/constants/app_strings.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
+import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/configs/theme/app_theme.dart';
 import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
@@ -15,6 +17,11 @@ class Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get current route location
+    final currentRoute = GoRouterState.of(context).uri.toString();
+    final isOnHomePage =
+        currentRoute == Routes.agent || currentRoute == '/${Routes.agent}';
+
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
         final displayText =
@@ -36,39 +43,88 @@ class Header extends StatelessWidget {
                 ),
               ),
               Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      'Agent: ${SessionManager.getUsername()}',
-                      style: context.medium.copyWith(
-                        color: AppColors.brownDarker,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
+
+              // Home Button - Only visible when NOT on home page
+              if (!isOnHomePage) ...[
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () {
+                      context.goNamed(Routes.agent);
+                    },
+                    child: Image.asset(
+                      AppImages.home,
+                      height: 25,
+                      color: AppColors.brownVeryDark,
                     ),
-                    8.horizontalSpace,
-                    const Icon(Icons.circle, color: AppColors.green, size: 10),
-                    4.horizontalSpace,
-                    Text(
-                      'Online',
-                      style: context.medium.copyWith(
-                        color: AppColors.green,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
+                  ),
+                ),
+                20.horizontalSpace,
+              ],
+
+              // Language Toggle
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () =>
+                      context.read<LocalizationCubit>().toggleLanguage(),
+                  child: Image.asset(
+                    AppImages.translation,
+                    height: 30,
+                    color: AppColors.brownVeryDark,
+                  ),
                 ),
               ),
+              20.horizontalSpace,
+
+              // Agent Status
+              BlocBuilder<LocalizationCubit, LocalizationState>(
+                builder: (context, localizationState) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: localizationState.locale.languageCode == "en"
+                          ? AppColors.white
+                          : AppColors.primary,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          '${context.trNoListen(AppStrings.agent)}: ${SessionManager.getUsername()}',
+                          style: context.medium.copyWith(
+                            color: localizationState.locale.languageCode == "en"
+                                ? AppColors.brownDark
+                                : AppColors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        8.horizontalSpace,
+                        const Icon(
+                          Icons.circle,
+                          color: AppColors.green,
+                          size: 10,
+                        ),
+                        4.horizontalSpace,
+                        Text(
+                          context.trNoListen(AppStrings.online),
+                          style: context.medium.copyWith(
+                            color: AppColors.green,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
               10.horizontalSpace,
+
+              // Menu Button
               PopupMenuButton<String>(
                 offset: const Offset(0, 60),
                 tooltip: '',
@@ -76,13 +132,25 @@ class Header extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 color: AppColors.offWhite,
-                icon: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.menu, color: AppColors.brownDeep, size: 24),
+                icon: BlocBuilder<LocalizationCubit, LocalizationState>(
+                  builder: (context, localizationState) {
+                    return Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: localizationState.locale.languageCode == "en"
+                            ? AppColors.white
+                            : AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.menu,
+                        color: localizationState.locale.languageCode == "en"
+                            ? AppColors.brownDark
+                            : AppColors.white,
+                        size: 24,
+                      ),
+                    );
+                  },
                 ),
                 itemBuilder: (BuildContext context) => [
                   PopupMenuItem<String>(
@@ -96,7 +164,7 @@ class Header extends StatelessWidget {
                         ),
                         12.horizontalSpace,
                         Text(
-                          'Notifications',
+                          context.trNoListen(AppStrings.notifications),
                           style: context.medium.copyWith(
                             color: AppColors.brownDarker,
                             fontSize: 14,
@@ -107,41 +175,67 @@ class Header extends StatelessWidget {
                   ),
                   PopupMenuItem<String>(
                     value: 'quiz',
+                    enabled: !_isOnRoute(currentRoute, Routes.quiz),
                     child: Row(
                       children: [
                         Icon(
                           Icons.quiz_outlined,
-                          color: AppColors.brownDeep,
+                          color: _isOnRoute(currentRoute, Routes.quiz)
+                              ? AppColors.taupe
+                              : AppColors.brownDeep,
                           size: 20,
                         ),
                         12.horizontalSpace,
                         Text(
-                          'Quiz',
+                          context.trNoListen(AppStrings.quiz),
                           style: context.medium.copyWith(
-                            color: AppColors.brownDarker,
+                            color: _isOnRoute(currentRoute, Routes.quiz)
+                                ? AppColors.taupe
+                                : AppColors.brownDarker,
                             fontSize: 14,
                           ),
                         ),
+                        if (_isOnRoute(currentRoute, Routes.quiz)) ...[
+                          4.horizontalSpace,
+                          Icon(
+                            Icons.check_circle,
+                            color: AppColors.green,
+                            size: 16,
+                          ),
+                        ],
                       ],
                     ),
                   ),
                   PopupMenuItem<String>(
                     value: 'training',
+                    enabled: !_isOnRoute(currentRoute, Routes.training),
                     child: Row(
                       children: [
                         Icon(
                           Icons.school_outlined,
-                          color: AppColors.brownDeep,
+                          color: _isOnRoute(currentRoute, Routes.training)
+                              ? AppColors.taupe
+                              : AppColors.brownDeep,
                           size: 20,
                         ),
                         12.horizontalSpace,
                         Text(
-                          'Training',
+                          context.trNoListen(AppStrings.training),
                           style: context.medium.copyWith(
-                            color: AppColors.brownDarker,
+                            color: _isOnRoute(currentRoute, Routes.training)
+                                ? AppColors.taupe
+                                : AppColors.brownDarker,
                             fontSize: 14,
                           ),
                         ),
+                        if (_isOnRoute(currentRoute, Routes.training)) ...[
+                          4.horizontalSpace,
+                          Icon(
+                            Icons.check_circle,
+                            color: AppColors.green,
+                            size: 16,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -162,7 +256,7 @@ class Header extends StatelessWidget {
                         ),
                         12.horizontalSpace,
                         Text(
-                          'Logout',
+                          context.trNoListen(AppStrings.logout),
                           style: context.medium.copyWith(
                             color: AppColors.red,
                             fontSize: 14,
@@ -179,12 +273,16 @@ class Header extends StatelessWidget {
                       // context.pushNamed('/notifications');
                       break;
                     case 'quiz':
-                      // Handle quiz action
-                      context.pushNamed(Routes.quiz);
+                      // Only navigate if not already on quiz page
+                      if (!_isOnRoute(currentRoute, Routes.quiz)) {
+                        context.pushNamed(Routes.quiz);
+                      }
                       break;
                     case 'training':
-                      // Handle training action
-                      context.pushNamed(Routes.training);
+                      // Only navigate if not already on training page
+                      if (!_isOnRoute(currentRoute, Routes.training)) {
+                        context.pushNamed(Routes.training);
+                      }
                       break;
                     case 'logout':
                       SessionManager.clearSession();
@@ -199,5 +297,23 @@ class Header extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Helper method to check if current route matches the target route
+  bool _isOnRoute(String currentRoute, String targetRoute) {
+    // Normalize the current route by removing leading slash
+    final normalizedCurrent = currentRoute.startsWith('/')
+        ? currentRoute.substring(1)
+        : currentRoute;
+
+    // Split the route into segments
+    final segments = normalizedCurrent.split('/');
+
+    // For routes like "/agent/quiz" or "/agent/quiz/participate"
+    // We check if the route contains the target as a segment
+    // This prevents false positives like "quiz" matching "quizzes"
+
+    // Check if target route exists as a complete segment in the path
+    return segments.contains(targetRoute);
   }
 }

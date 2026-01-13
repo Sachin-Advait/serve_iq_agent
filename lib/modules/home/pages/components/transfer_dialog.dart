@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:servelq_agent/common/constants/app_strings.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
+import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
@@ -86,8 +88,8 @@ class _TransferDialogState extends State<TransferDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Transfer Visitor',
+                Text(
+                  context.tr(AppStrings.transferTitle),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -96,7 +98,8 @@ class _TransferDialogState extends State<TransferDialog> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Token: ${widget.state.currentToken?.token ?? 'N/A'}',
+                  '${context.tr(AppStrings.transferTokenLabel)}: '
+                  '${widget.state.currentToken?.token ?? context.tr(AppStrings.notAvailable)}',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 14,
@@ -234,8 +237,8 @@ class _TransferDialogState extends State<TransferDialog> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text(
-                'Cancel',
+              child: Text(
+                context.tr(AppStrings.transferCancel),
                 style: TextStyle(
                   color: AppColors.brownDeep,
                   fontWeight: FontWeight.w600,
@@ -278,7 +281,7 @@ class _TransferDialogState extends State<TransferDialog> {
                         ),
                         SizedBox(width: 8),
                         Text(
-                          'Transfer Visitor',
+                          context.tr(AppStrings.transferConfirm),
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
@@ -305,15 +308,15 @@ class _TransferDialogState extends State<TransferDialog> {
       // Call your transfer method from the cubit
       await context.read<HomeCubit>().transferToken(selectedCounterId!);
 
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
+      if (context.mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
         setState(() {
           isTransferring = false;
         });
-        flutterToast(message: 'Transfer failed: ${e.toString()}');
+        if (context.mounted) {
+          flutterToast(message: '${context.tr(AppStrings.transferFailed)}: $e');
+        }
       }
     }
   }

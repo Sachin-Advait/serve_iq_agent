@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:servelq_agent/common/constants/app_strings.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
+import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/configs/theme/app_theme.dart';
 import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
@@ -24,13 +26,13 @@ class LeftPane extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     QueueCard(
-                      label: 'Total Waiting',
+                      label: context.tr(AppStrings.queueTotalWaiting),
                       value: state.queue.length.toString(),
                       icon: AppImages.totalWaiting,
                     ),
                     const SizedBox(height: 16),
                     QueueCard(
-                      label: 'Avg Wait Time',
+                      label: context.tr(AppStrings.queueAvgWaitTime),
                       value: (state.counter?.avgSecond ?? 0).toStringAsFixed(1),
                       icon: AppImages.avgWaitingTime,
                     ),
@@ -38,7 +40,7 @@ class LeftPane extends StatelessWidget {
                     if (state.currentTokenStatus ==
                         CurrentTokenStatus.loaded) ...[
                       const SizedBox(height: 24),
-                      _buildCurrentTokenCard(state),
+                      _buildCurrentTokenCard(state, context),
                     ],
                     const SizedBox(height: 20),
                     _buildHoldTokens(state, context),
@@ -54,7 +56,7 @@ class LeftPane extends StatelessWidget {
     );
   }
 
-  Widget _buildCurrentTokenCard(HomeState state) {
+  Widget _buildCurrentTokenCard(HomeState state, BuildContext context) {
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.all(16),
@@ -69,7 +71,7 @@ class LeftPane extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
-            'Current Token',
+            context.tr(AppStrings.queueCurrentToken),
             style: TextStyle(
               color: AppColors.white,
               fontSize: 16,
@@ -116,7 +118,7 @@ class LeftPane extends StatelessWidget {
                 ),
                 SizedBox(width: 8),
                 Text(
-                  'Hold Tokens',
+                  context.tr(AppStrings.queueHoldTokens),
                   style: TextStyle(
                     fontSize: 15,
                     color: AppColors.white,
@@ -213,7 +215,7 @@ class LeftPane extends StatelessWidget {
               ),
               10.horizontalSpace,
               Text(
-                'Upcoming Tokens',
+                context.tr(AppStrings.queueUpcomingTokens),
                 style: TextStyle(
                   fontSize: 15,
                   color: Colors.white,
@@ -237,7 +239,7 @@ class LeftPane extends StatelessWidget {
                 SvgPicture.asset(AppImages.noToken, height: 25),
                 10.horizontalSpace,
                 Text(
-                  'No upcoming tokens',
+                  context.tr(AppStrings.queueNoUpcomingTokens),
                   style: context.medium.copyWith(
                     fontSize: 14,
                     color: AppColors.brownDeep,
@@ -317,7 +319,7 @@ class LeftPane extends StatelessWidget {
                 ),
                 SizedBox(width: 8),
                 Text(
-                  'Transferred Tokens',
+                  context.tr(AppStrings.queueTransferredTokens),
                   style: context.medium.copyWith(
                     fontSize: 15,
                     color: AppColors.white,
@@ -368,7 +370,7 @@ class LeftPane extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'From: Counter ${token.transferCounterName}',
+                              '${context.tr(AppStrings.queueFromCounter)} ${token.transferCounterName}',
                               style: const TextStyle(
                                 fontSize: 10,
                                 color: AppColors.darkRed,

@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:get_storage/get_storage.dart';
@@ -11,6 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:servelq_agent/common/constants/app_strings.dart';
 import 'package:servelq_agent/common/utils/app_screen_util.dart';
 import 'package:servelq_agent/common/utils/get_it.dart';
+import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_theme.dart';
 import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
 import 'package:servelq_agent/routes/pages.dart';
@@ -35,33 +37,51 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<HomeCubit>(),
-      child: LayoutBuilder(
-        builder: (context, constraints) => ScreenUtilInit(
-          designSize: Size(constraints.maxWidth, constraints.maxHeight),
-          minTextAdapt: true,
-          ensureScreenSize: true,
-          splitScreenMode: true,
-          builder: (context, child) {
-            final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => getIt<HomeCubit>()),
+        BlocProvider(create: (context) => LocalizationCubit()..load()),
+      ],
+      child: BlocBuilder<LocalizationCubit, LocalizationState>(
+        builder: (context, state) {
+          return LayoutBuilder(
+            builder: (context, constraints) => ScreenUtilInit(
+              designSize: Size(constraints.maxWidth, constraints.maxHeight),
+              minTextAdapt: true,
+              ensureScreenSize: true,
+              splitScreenMode: true,
+              builder: (context, child) {
+                final isTablet =
+                    MediaQuery.of(context).size.shortestSide >= 600;
 
-            AppScreenUtil().init(constraints);
+                AppScreenUtil().init(constraints);
 
-            return MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).copyWith(textScaler: TextScaler.linear(isTablet ? 1.2 : 1.0)),
-              child: MaterialApp.router(
-                routerConfig: Pages.router,
-                title: AppStrings.appTitle,
-                debugShowCheckedModeBanner: false,
-                builder: EasyLoading.init(),
-                theme: AppThemes.lightTheme,
-              ),
-            );
-          },
-        ),
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.linear(isTablet ? 1.2 : 1.0),
+                  ),
+                  child: MaterialApp.router(
+                    routerConfig: Pages.router,
+                    title: context.tr(AppStrings.appTitle),
+                    debugShowCheckedModeBanner: false,
+                    builder: EasyLoading.init(),
+                    theme: AppThemes.lightTheme,
+                    locale: state.locale,
+                    localizationsDelegates: const [
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                      GlobalCupertinoLocalizations.delegate,
+                    ],
+                    supportedLocales: const [
+                      Locale('en', 'US'),
+                      Locale('ar', 'SA'),
+                    ],
+                  ),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }

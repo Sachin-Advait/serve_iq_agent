@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:servelq_agent/common/constants/app_strings.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
+import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
 import 'package:servelq_agent/modules/home/pages/components/error_screen.dart';
@@ -31,12 +33,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     await NotificationService.instance.init();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      context.read<HomeCubit>().onAppResumed();
-    }
-  }
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   if (state == AppLifecycleState.resumed) {
+  //     context.read<HomeCubit>().onAppResumed();
+  //   }
+  // }
 
   @override
   void dispose() {
@@ -48,17 +50,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(AppImages.bg01Png),
-            fit: BoxFit.cover,
+      child: Scaffold(
+        backgroundColor: AppColors.offWhite,
+        resizeToAvoidBottomInset: false,
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(AppImages.bg01Png),
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          resizeToAvoidBottomInset: false,
-          body: BlocListener<HomeCubit, HomeState>(
+          child: BlocListener<HomeCubit, HomeState>(
             listener: (context, state) {
               if (state.status == HomeStatus.error) {
                 flutterToast(message: "An error occurred");
@@ -67,7 +69,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (!state.isNetworkConnected &&
                   state.status == HomeStatus.loaded) {
                 flutterToast(
-                  message: "No internet connection",
+                  message: context.tr(AppStrings.noInternet),
                   color: AppColors.darkRed,
                 );
               }
@@ -76,7 +78,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               builder: (context, state) {
                 if (state.status == HomeStatus.initial ||
                     state.status == HomeStatus.loading) {
-                  return LoadingScreen(title: 'Loading Agent Dashboard...');
+                  return LoadingScreen(
+                    title: context.tr(AppStrings.loadingDashboard),
+                  );
                 }
 
                 if (state.status == HomeStatus.loaded) {
@@ -105,12 +109,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
                 if (state.status == HomeStatus.error) {
                   return ErrorScreen(
-                    message: 'An error occurred',
+                    message: context.tr(AppStrings.errorOccurred),
                     onRetry: () => context.read<HomeCubit>().loadInitialData(),
                   );
                 }
 
-                return LoadingScreen(title: "Loading Agent Dashboard...");
+                return LoadingScreen(
+                  title: context.tr(AppStrings.loadingDashboard),
+                );
               },
             ),
           ),
@@ -142,9 +148,9 @@ class NetworkStatusBanner extends StatelessWidget {
             children: [
               const Icon(Icons.wifi_off, color: Colors.white, size: 20),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'No Internet Connection',
+                  context.tr(AppStrings.noInternet),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -164,8 +170,8 @@ class NetworkStatusBanner extends StatelessWidget {
                     vertical: 8,
                   ),
                 ),
-                child: const Text(
-                  'Check Again',
+                child: Text(
+                  context.tr(AppStrings.checkAgain),
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -218,9 +224,9 @@ class WebSocketStatusBanner extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Connecting to server...',
+                    context.tr(AppStrings.connectingServer),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -247,8 +253,8 @@ class WebSocketStatusBanner extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
-                        'Server Connection Failed',
+                      Text(
+                        context.tr(AppStrings.serverFailed),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -280,8 +286,8 @@ class WebSocketStatusBanner extends StatelessWidget {
                       vertical: 8,
                     ),
                   ),
-                  child: const Text(
-                    'Retry',
+                  child: Text(
+                    context.tr(AppStrings.retry),
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

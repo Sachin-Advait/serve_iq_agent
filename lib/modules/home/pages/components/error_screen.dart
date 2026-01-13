@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:servelq_agent/common/constants/app_strings.dart';
+import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 
 class ErrorScreen extends StatelessWidget {
@@ -18,7 +20,7 @@ class ErrorScreen extends StatelessWidget {
             Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
             const SizedBox(height: 20),
             Text(
-              'Failed to load data',
+              context.tr(AppStrings.errorFailedLoad),
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.grey[800],
@@ -41,7 +43,10 @@ class ErrorScreen extends StatelessWidget {
                   vertical: 12,
                 ),
               ),
-              child: const Text('Retry', style: TextStyle(color: Colors.white)),
+              child: Text(
+                context.tr(AppStrings.retry),
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
           ],
         ),

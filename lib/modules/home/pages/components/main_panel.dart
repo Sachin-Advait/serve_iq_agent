@@ -1,7 +1,9 @@
 // components/main_panel.dart
 import 'package:flutter/material.dart';
+import 'package:servelq_agent/common/constants/app_strings.dart';
 import 'package:servelq_agent/common/utils/app_screen_util.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
+import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/configs/theme/app_theme.dart';
 import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
@@ -19,7 +21,7 @@ class MainPanel extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         children: [
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           if (state.currentToken?.mobileNumber != null &&
               state.currentTokenStatus == CurrentTokenStatus.loaded)
             _buildCurrentTokenInfo(state, context)
@@ -28,8 +30,8 @@ class MainPanel extends StatelessWidget {
           const SizedBox(height: 28),
           ActionButtons(state: state),
           const SizedBox(height: 28),
-          Expanded(child: _buildHistoryPanel(state)),
-          SizedBox(height: 20),
+          Expanded(child: _buildHistoryPanel(state, context)),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -39,11 +41,11 @@ class MainPanel extends StatelessWidget {
     String message;
 
     if (state.counter?.status == "COMPLETE") {
-      message = 'Visitor is writing the feedback, please wait';
+      message = context.tr(AppStrings.visitorWritingFeedback);
     } else if (state.queue.isEmpty) {
-      message = 'No tokens in queue';
+      message = context.tr(AppStrings.noTokensInQueue);
     } else {
-      message = 'Click "Call Next" to serve the next visitor';
+      message = context.tr(AppStrings.clickCallNextToServe);
     }
 
     return Container(
@@ -85,7 +87,7 @@ class MainPanel extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -95,7 +97,7 @@ class MainPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Current Visitor',
+            context.tr(AppStrings.currentVisitor),
             style: context.semiBold.copyWith(
               fontSize: 20,
               color: AppColors.brownDarker,
@@ -106,7 +108,7 @@ class MainPanel extends StatelessWidget {
             children: [
               Expanded(
                 child: InfoField(
-                  label: 'Mobile Number',
+                  label: context.tr(AppStrings.mobileNumber),
                   value: token.mobileNumber,
                   icon: AppImages.id,
                 ),
@@ -114,7 +116,7 @@ class MainPanel extends StatelessWidget {
               const SizedBox(width: 24),
               Expanded(
                 child: InfoField(
-                  label: 'Service Type',
+                  label: context.tr(AppStrings.serviceType),
                   value: token.serviceName,
                   icon: AppImages.serviceType,
                 ),
@@ -123,7 +125,7 @@ class MainPanel extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'Notes / Documents',
+            context.tr(AppStrings.notesDocuments),
             style: context.semiBold.copyWith(
               fontSize: 12,
               color: AppColors.brownDarker,
@@ -134,7 +136,7 @@ class MainPanel extends StatelessWidget {
             maxLines: 3,
             textInputAction: TextInputAction.done,
             decoration: InputDecoration(
-              hintText: 'Add notes or attach documents...',
+              hintText: context.tr(AppStrings.addNotesOrAttachDocuments),
               hintStyle: const TextStyle(color: AppColors.taupe),
               filled: true,
               fillColor: AppColors.lightBeige.withValues(alpha: .8),
@@ -160,7 +162,7 @@ class MainPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildHistoryPanel(HomeState state) {
+  Widget _buildHistoryPanel(HomeState state, BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(28, 28, 28, 0),
       decoration: BoxDecoration(
@@ -168,7 +170,7 @@ class MainPanel extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -177,9 +179,9 @@ class MainPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Recent Service History',
-            style: TextStyle(
+          Text(
+            context.tr(AppStrings.recentServiceHistory),
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: AppColors.brownDarker,
@@ -195,25 +197,25 @@ class MainPanel extends StatelessWidget {
                           child: Icon(
                             Icons.history,
                             size: 64,
-                            color: AppColors.brownDarker.withOpacity(0.3),
+                            color: AppColors.brownDarker.withValues(alpha: 0.3),
                           ),
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No service history yet',
+                          context.tr(AppStrings.noServiceHistoryYet),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.brownDarker.withOpacity(0.6),
+                            color: AppColors.brownDarker.withValues(alpha: 0.6),
                           ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Recent services will appear here',
+                          context.tr(AppStrings.recentServicesWillAppearHere),
                           style: TextStyle(
                             fontSize: 14,
-                            color: AppColors.brownDarker.withOpacity(0.4),
+                            color: AppColors.brownDarker.withValues(alpha: 0.4),
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -303,7 +305,7 @@ class MainPanel extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                '${state.recentServices[index].time} mins',
+                                '${state.recentServices[index].time} ${context.tr(AppStrings.mins)}',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: AppColors.green,
@@ -384,11 +386,11 @@ class MainPanel extends StatelessWidget {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.green.withOpacity(0.1),
+                                color: AppColors.green.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                '${state.recentServices[index].time} mins',
+                                '${state.recentServices[index].time} ${context.tr(AppStrings.mins)}',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: AppColors.green,
