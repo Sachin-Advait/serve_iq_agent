@@ -4,8 +4,10 @@ import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/models/training_model.dart';
 import 'package:servelq_agent/modules/home/pages/components/header.dart';
+import 'package:servelq_agent/modules/training/components/document_learning.dart';
 import 'package:servelq_agent/modules/training/components/filter_chip.dart';
 import 'package:servelq_agent/modules/training/components/material_card.dart';
+import 'package:servelq_agent/modules/training/components/video_learning.dart';
 import 'package:servelq_agent/modules/training/cubit/training_cubit.dart';
 
 class Training extends StatefulWidget {
@@ -35,35 +37,50 @@ class _TrainingState extends State<Training> {
     TrainingAssignment material,
     BuildContext context,
   ) async {
-    // Navigation logic here
-    if (context.mounted) context.read<TrainingCubit>().loadTrainings();
+    if (material.type!.toLowerCase() == "video") {
+      await showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (_) => BlocProvider.value(
+          value: context.read<TrainingCubit>(),
+          child: VideoLearningDialog(material: material),
+        ),
+      );
+    } else if (material.type!.toLowerCase() == "document") {
+      context.read<TrainingCubit>().updateTrainingProgess(
+        material.trainingId!,
+        100,
+      );
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => DocumentLearning(material: material)),
+      );
+    }
+
+    if (context.mounted) {
+      context.read<TrainingCubit>().loadTrainings();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isWideScreen = size.width > 1200;
-    final isMediumScreen = size.width > 800 && size.width <= 1200;
-
-    return Container(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage(AppImages.bg01Png),
-          fit: BoxFit.cover,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(AppImages.bg01Png),
+            fit: BoxFit.cover,
+          ),
         ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Column(
+        child: Column(
           children: [
-            // Professional Header
-            Header(),
-            // Filter Section
+            /// 🔝 Header
+            const Header(),
+
+            /// 🎛 Filter section (web fixed layout)
             Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: isWideScreen ? 28 : (isMediumScreen ? 32 : 16),
-                vertical: 16,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
               child: Row(
                 children: [
                   Text(
@@ -96,6 +113,7 @@ class _TrainingState extends State<Training> {
               ),
             ),
 
+            /// 📦 Content
             Expanded(
               child: BlocBuilder<TrainingCubit, TrainingState>(
                 builder: (context, state) {
@@ -109,84 +127,29 @@ class _TrainingState extends State<Training> {
 
                   if (state is TrainingLoaded) {
                     if (state.trainings.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.school_outlined,
-                                size: 64,
-                                color: Colors.grey.shade400,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            Text(
-                              'No training materials found',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.grey.shade800,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Try adjusting your filters',
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
+                      return _NoTrainingView();
                     }
 
                     return Center(
                       child: Container(
-                        constraints: BoxConstraints(
-                          maxWidth: isWideScreen ? 1400 : double.infinity,
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isWideScreen
-                              ? 48
-                              : (isMediumScreen ? 32 : 16),
-                        ),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            int crossAxisCount = 1;
-                            if (isWideScreen) {
-                              crossAxisCount = 3;
-                            } else if (isMediumScreen) {
-                              crossAxisCount = 2;
-                            }
-
-                            return GridView.builder(
-                              padding: const EdgeInsets.only(
-                                bottom: 48,
-                                top: 16,
+                        constraints: const BoxConstraints(maxWidth: 1400),
+                        padding: const EdgeInsets.symmetric(horizontal: 48),
+                        child: GridView.builder(
+                          padding: const EdgeInsets.only(top: 16, bottom: 48),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 20,
+                                mainAxisSpacing: 20,
+                                childAspectRatio: 1.54,
                               ),
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: crossAxisCount,
-                                    crossAxisSpacing: 20,
-                                    mainAxisSpacing: 20,
-                                    childAspectRatio: isWideScreen ? 1.1 : 1.0,
-                                  ),
-                              itemCount: state.trainings.length,
-                              itemBuilder: (context, index) {
-                                final material = state.trainings[index];
-                                return MaterialCardWidget(
-                                  material: material,
-                                  onViewMaterial: () =>
-                                      _handleViewMaterial(material, context),
-                                );
-                              },
+                          itemCount: state.trainings.length,
+                          itemBuilder: (context, index) {
+                            final material = state.trainings[index];
+                            return MaterialCardWidget(
+                              material: material,
+                              onViewMaterial: () =>
+                                  _handleViewMaterial(material, context),
                             );
                           },
                         ),
@@ -195,43 +158,7 @@ class _TrainingState extends State<Training> {
                   }
 
                   if (state is TrainingError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.error_outline_rounded,
-                              size: 64,
-                              color: Colors.red.shade400,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            'Something went wrong',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.grey.shade800,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            state.message,
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Colors.grey.shade600,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    );
+                    return _TrainingErrorView(message: state.message);
                   }
 
                   return const SizedBox.shrink();
@@ -240,6 +167,89 @@ class _TrainingState extends State<Training> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _NoTrainingView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.school_outlined,
+              size: 64,
+              color: Colors.grey.shade400,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'No training materials found',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: Colors.grey.shade800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try adjusting your filters',
+            style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrainingErrorView extends StatelessWidget {
+  final String message;
+
+  const _TrainingErrorView({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.error_outline_rounded,
+              size: 64,
+              color: Colors.red.shade400,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Something went wrong',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: Colors.grey.shade800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            message,
+            style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

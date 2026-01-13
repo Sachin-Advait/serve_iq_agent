@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:servelq_agent/common/constants/app_errors.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
+import 'package:servelq_agent/configs/theme/app_colors.dart';
 
 class ApiClient {
   final Dio _dio;
@@ -71,8 +72,27 @@ class ApiClient {
         }
         break;
 
+      //  if (statusCode == 401) {
+      //   // Optional: logout / refresh token
+      // } else if (statusCode == 400) {
+      //   final message = responseData is Map && responseData['message'] != null
+      //       ? responseData['message'].toString()
+      //       : AppErrors.unknownErrorDetails;
+
+      //   flutterToast(message: message, color: AppColors.red);
+      // } else {
+      //   flutterToast(
+      //     message: AppErrors.serverErrorDetails,
+      //     color: AppColors.red,
+      //   );
+      // }
+      // break;
+
       default:
-        flutterToast(message: AppErrors.unknownErrorDetails);
+        flutterToast(
+          message: AppErrors.unknownErrorDetails,
+          color: AppColors.red,
+        );
         break;
     }
     return null;

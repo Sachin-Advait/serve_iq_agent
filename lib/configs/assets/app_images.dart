@@ -32,4 +32,5 @@ class AppImages {
   static const String logout = 'assets/images/Logout.svg';
   static const String translation = 'assets/images/translation.png';
   static const String home = 'assets/images/home.png';
+  static const String search = 'assets/images/search.png';
 }

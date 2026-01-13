@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
+import 'package:servelq_agent/configs/theme/app_theme.dart';
 
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({
@@ -19,7 +20,7 @@ class PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 64,
+      height: 54,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
@@ -39,14 +40,7 @@ class PrimaryButton extends StatelessWidget {
                   valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                 ),
               )
-            : Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.white,
-                ),
-              ),
+            : Text(label, style: context.medium.copyWith(fontSize: 16)),
       ),
     );
   }

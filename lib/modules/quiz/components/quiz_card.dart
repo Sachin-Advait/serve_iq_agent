@@ -32,8 +32,13 @@ class QuizSurveryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final canSeeResult =
+        quiz.isAnnounced == true &&
+        quiz.isParticipated == true &&
+        !quiz.status &&
+        quiz.visibilityType == "PUBLIC";
+
     return Container(
-      width: MediaQuery.of(context).size.width,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -47,6 +52,7 @@ class QuizSurveryCard extends StatelessWidget {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -54,11 +60,15 @@ class QuizSurveryCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   quiz.title,
-                  style: context.medium.copyWith(fontSize: 17),
+                  style: context.semiBold.copyWith(
+                    fontSize: 20,
+                    color: AppColors.primary,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ),
 
-              const SizedBox(width: 10),
+              const SizedBox(width: 20),
 
               if (quiz.visibilityType == "PRIVATE")
                 Container(
@@ -113,7 +123,7 @@ class QuizSurveryCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 20),
 
           // Status chip
           Container(
@@ -148,65 +158,60 @@ class QuizSurveryCard extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
           // Action buttons
-          SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: PrimaryButton(
-              color: quiz.status
-                  ? (quiz.isParticipated == true && quiz.maxRetake > 1
-                        ? AppColors.darkBlue
-                        : quiz.maxRetake == 0
-                        ? AppColors.beige
-                        : AppColors.primary)
-                  : AppColors.beige,
-              label:
-                  quiz.isParticipated == true &&
-                      quiz.maxRetake > 1 &&
-                      quiz.status
-                  ? "Re-attempt"
-                  : quiz.status == false && quiz.isParticipated == false
-                  ? "Not Participated"
-                  : quiz.isParticipated == true
-                  ? "Participated"
-                  : quiz.status == false
-                  ? "Closed"
-                  : "Participate",
-              onPressed: () async {
-                if (quiz.status == false) return;
+          PrimaryButton(
+            color: quiz.status
+                ? (quiz.isParticipated == true && quiz.maxRetake > 1
+                      ? AppColors.darkBlue
+                      : quiz.maxRetake == 0
+                      ? AppColors.beige
+                      : AppColors.primary)
+                : AppColors.beige,
+            label:
+                quiz.isParticipated == true && quiz.maxRetake > 1 && quiz.status
+                ? "Re-attempt"
+                : quiz.status == false && quiz.isParticipated == false
+                ? "Not Participated"
+                : quiz.isParticipated == true
+                ? "Participated"
+                : quiz.status == false
+                ? "Closed"
+                : "Participate",
+            onPressed: () async {
+              if (quiz.status == false) return;
 
-                if (quiz.status &&
-                    (quiz.isParticipated == false ||
-                        (quiz.isParticipated == true && quiz.maxRetake > 1))) {
-                  context.pushNamed(
-                    Routes.participate,
-                    pathParameters: {
-                      'quizId': quiz.id,
-                      'isMandatory': quiz.isMandatory.toString(),
-                    },
-                  );
-                }
-              },
-            ),
+              if (quiz.status &&
+                  (quiz.isParticipated == false ||
+                      (quiz.isParticipated == true && quiz.maxRetake > 1))) {
+                context.pushNamed(
+                  Routes.participate,
+                  pathParameters: {
+                    'quizId': quiz.id,
+                    'isMandatory': quiz.isMandatory.toString(),
+                  },
+                );
+              }
+            },
           ),
 
-          if (quiz.isAnnounced == true &&
-              quiz.isParticipated == true &&
-              !quiz.status &&
-              quiz.visibilityType == "PUBLIC")
-            Container(
-              padding: const EdgeInsets.only(top: 5),
-              width: MediaQuery.of(context).size.width,
-              child: PrimaryButton(
-                color: AppColors.brownVeryDark,
-                label: "See Result",
-                onPressed: () => context.pushNamed(
-                  Routes.result,
-                  extra: {"quizId": quiz.id, "title": quiz.title},
-                ),
-              ),
+          Container(
+            padding: const EdgeInsets.only(top: 15),
+            width: double.infinity,
+            child: PrimaryButton(
+              color: canSeeResult
+                  ? AppColors.brownVeryDark
+                  : AppColors.lightBeige, // disabled color
+              label: canSeeResult ? "See Result" : "Result Not Available",
+              onPressed: canSeeResult
+                  ? () => context.pushNamed(
+                      Routes.result,
+                      extra: {"quizId": quiz.id, "title": quiz.title},
+                    )
+                  : () {},
             ),
+          ),
         ],
       ),
     );

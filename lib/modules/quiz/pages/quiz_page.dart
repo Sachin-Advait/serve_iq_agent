@@ -20,16 +20,12 @@ class _QuizPageState extends State<QuizPage> {
 
   @override
   void initState() {
-    context.read<QuizCubit>().getQuizzes();
     super.initState();
+    context.read<QuizCubit>().getQuizzes();
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isWideScreen = size.width > 1200;
-    final isMediumScreen = size.width > 800 && size.width <= 1200;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
@@ -41,118 +37,97 @@ class _QuizPageState extends State<QuizPage> {
         ),
         child: Column(
           children: [
-            Header(),
-
-            // Filter Bar
+            const Header(),
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: isWideScreen ? 48 : (isMediumScreen ? 32 : 16),
-                vertical: 16,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
               child: FilterBar(searchController: searchController),
             ),
-
-            // Content Area
             Expanded(
               child: BlocBuilder<QuizCubit, QuizState>(
                 builder: (context, state) {
                   if (state is QuizLoading) {
-                    return LoadingScreen(title: "Loading Quizzes");
+                    return const LoadingScreen(title: "Loading Quizzes");
                   }
+
                   if (state is QuizError) {
                     return ErrorScreen(
-                      message: 'An error occurred',
+                      message: "An error occurred",
                       onRetry: () => context.read<QuizCubit>().getQuizzes(),
                     );
                   }
+
                   if (state is QuizLoaded) {
                     if (state.filtered.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.search_off_rounded,
-                                size: 64,
-                                color: Colors.grey.shade400,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            Text(
-                              "No results found",
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.grey.shade800,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              "Try adjusting your filters or search terms",
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
+                      return _NoResultsView();
                     }
 
                     return Center(
                       child: Container(
-                        constraints: BoxConstraints(
-                          maxWidth: isWideScreen ? 1400 : double.infinity,
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isWideScreen
-                              ? 48
-                              : (isMediumScreen ? 32 : 16),
-                        ),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            int crossAxisCount = 1;
-                            if (isWideScreen) {
-                              crossAxisCount = 3;
-                            } else if (isMediumScreen) {
-                              crossAxisCount = 2;
-                            }
-
-                            return GridView.builder(
-                              padding: const EdgeInsets.only(
-                                bottom: 48,
-                                top: 8,
+                        constraints: const BoxConstraints(maxWidth: 1400),
+                        padding: const EdgeInsets.symmetric(horizontal: 48),
+                        child: GridView.builder(
+                          padding: const EdgeInsets.only(top: 8, bottom: 48),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 20,
+                                mainAxisSpacing: 20,
+                                childAspectRatio: 1.35,
                               ),
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: crossAxisCount,
-                                    crossAxisSpacing: 20,
-                                    mainAxisSpacing: 20,
-                                    childAspectRatio: isWideScreen ? 1.3 : 1.2,
-                                  ),
-                              itemCount: state.filtered.length,
-                              itemBuilder: (context, index) {
-                                final quiz = state.filtered[index];
-                                return QuizSurveryCard(quiz: quiz);
-                              },
-                            );
+                          itemCount: state.filtered.length,
+                          itemBuilder: (context, index) {
+                            return QuizSurveryCard(quiz: state.filtered[index]);
                           },
                         ),
                       ),
                     );
                   }
-                  return LoadingScreen(title: "Loading Quizzes");
+
+                  return const LoadingScreen(title: "Loading Quizzes");
                 },
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _NoResultsView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.search_off_rounded,
+              size: 64,
+              color: Colors.grey.shade400,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            "No results found",
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: Colors.grey.shade800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "Try adjusting your filters or search terms",
+            style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
+          ),
+        ],
       ),
     );
   }

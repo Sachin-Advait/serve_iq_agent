@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:servelq_agent/common/utils/app_screen_util.dart';
+import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/models/quiz_details_model.dart';
@@ -85,17 +86,7 @@ class _ParticipatePageState extends State<ParticipatePage> {
               child: BlocConsumer<ParticipateCubit, ParticipateState>(
                 listener: (context, state) {
                   if (state is ParticipateValidationError) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: AppColors.red,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        margin: const EdgeInsets.all(16),
-                      ),
-                    );
+                    flutterToast(message: state.message, color: AppColors.red);
                   }
                 },
                 builder: (context, state) {
@@ -758,18 +749,9 @@ class _ParticipatePageState extends State<ParticipatePage> {
         onTap: () {
           // Validate if survey requires all answers
           if (isSurvey && !allAnswered) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text(
-                  "Please answer all questions before completing",
-                ),
-                backgroundColor: AppColors.red,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                margin: const EdgeInsets.all(16),
-              ),
+            flutterToast(
+              message: "Please answer all questions before completing",
+              color: AppColors.red,
             );
             return;
           }
