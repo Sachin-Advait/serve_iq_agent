@@ -541,11 +541,11 @@ class HomeCubit extends Cubit<HomeState> {
         state.copyWith(
           currentTokenStatus: CurrentTokenStatus.initial,
           currentToken: TokenModel(),
+          counter: await agentRepository.getCounter(),
         ),
       );
 
       flutterToast(message: 'Token successfully transferred');
-      await queueAPI();
     } catch (e) {
       flutterToast(
         message: 'Error while transferring. Please try again',
