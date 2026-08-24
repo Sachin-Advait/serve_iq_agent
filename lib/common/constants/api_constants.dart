@@ -1,13 +1,14 @@
 class ApiConstants {
-  // static const String baseUrl = "http://localhost:8085/serveiq/api/";
-  static const String baseUrl =
-      "https://serveiqbackend.insyncproducts.online/serveiq/api/";
-  static const String wsUrl =
-      "wss://serveiqbackend.insyncproducts.online/serveiq/ws";
+  static const String baseUrl = "http://192.168.1.4:8085/serveiq/api/";
+  // static const String baseUrl =
+  //     "https://serveiqbackend.insyncproducts.online/serveiq/api/";
+
+  static const String wsUrl = "ws://192.168.1.4:8085/serveiq/ws";
+  // static const String wsUrl =
+  //     "wss://serveiqbackend.insyncproducts.online/serveiq/ws";
 
   // ---------- AUTH ----------
   static const String login = 'auth/login';
-  static const String register = 'auth/register';
 
   // ---------- AGENT ----------
   static const String queue = 'agent/queue/';

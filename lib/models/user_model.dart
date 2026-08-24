@@ -25,7 +25,27 @@ class UserModel {
       counterId: json['counterId'] ?? '',
     );
   }
+}
 
-  bool get isAgent => role == 'USER';
-  bool get isDisplay => role == 'DISPLAY';
+class AuthResponse {
+  final String token;
+  final int expiresInSeconds;
+  final String tokenType;
+  final UserModel user;
+
+  AuthResponse({
+    required this.token,
+    required this.expiresInSeconds,
+    required this.tokenType,
+    required this.user,
+  });
+
+  factory AuthResponse.fromJson(Map<String, dynamic> json) {
+    return AuthResponse(
+      token: json['token'] ?? '',
+      expiresInSeconds: json['expiresInSeconds'] ?? 0,
+      tokenType: json['tokenType'] ?? 'Bearer',
+      user: UserModel.fromJson(json['user'] ?? {}),
+    );
+  }
 }

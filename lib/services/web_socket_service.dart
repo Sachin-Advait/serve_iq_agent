@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:servelq_agent/common/constants/api_constants.dart';
+import 'package:servelq_agent/services/session_manager.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 
 class WebSocketService {
@@ -176,6 +177,7 @@ class WebSocketService {
           // Subscribe to upcoming queue updates
           _stompClient?.subscribe(
             destination: '/topic/agent-upcoming/$_currentCounterId',
+            headers: {"Authorization": SessionManager.getToken()},
             callback: (StompFrame frame) {
               _lastMessageReceived = DateTime.now();
               _reconnectAttempts = 0;

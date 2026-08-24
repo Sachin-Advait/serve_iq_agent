@@ -11,6 +11,7 @@ import 'package:servelq_agent/modules/quiz/cubit/quiz_cubit.dart';
 import 'package:servelq_agent/modules/quiz_result/bloc/quiz_result_bloc.dart';
 import 'package:servelq_agent/modules/training/cubit/training_cubit.dart';
 import 'package:servelq_agent/services/api_client.dart';
+import 'package:servelq_agent/services/session_manager.dart';
 
 final getIt = GetIt.instance;
 
@@ -26,6 +27,11 @@ void getItSetup() {
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) async {
+        final token = SessionManager.getToken();
+
+        if (token.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
         if (kDebugMode) {
           if (options.data is FormData) {
             FormData d = options.data;
