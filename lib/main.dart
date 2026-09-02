@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -16,15 +14,10 @@ import 'package:servelq_agent/common/utils/get_it.dart';
 import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_theme.dart';
 import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
-import 'package:servelq_agent/my_http_overrides.dart';
 import 'package:servelq_agent/routes/pages.dart';
-import 'package:servelq_agent/services/firebase_config.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  final securityContext = await createSecurityContext();
-  HttpOverrides.global = MyHttpOverrides(securityContext);
 
   setUrlStrategy(PathUrlStrategy());
   GoRouter.optionURLReflectsImperativeAPIs = true;
@@ -32,7 +25,7 @@ Future<void> main() async {
   getItSetup();
 
   // Adding Firebase configuration utils
-  await Firebase.initializeApp(options: FirebaseConfig.web);
+  // await Firebase.initializeApp(options: FirebaseConfig.web);
 
   runApp(const MyApp());
 }

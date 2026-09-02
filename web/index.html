@@ -1,32 +1,33 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <base href="$FLUTTER_BASE_HREF">
+  <head>
+    <base href="/agent/" />
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-  <meta name="description" content="ServeIQ Agent App">
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="description" content="ServeIQ Agent App" />
 
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="servelq_agent">
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="MSSPF Agent" />
 
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
-  <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/Icon-192.png" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="manifest" href="manifest.json" />
 
-  <title>servelq_agent</title>
+    <title>MSSPF Agent</title>
 
-  <!-- ✅ Register service worker ONLY -->
- <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register(
-      '$FLUTTER_BASE_HREF/firebase-messaging-sw.js'
-    );
-  }
- </script>
-</head>
-<body>
-  <script src="flutter_bootstrap.js" async></script>
-</body>
+    <!-- Firebase Messaging Service Worker -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/firebase-messaging-sw.js", {
+          scope: "/agent/",
+        });
+      }
+    </script>
+  </head>
+
+  <body>
+    <script src="flutter_bootstrap.js" async></script>
+  </body>
 </html>

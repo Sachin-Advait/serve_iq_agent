@@ -31,7 +31,7 @@ class _QuizPageState extends State<QuizPage> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(AppImages.bg01Png),
+            image: AssetImage(AppImages.bg),
             fit: BoxFit.cover,
           ),
         ),

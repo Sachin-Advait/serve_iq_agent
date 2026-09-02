@@ -11,7 +11,6 @@ import 'package:servelq_agent/modules/home/pages/components/header.dart';
 import 'package:servelq_agent/modules/home/pages/components/left_pane.dart';
 import 'package:servelq_agent/modules/home/pages/components/loading_screen.dart';
 import 'package:servelq_agent/modules/home/pages/components/main_panel.dart';
-import 'package:servelq_agent/services/notification_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,22 +22,22 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void initState() {
-    initialize();
+    // initialize();
     WidgetsBinding.instance.addObserver(this);
     context.read<HomeCubit>().loadInitialData();
     super.initState();
   }
 
-  void initialize() async {
-    await NotificationService.instance.init();
-  }
-
-  // @override
-  // void didChangeAppLifecycleState(AppLifecycleState state) {
-  //   if (state == AppLifecycleState.resumed) {
-  //     context.read<HomeCubit>().onAppResumed();
-  //   }
+  // void initialize() async {
+  //   await NotificationService.instance.init();
   // }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      context.read<HomeCubit>().onAppResumed();
+    }
+  }
 
   @override
   void dispose() {
@@ -56,7 +55,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage(AppImages.bg01Png),
+              image: AssetImage(AppImages.bg),
               fit: BoxFit.cover,
             ),
           ),

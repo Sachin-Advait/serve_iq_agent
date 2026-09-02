@@ -72,61 +72,69 @@ class _LoginPageState extends State<LoginPage> {
         }
       },
       child: Scaffold(
-        body: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 600, maxHeight: 650),
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 25,
-                  offset: const Offset(0, 10),
-                ),
-              ],
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(AppImages.bg),
+              fit: BoxFit.cover,
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Logo Section
-                SvgPicture.asset(AppImages.logo, height: 150),
-                // Login Form
-                _buildTextField(
-                  controller: _emailController,
-                  label: 'Email Address',
-                  icon: Icons.email_outlined,
-                  enabled: !_isLoading,
-                ),
-                const SizedBox(height: 24),
-                _buildTextField(
-                  controller: _passwordController,
-                  label: 'Password',
-                  icon: Icons.lock_outline,
-                  obscureText: _obscurePassword,
-                  enabled: !_isLoading,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      color: AppColors.warmGray,
-                    ),
-                    onPressed: () => setState(() {
-                      _obscurePassword = !_obscurePassword;
-                    }),
+          ),
+          child: Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 600, maxHeight: 650),
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    blurRadius: 25,
+                    offset: const Offset(0, 10),
                   ),
-                ),
-                const SizedBox(height: 40),
-                PrimaryButton(
-                  label: 'Login',
-                  color: AppColors.primary,
-                  isLoading: _isLoading,
-                  onPressed: _performLogin,
-                ),
-              ],
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Logo Section
+                  SvgPicture.asset(AppImages.logo, height: 150),
+                  // Login Form
+                  _buildTextField(
+                    controller: _emailController,
+                    label: 'Email Address',
+                    icon: Icons.email_outlined,
+                    enabled: !_isLoading,
+                  ),
+                  const SizedBox(height: 24),
+                  _buildTextField(
+                    controller: _passwordController,
+                    label: 'Password',
+                    icon: Icons.lock_outline,
+                    obscureText: _obscurePassword,
+                    enabled: !_isLoading,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: AppColors.warmGray,
+                      ),
+                      onPressed: () => setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      }),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  PrimaryButton(
+                    label: 'Login',
+                    color: AppColors.primary,
+                    isLoading: _isLoading,
+                    onPressed: _performLogin,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
