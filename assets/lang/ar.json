@@ -48,7 +48,8 @@
   "mins": "دقيقة",
 
   "agent": "الموظف",
-  "online": "متصل",
+  "serving": "متصل",
+  "break": "استراحة",
   "notifications": "الإشعارات",
   "quiz": "الاختبار",
   "training": "التدريب",

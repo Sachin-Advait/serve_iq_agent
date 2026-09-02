@@ -46,6 +46,7 @@ flutter:
   assets:
     - assets/images/
     - assets/lang/
+    - assets/certs/MSSPF-MSSPFDCPR02-CA.crt
     
   fonts:
     - family: Poppins

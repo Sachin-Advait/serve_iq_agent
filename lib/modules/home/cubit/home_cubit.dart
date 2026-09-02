@@ -710,6 +710,36 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
+  /// Toggle the agent's serving/break status
+  Future<void> toggleServingStatus(bool value) async {
+    // Optimistically update the UI first
+    emit(state.copyWith(isServing: value));
+
+    // Check network
+    if (!state.isNetworkConnected) {
+      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      // Revert since we couldn't sync with the server
+      emit(state.copyWith(isServing: !value));
+      return;
+    }
+
+    try {
+      // TODO: replace with your actual repository call, e.g.:
+      // await agentRepository.updateServingStatus(value);
+      flutterToast(
+        message: value ? 'You are now serving' : 'You are now on break',
+      );
+    } catch (e) {
+      debugPrint('Error updating serving status: $e');
+      flutterToast(
+        message: 'Failed to update status. Please try again.',
+        color: AppColors.darkRed,
+      );
+      // Revert on failure
+      emit(state.copyWith(isServing: !value));
+    }
+  }
+
   @override
   Future<void> close() {
     _completeButtonTimer?.cancel();

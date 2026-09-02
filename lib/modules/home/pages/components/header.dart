@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servelq_agent/common/constants/app_strings.dart';
+import 'package:servelq_agent/common/utils/app_screen_util.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
@@ -78,13 +78,11 @@ class Header extends StatelessWidget {
               20.horizontalSpace,
 
               // Agent Status
+              // Agent Status
               BlocBuilder<LocalizationCubit, LocalizationState>(
                 builder: (context, localizationState) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
+                    padding: const EdgeInsets.only(left: 12),
                     decoration: BoxDecoration(
                       color: localizationState.locale.languageCode == "en"
                           ? AppColors.white
@@ -92,6 +90,8 @@ class Header extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           '${context.trNoListen(AppStrings.agent)}: ${SessionManager.getUsername()}',
@@ -103,18 +103,37 @@ class Header extends StatelessWidget {
                             fontSize: 14,
                           ),
                         ),
-                        8.horizontalSpace,
-                        const Icon(
-                          Icons.circle,
-                          color: AppColors.green,
-                          size: 10,
-                        ),
-                        4.horizontalSpace,
+                        20.horizontalSpace,
                         Text(
-                          context.trNoListen(AppStrings.online),
+                          context.trNoListen(
+                            context.watch<HomeCubit>().state.isServing
+                                ? AppStrings.serving
+                                : AppStrings.onBreak,
+                          ),
                           style: context.medium.copyWith(
-                            color: AppColors.green,
+                            color: context.watch<HomeCubit>().state.isServing
+                                ? AppColors.green
+                                : AppColors.red,
                             fontSize: 12,
+                          ),
+                        ),
+                        Transform.scale(
+                          scale: 0.7,
+                          child: Switch(
+                            value: context.watch<HomeCubit>().state.isServing,
+                            activeThumbColor: AppColors.white,
+                            inactiveThumbColor: AppColors.white,
+                            activeTrackColor: AppColors.green,
+                            inactiveTrackColor: AppColors.red,
+                            padding: EdgeInsets.zero,
+                            trackOutlineColor: WidgetStatePropertyAll(
+                              AppColors.white,
+                            ),
+                            onChanged: (value) {
+                              context.read<HomeCubit>().toggleServingStatus(
+                                value,
+                              );
+                            },
                           ),
                         ),
                       ],
@@ -123,8 +142,6 @@ class Header extends StatelessWidget {
                 },
               ),
               10.horizontalSpace,
-
-              // Menu Button
               PopupMenuButton<String>(
                 offset: const Offset(0, 60),
                 tooltip: '',
@@ -153,97 +170,97 @@ class Header extends StatelessWidget {
                   },
                 ),
                 itemBuilder: (BuildContext context) => [
-                  PopupMenuItem<String>(
-                    value: 'notification',
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.notifications_outlined,
-                          color: AppColors.brownDeep,
-                          size: 20,
-                        ),
-                        12.horizontalSpace,
-                        Text(
-                          context.trNoListen(AppStrings.notifications),
-                          style: context.medium.copyWith(
-                            color: AppColors.brownDarker,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'quiz',
-                    enabled: !_isOnRoute(currentRoute, Routes.quiz),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.quiz_outlined,
-                          color: _isOnRoute(currentRoute, Routes.quiz)
-                              ? AppColors.taupe
-                              : AppColors.brownDeep,
-                          size: 20,
-                        ),
-                        12.horizontalSpace,
-                        Text(
-                          context.trNoListen(AppStrings.quiz),
-                          style: context.medium.copyWith(
-                            color: _isOnRoute(currentRoute, Routes.quiz)
-                                ? AppColors.taupe
-                                : AppColors.brownDarker,
-                            fontSize: 14,
-                          ),
-                        ),
-                        if (_isOnRoute(currentRoute, Routes.quiz)) ...[
-                          4.horizontalSpace,
-                          Icon(
-                            Icons.check_circle,
-                            color: AppColors.green,
-                            size: 16,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'training',
-                    enabled: !_isOnRoute(currentRoute, Routes.training),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.school_outlined,
-                          color: _isOnRoute(currentRoute, Routes.training)
-                              ? AppColors.taupe
-                              : AppColors.brownDeep,
-                          size: 20,
-                        ),
-                        12.horizontalSpace,
-                        Text(
-                          context.trNoListen(AppStrings.training),
-                          style: context.medium.copyWith(
-                            color: _isOnRoute(currentRoute, Routes.training)
-                                ? AppColors.taupe
-                                : AppColors.brownDarker,
-                            fontSize: 14,
-                          ),
-                        ),
-                        if (_isOnRoute(currentRoute, Routes.training)) ...[
-                          4.horizontalSpace,
-                          Icon(
-                            Icons.check_circle,
-                            color: AppColors.green,
-                            size: 16,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem<String>(
-                    height: 1,
-                    enabled: false,
-                    child: Divider(color: AppColors.lightBeige, thickness: 1),
-                  ),
+                  // PopupMenuItem<String>(
+                  //   value: 'notification',
+                  //   child: Row(
+                  //     children: [
+                  //       Icon(
+                  //         Icons.notifications_outlined,
+                  //         color: AppColors.brownDeep,
+                  //         size: 20,
+                  //       ),
+                  //       12.horizontalSpace,
+                  //       Text(
+                  //         context.trNoListen(AppStrings.notifications),
+                  //         style: context.medium.copyWith(
+                  //           color: AppColors.brownDarker,
+                  //           fontSize: 14,
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                  // PopupMenuItem<String>(
+                  //   value: 'quiz',
+                  //   enabled: !_isOnRoute(currentRoute, Routes.quiz),
+                  //   child: Row(
+                  //     children: [
+                  //       Icon(
+                  //         Icons.quiz_outlined,
+                  //         color: _isOnRoute(currentRoute, Routes.quiz)
+                  //             ? AppColors.taupe
+                  //             : AppColors.brownDeep,
+                  //         size: 20,
+                  //       ),
+                  //       12.horizontalSpace,
+                  //       Text(
+                  //         context.trNoListen(AppStrings.quiz),
+                  //         style: context.medium.copyWith(
+                  //           color: _isOnRoute(currentRoute, Routes.quiz)
+                  //               ? AppColors.taupe
+                  //               : AppColors.brownDarker,
+                  //           fontSize: 14,
+                  //         ),
+                  //       ),
+                  //       if (_isOnRoute(currentRoute, Routes.quiz)) ...[
+                  //         4.horizontalSpace,
+                  //         Icon(
+                  //           Icons.check_circle,
+                  //           color: AppColors.green,
+                  //           size: 16,
+                  //         ),
+                  //       ],
+                  //     ],
+                  //   ),
+                  // ),
+                  // PopupMenuItem<String>(
+                  //   value: 'training',
+                  //   enabled: !_isOnRoute(currentRoute, Routes.training),
+                  //   child: Row(
+                  //     children: [
+                  //       Icon(
+                  //         Icons.school_outlined,
+                  //         color: _isOnRoute(currentRoute, Routes.training)
+                  //             ? AppColors.taupe
+                  //             : AppColors.brownDeep,
+                  //         size: 20,
+                  //       ),
+                  //       12.horizontalSpace,
+                  //       Text(
+                  //         context.trNoListen(AppStrings.training),
+                  //         style: context.medium.copyWith(
+                  //           color: _isOnRoute(currentRoute, Routes.training)
+                  //               ? AppColors.taupe
+                  //               : AppColors.brownDarker,
+                  //           fontSize: 14,
+                  //         ),
+                  //       ),
+                  //       if (_isOnRoute(currentRoute, Routes.training)) ...[
+                  //         4.horizontalSpace,
+                  //         Icon(
+                  //           Icons.check_circle,
+                  //           color: AppColors.green,
+                  //           size: 16,
+                  //         ),
+                  //       ],
+                  //     ],
+                  //   ),
+                  // ),
+                  // PopupMenuItem<String>(
+                  //   height: 1,
+                  //   enabled: false,
+                  //   child: Divider(color: AppColors.lightBeige, thickness: 1),
+                  // ),
                   PopupMenuItem<String>(
                     value: 'logout',
                     child: Row(
@@ -268,21 +285,25 @@ class Header extends StatelessWidget {
                 ],
                 onSelected: (String value) {
                   switch (value) {
-                    case 'notification':
-                      // Handle notification action
-                      // context.pushNamed('/notifications');
-                      break;
-                    case 'quiz':
-                      // Only navigate if not already on quiz page
-                      if (!_isOnRoute(currentRoute, Routes.quiz)) {
-                        context.pushNamed(Routes.quiz);
-                      }
-                      break;
-                    case 'training':
-                      // Only navigate if not already on training page
-                      if (!_isOnRoute(currentRoute, Routes.training)) {
-                        context.pushNamed(Routes.training);
-                      }
+                    // case 'notification':
+                    //   // Handle notification action
+                    //   // context.pushNamed('/notifications');
+                    //   break;
+                    // case 'quiz':
+                    //   // Only navigate if not already on quiz page
+                    //   if (!_isOnRoute(currentRoute, Routes.quiz)) {
+                    //     context.pushNamed(Routes.quiz);
+                    //   }
+                    //   break;
+                    // case 'training':
+                    //   // Only navigate if not already on training page
+                    //   if (!_isOnRoute(currentRoute, Routes.training)) {
+                    //     context.pushNamed(Routes.training);
+                    //   }
+                    // break;
+                    case 'Break':
+                      // SessionManager.clearSession();
+                      // context.goNamed(Routes.login);
                       break;
                     case 'logout':
                       SessionManager.clearSession();
@@ -300,7 +321,7 @@ class Header extends StatelessWidget {
   }
 
   /// Helper method to check if current route matches the target route
-  bool _isOnRoute(String currentRoute, String targetRoute) {
+  bool isOnRoute(String currentRoute, String targetRoute) {
     // Normalize the current route by removing leading slash
     final normalizedCurrent = currentRoute.startsWith('/')
         ? currentRoute.substring(1)

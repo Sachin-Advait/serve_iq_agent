@@ -23,6 +23,7 @@ class HomeState {
   final bool isNetworkConnected;
   final ConnectivityResult connectivityStatus;
   final bool wasNetworkRestored;
+  final bool isServing;
 
   const HomeState({
     this.status = HomeStatus.initial,
@@ -40,6 +41,7 @@ class HomeState {
     this.isNetworkConnected = true,
     this.connectivityStatus = ConnectivityResult.none,
     this.wasNetworkRestored = false,
+    this.isServing = true,
   });
 
   HomeState copyWith({
@@ -58,6 +60,7 @@ class HomeState {
     bool? isNetworkConnected,
     ConnectivityResult? connectivityStatus,
     bool? wasNetworkRestored,
+    bool? isServing,
   }) {
     return HomeState(
       status: status ?? this.status,
@@ -78,6 +81,7 @@ class HomeState {
       isNetworkConnected: isNetworkConnected ?? this.isNetworkConnected,
       connectivityStatus: connectivityStatus ?? this.connectivityStatus,
       wasNetworkRestored: wasNetworkRestored ?? this.wasNetworkRestored,
+      isServing: isServing ?? this.isServing,
     );
   }
 }

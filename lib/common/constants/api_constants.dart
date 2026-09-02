@@ -1,14 +1,31 @@
-class ApiConstants {
-  static const String baseUrl = "http://192.168.1.4:8085/serveiq/api/";
-  // static const String baseUrl =
-  //     "https://serveiqbackend.insyncproducts.online/serveiq/api/";
+enum AppEnvironment { testing, production }
 
-  static const String wsUrl = "ws://192.168.1.4:8085/serveiq/ws";
-  // static const String wsUrl =
-  //     "wss://serveiqbackend.insyncproducts.online/serveiq/ws";
+class ApiConstants {
+  ApiConstants._();
+
+  static const AppEnvironment _environment = bool.fromEnvironment('PRODUCTION')
+      ? AppEnvironment.production
+      : AppEnvironment.testing;
+
+  static const String _testingBaseUrl =
+      "https://serveiqbackend.insyncproducts.online/serveiq/api/";
+  static const String _testingWsUrl =
+      "wss://serveiqbackend.insyncproducts.online/serveiq/ws";
+
+  static const String _prodBaseUrl =
+      "https://testqms.msspf.gov.om/serveiq/api/";
+  static const String _prodWsUrl = "wss://testqms.msspf.gov.om/serveiq/ws";
+
+  static String get baseUrl => _environment == AppEnvironment.production
+      ? _prodBaseUrl
+      : _testingBaseUrl;
+
+  static String get wsUrl =>
+      _environment == AppEnvironment.production ? _prodWsUrl : _testingWsUrl;
 
   // ---------- AUTH ----------
   static const String login = 'auth/login';
+  static const String logout = 'auth/logout';
 
   // ---------- AGENT ----------
   static const String queue = 'agent/queue/';
@@ -28,7 +45,7 @@ class ApiConstants {
   static const String singleCounter = 'counters/';
 
   // ---------- QUIZ and TRAINING ----------
-  static const String quiz = '/user/quiz-survey';
+  static const String quiz = 'user/quiz-survey';
   static const String submit = 'user/quiz-survey/user/submit/';
   static const String result = 'user/quiz-result/';
   static const String topScorer = 'user/quiz-survey/summary/';

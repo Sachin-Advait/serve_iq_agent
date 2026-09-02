@@ -50,7 +50,8 @@ class AppStrings {
   static const mins = "mins";
 
   static const agent = 'agent';
-  static const online = 'online';
+  static const serving = 'serving';
+  static const onBreak = 'On Break';
   static const notifications = 'notifications';
   static const quiz = 'quiz';
   static const training = 'training';

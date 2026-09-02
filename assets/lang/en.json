@@ -9,7 +9,7 @@
   "server_failed": "Server Connection Failed",
   "retry": "Retry",
   "error_occurred": "An error occurred",
-  
+
   "action_call_next": "Call Next",
   "action_complete": "Complete",
   "action_recall": "Recall",
@@ -49,7 +49,8 @@
   "mins": "mins",
 
   "agent": "Agent",
-  "online": "Online",
+  "serving": "Serving",
+  "break": "Break",
   "notifications": "Notifications",
   "quiz": "Quiz",
   "training": "Training",
