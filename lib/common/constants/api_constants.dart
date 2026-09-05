@@ -7,10 +7,8 @@ class ApiConstants {
       ? AppEnvironment.production
       : AppEnvironment.testing;
 
-  static const String _testingBaseUrl =
-      "https://serveiqbackend.insyncproducts.online/serveiq/api/";
-  static const String _testingWsUrl =
-      "wss://serveiqbackend.insyncproducts.online/serveiq/ws";
+  static const String _testingBaseUrl = "http://192.168.1.6:8085/serveiq/api/";
+  static const String _testingWsUrl = "ws://192.168.1.6:8085/serveiq/ws";
 
   static const String _prodBaseUrl =
       "https://testqms.msspf.gov.om/serveiq/api/";
@@ -28,6 +26,12 @@ class ApiConstants {
   static const String logout = 'auth/logout';
 
   // ---------- AGENT ----------
+  static const String pauseCounter = 'counters/pause/';
+
+  // ---------- AUTH ----------
+  // logout already exists: static const String logout = 'auth/logout';
+
+  // ---------- AGENT ----------
   static const String queue = 'agent/queue/';
   static const String callNext = 'agent/call-next-token/';
   static const String activeToken = 'agent/active-token/';
@@ -39,6 +43,10 @@ class ApiConstants {
   static const String hold = 'agent/hold-token/';
   static const String callHoldToken = 'agent/call-hold-token/';
   static const String noShow = 'agent/no-show-token/';
+
+  static const String counterLogout = 'agent/counter/logout';
+  static const String counterPause = 'agent/counter/';
+  static const String counterResume = 'agent/counter/';
 
   // ---------- COUNTERS ----------
   static const String counters = 'counters';

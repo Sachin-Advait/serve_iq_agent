@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servelq_agent/common/constants/app_strings.dart';
 import 'package:servelq_agent/common/utils/app_screen_util.dart';
+import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
@@ -106,12 +107,12 @@ class Header extends StatelessWidget {
                         20.horizontalSpace,
                         Text(
                           context.trNoListen(
-                            context.watch<HomeCubit>().state.isServing
+                            state.counter?.paused != true
                                 ? AppStrings.serving
                                 : AppStrings.onBreak,
                           ),
                           style: context.medium.copyWith(
-                            color: context.watch<HomeCubit>().state.isServing
+                            color: state.counter?.paused != true
                                 ? AppColors.green
                                 : AppColors.red,
                             fontSize: 12,
@@ -120,7 +121,7 @@ class Header extends StatelessWidget {
                         Transform.scale(
                           scale: 0.7,
                           child: Switch(
-                            value: context.watch<HomeCubit>().state.isServing,
+                            value: state.counter?.paused != true,
                             activeThumbColor: AppColors.white,
                             inactiveThumbColor: AppColors.white,
                             activeTrackColor: AppColors.green,
@@ -130,9 +131,17 @@ class Header extends StatelessWidget {
                               AppColors.white,
                             ),
                             onChanged: (value) {
-                              context.read<HomeCubit>().toggleServingStatus(
-                                value,
-                              );
+                              if (state.counter?.status == 'IDLE' ||
+                                  state.counter?.status == "PAUSED") {
+                                context.read<HomeCubit>().toggleServingStatus(
+                                  value,
+                                );
+                              } else {
+                                flutterToast(
+                                  message:
+                                      'Finish the current token to set counter to break',
+                                );
+                              }
                             },
                           ),
                         ),
@@ -306,8 +315,20 @@ class Header extends StatelessWidget {
                       // context.goNamed(Routes.login);
                       break;
                     case 'logout':
-                      SessionManager.clearSession();
-                      context.goNamed(Routes.login);
+                      if (state.counter?.status == 'IDLE' ||
+                          state.counter?.status == "PAUSED") {
+                        context.read<HomeCubit>().logout().then((_) {
+                          if (context.mounted) {
+                            context.goNamed(Routes.login);
+                          }
+                        });
+                      } else {
+                        flutterToast(
+                          message:
+                              'Finish the current token to set counter to break',
+                        );
+                      }
+
                       break;
                   }
                 },

@@ -63,30 +63,34 @@ class ApiClient {
         break;
 
       case DioExceptionType.badResponse:
-        if (e.response?.statusCode == 401) {
-          // Do Nothing
+        //   if (e.response?.statusCode == 401) {
+        //     // Do Nothing
+        //   } else if (e.response?.statusCode == 400) {
+        //     // Do Nothing
+        //   } else {
+        //     flutterToast(message: AppErrors.serverErrorDetails);
+        //   }
+        //   break;
+
+        if (e.response?.statusCode == 403) {
+          // SessionManager.clearSession();
+          // Pages.router.goNamed(Routes.login);
         } else if (e.response?.statusCode == 400) {
-          // Do Nothing
+          final message =
+              e.response?.data is Map && e.response?.data['message'] != null
+              ? e.response?.data['message'].toString() ??
+                    AppErrors.unknownErrorDetails
+              : AppErrors.unknownErrorDetails;
+
+          flutterToast(message: message, color: AppColors.red);
+        } else if (e.response?.statusCode == 404) {
         } else {
-          flutterToast(message: AppErrors.serverErrorDetails);
+          flutterToast(
+            message: AppErrors.serverErrorDetails,
+            color: AppColors.red,
+          );
         }
         break;
-
-      //  if (statusCode == 401) {
-      //   // Optional: logout / refresh token
-      // } else if (statusCode == 400) {
-      //   final message = responseData is Map && responseData['message'] != null
-      //       ? responseData['message'].toString()
-      //       : AppErrors.unknownErrorDetails;
-
-      //   flutterToast(message: message, color: AppColors.red);
-      // } else {
-      //   flutterToast(
-      //     message: AppErrors.serverErrorDetails,
-      //     color: AppColors.red,
-      //   );
-      // }
-      // break;
 
       default:
         flutterToast(

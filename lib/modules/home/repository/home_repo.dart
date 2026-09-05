@@ -196,4 +196,48 @@ class HomeRepository {
     }
     return null;
   }
+
+  Future<void> logoutCounter() async {
+    try {
+      await _apiClient.postApi(ApiConstants.counterLogout);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<CounterModel> pauseCounter() async {
+    final path =
+        '${ApiConstants.counterPause}${SessionManager.getCounter()}/pause';
+    try {
+      final response = await _apiClient.postApi(path);
+
+      if (response != null && response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map<String, dynamic>) {
+          return CounterModel.fromJson(data);
+        }
+      }
+      throw Exception('Failed to pause counter');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<CounterModel> resumeCounter() async {
+    final path =
+        '${ApiConstants.counterResume}${SessionManager.getCounter()}/resume';
+    try {
+      final response = await _apiClient.postApi(path);
+
+      if (response != null && response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map<String, dynamic>) {
+          return CounterModel.fromJson(data);
+        }
+      }
+      throw Exception('Failed to resume counter');
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

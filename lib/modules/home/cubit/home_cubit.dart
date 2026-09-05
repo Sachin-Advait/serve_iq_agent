@@ -710,22 +710,21 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
-  /// Toggle the agent's serving/break status
+  /// Toggle the agent's serving/break status — pauses or resumes the counter.
   Future<void> toggleServingStatus(bool value) async {
-    // Optimistically update the UI first
-    emit(state.copyWith(isServing: value));
-
     // Check network
     if (!state.isNetworkConnected) {
       flutterToast(message: 'No internet connection', color: AppColors.darkRed);
-      // Revert since we couldn't sync with the server
-      emit(state.copyWith(isServing: !value));
       return;
     }
 
     try {
-      // TODO: replace with your actual repository call, e.g.:
-      // await agentRepository.updateServingStatus(value);
+      final updatedCounter = value
+          ? await agentRepository.resumeCounter()
+          : await agentRepository.pauseCounter();
+
+      emit(state.copyWith(counter: updatedCounter));
+
       flutterToast(
         message: value ? 'You are now serving' : 'You are now on break',
       );
@@ -735,8 +734,24 @@ class HomeCubit extends Cubit<HomeState> {
         message: 'Failed to update status. Please try again.',
         color: AppColors.darkRed,
       );
-      // Revert on failure
-      emit(state.copyWith(isServing: !value));
+    }
+  }
+
+  /// Logout: closes the counter on the backend, then clears local session.
+  /// Returns true on success so the UI can decide whether to navigate.
+  Future<bool> logout() async {
+    try {
+      if (state.isNetworkConnected) {
+        await agentRepository.logoutCounter();
+      }
+      return true;
+    } catch (e) {
+      debugPrint('Error during logout: $e');
+      // Still allow local logout even if the server call fails —
+      // don't trap the agent in a session they can't get out of.
+      return true;
+    } finally {
+      SessionManager.clearSession();
     }
   }
 
