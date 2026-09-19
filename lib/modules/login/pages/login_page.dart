@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:servelq_agent/common/utils/app_screen_util.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/common/widgets/primary_button.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
+import 'package:servelq_agent/configs/theme/app_theme.dart';
 import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
 import 'package:servelq_agent/routes/pages.dart';
 
@@ -99,7 +100,21 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Logo Section
-                  SvgPicture.asset(AppImages.logo, height: 150),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(AppImages.logo, height: 60.heightMultiplier),
+                      10.horizontalSpace,
+                      Text(
+                        "MSSPF",
+                        style: context.semiBold.copyWith(
+                          color: AppColors.almostBlack,
+                          fontSize: 30.textMultiplier,
+                        ),
+                      ),
+                    ],
+                  ),
+                  50.verticalSpace,
                   // Login Form
                   _buildTextField(
                     controller: _emailController,

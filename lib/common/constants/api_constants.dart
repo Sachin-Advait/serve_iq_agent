@@ -7,8 +7,14 @@ class ApiConstants {
       ? AppEnvironment.production
       : AppEnvironment.testing;
 
-  static const String _testingBaseUrl = "http://192.168.1.6:8085/serveiq/api/";
-  static const String _testingWsUrl = "ws://192.168.1.6:8085/serveiq/ws";
+  static const String _testingBaseUrl =
+      "https://serveiqbackend.insyncproducts.online/serveiq/api/";
+  static const String _testingWsUrl =
+      "wss://serveiqbackend.insyncproducts.online/serveiq/ws";
+
+//   static const String _testingBaseUrl =
+//       "http://192.168.1.121:8085/serveiq/api/";
+//   static const String _testingWsUrl = "ws://192.168.1.121:8085/serveiq/ws";
 
   static const String _prodBaseUrl =
       "https://testqms.msspf.gov.om/serveiq/api/";

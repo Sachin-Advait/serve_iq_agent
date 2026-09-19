@@ -29,12 +29,12 @@ class Header extends StatelessWidget {
             '${SessionManager.getCounterName()} - ${SessionManager.getCounterCode()}';
 
         return Container(
-          padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SvgPicture.asset(AppImages.logo, height: 40),
-              50.horizontalSpace,
+              Image.asset(AppImages.logo, height: 40),
+              20.horizontalSpace,
               Text(
                 displayText,
                 style: context.semiBold.copyWith(
@@ -83,7 +83,14 @@ class Header extends StatelessWidget {
               BlocBuilder<LocalizationCubit, LocalizationState>(
                 builder: (context, localizationState) {
                   return Container(
-                    padding: const EdgeInsets.only(left: 12),
+                    padding: EdgeInsets.only(
+                      left: localizationState.locale.languageCode == "en"
+                          ? 12
+                          : 6,
+                      right: localizationState.locale.languageCode == "en"
+                          ? 0
+                          : 20,
+                    ),
                     decoration: BoxDecoration(
                       color: localizationState.locale.languageCode == "en"
                           ? AppColors.white
@@ -139,7 +146,7 @@ class Header extends StatelessWidget {
                               } else {
                                 flutterToast(
                                   message:
-                                      'Finish the current token to set counter to break',
+                                      'Finish the current token to set the counter to Break.',
                                 );
                               }
                             },
@@ -152,6 +159,7 @@ class Header extends StatelessWidget {
               ),
               10.horizontalSpace,
               PopupMenuButton<String>(
+                padding: EdgeInsets.zero,
                 offset: const Offset(0, 60),
                 tooltip: '',
                 shape: RoundedRectangleBorder(
@@ -325,7 +333,7 @@ class Header extends StatelessWidget {
                       } else {
                         flutterToast(
                           message:
-                              'Finish the current token to set counter to break',
+                              'Finish the current token to set the counter to Break.',
                         );
                       }
 

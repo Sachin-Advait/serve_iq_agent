@@ -7,7 +7,7 @@ class AppImages {
   static const String noToken = 'assets/images/no_token.svg';
 
   // Branding
-  static const String logo = 'assets/images/logo.svg';
+  static const String logo = 'assets/images/logo.png';
 
   // Dashboard / Metrics
   static const String avgWaitingTime = 'assets/images/avg_waiting_time.svg';
