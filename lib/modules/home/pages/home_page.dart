@@ -32,12 +32,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   //   await NotificationService.instance.init();
   // }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      context.read<HomeCubit>().onAppResumed();
-    }
-  }
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   if (state == AppLifecycleState.resumed) {
+  //     context.read<HomeCubit>().onAppResumed();
+  //   }
+  // }
 
   @override
   void dispose() {
