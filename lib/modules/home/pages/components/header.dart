@@ -21,12 +21,11 @@ class Header extends StatelessWidget {
     // Get current route location
     final currentRoute = GoRouterState.of(context).uri.toString();
     final isOnHomePage =
-        currentRoute == Routes.agent || currentRoute == '/${Routes.agent}';
+        currentRoute == Routes.home || currentRoute == '/${Routes.home}';
 
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
-        final displayText =
-            '${SessionManager.getCounterName()} - ${SessionManager.getCounterCode()}';
+        final displayText = SessionManager.getCounterName();
 
         return Container(
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
@@ -51,7 +50,7 @@ class Header extends StatelessWidget {
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: () {
-                      context.goNamed(Routes.agent);
+                      context.goNamed(Routes.home);
                     },
                     child: Image.asset(
                       AppImages.home,

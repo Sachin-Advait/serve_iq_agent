@@ -28,12 +28,12 @@ class Pages {
       final token = SessionManager.getToken();
 
       // If user already logged in, redirect from login to agent
-      if (token.isNotEmpty && state.matchedLocation == '/login') {
-        return Routes.agent;
+      if (token.isNotEmpty && state.matchedLocation == Routes.login) {
+        return Routes.home;
       }
 
       // If user is not logged in, block access to /agent
-      if (token.isEmpty && state.matchedLocation == '/agent') {
+      if (token.isEmpty && state.matchedLocation == Routes.home) {
         return Routes.login;
       }
 
@@ -49,8 +49,8 @@ class Pages {
         ),
       ),
       GoRoute(
-        path: Routes.agent,
-        name: Routes.agent,
+        path: Routes.home,
+        name: Routes.home,
         builder: (_, state) => const HomePage(),
         routes: [
           GoRoute(

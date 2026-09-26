@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:servelq_agent/models/counter_option.dart';
 import 'package:servelq_agent/models/user_model.dart';
 import 'package:servelq_agent/modules/login/repository/auth_repo.dart';
 
@@ -7,41 +8,57 @@ part 'login_event.dart';
 part 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  final AuthRepository authRepository;
-
-  LoginBloc(this.authRepository) : super(LoginInitial()) {
+  LoginBloc(this.authRepository) : super(const LoginState()) {
+    on<LoadCounters>(_onLoadCounters);
+    on<SelectCounter>(_onSelectCounter);
     on<AgentLogin>(_onAgentLogin);
-    on<TVDisplayLogin>(_onTVDisplayLogin);
   }
 
-  Future<void> _onAgentLogin(AgentLogin event, Emitter<LoginState> emit) async {
-    emit(LoginLoading());
+  final AuthRepository authRepository;
+
+  Future<void> _onLoadCounters(
+    LoadCounters event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(state.copyWith(loadingCounters: true));
     try {
-      final user = await authRepository.login(
-        username: event.email,
-        password: event.password,
-        userType: 'agent',
+      final counters = await authRepository.fetchCounters();
+      final stillValid =
+          state.selectedCounterId != null &&
+          counters.any((c) => c.id == state.selectedCounterId);
+      emit(
+        state.copyWith(
+          counters: counters,
+          loadingCounters: false,
+          clearSelection: !stillValid,
+        ),
       );
-      emit(LoginSuccess(user));
-    } catch (e) {
-      emit(LoginError(e.toString()));
+    } catch (_) {
+      emit(state.copyWith(counters: const [], loadingCounters: false));
     }
   }
 
-  Future<void> _onTVDisplayLogin(
-    TVDisplayLogin event,
-    Emitter<LoginState> emit,
-  ) async {
-    emit(LoginLoading());
+  void _onSelectCounter(SelectCounter event, Emitter<LoginState> emit) {
+    emit(state.copyWith(selectedCounterId: event.counterId));
+  }
+
+  Future<void> _onAgentLogin(AgentLogin event, Emitter<LoginState> emit) async {
+    final counterId = state.selectedCounterId;
+    if (counterId == null) {
+      emit(state.copyWith(errorMessage: 'Please select a counter'));
+      return;
+    }
+    emit(state.copyWith(submitting: true, clearError: true));
     try {
       final user = await authRepository.login(
         username: event.email,
         password: event.password,
-        userType: 'display',
+        counterId: counterId,
       );
-      emit(LoginSuccess(user));
+      emit(state.copyWith(submitting: false, user: user));
     } catch (e) {
-      emit(LoginError(e.toString()));
+      emit(state.copyWith(submitting: false, errorMessage: e.toString()));
+      add(const LoadCounters());
     }
   }
 }
