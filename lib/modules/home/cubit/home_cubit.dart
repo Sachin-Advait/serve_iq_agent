@@ -286,7 +286,18 @@ class HomeCubit extends Cubit<HomeState> {
 
   Future<void> _handleCounterUpdate(Map<String, dynamic> json) async {
     try {
-      final updatedCounter = CounterModel.fromJson(json);
+      // /topic/counter/{id} carries a CounterStatusResponseDTO (counterId,
+      // status, paused, enabled, token details), not the full counter, so
+      // CounterModel.fromJson can't parse it. Merge the status fields into
+      // the counter we already hold; refetch if we don't have one yet.
+      final current = state.counter;
+      final updatedCounter = current == null
+          ? await agentRepository.getCounter()
+          : current.copyWith(
+              status: json['status'] as String?,
+              paused: json['paused'] as bool?,
+              enabled: json['enabled'] as bool?,
+            );
       final updatedRecentServices = await agentRepository.getRecentTokens();
 
       emit(

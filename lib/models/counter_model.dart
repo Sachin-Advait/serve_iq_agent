@@ -40,4 +40,20 @@ class CounterModel {
       avgSecond: json['avgSeconds'] ?? 10,
     );
   }
+
+  CounterModel copyWith({bool? enabled, bool? paused, String? status}) {
+    return CounterModel(
+      id: id,
+      code: code,
+      name: name,
+      enabled: enabled ?? this.enabled,
+      paused: paused ?? this.paused,
+      status: status ?? this.status,
+      userId: userId,
+      username: username,
+      avgSecond: avgSecond,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
+  }
 }
