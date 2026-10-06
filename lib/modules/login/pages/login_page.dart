@@ -26,8 +26,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _emailController.text = 'farzan@serveiq.com';
-    _passwordController.text = '12345678';
     context.read<LoginBloc>().add(const LoadCounters());
   }
 

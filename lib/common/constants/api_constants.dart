@@ -29,7 +29,6 @@ class ApiConstants {
 
   // ---------- AUTH ----------
   static const String login = 'auth/login';
-  static const String logout = 'auth/logout';
 
   // ---------- AGENT ----------
   static const String pauseCounter = 'counters/pause/';
