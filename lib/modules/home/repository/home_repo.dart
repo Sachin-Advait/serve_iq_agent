@@ -205,39 +205,27 @@ class HomeRepository {
     return code >= 200 && code < 300;
   }
 
-  Future<CounterModel> pauseCounter() async {
+  Future<CounterModel?> pauseCounter() async {
     final path =
         '${ApiConstants.counterPause}${SessionManager.getCounter()}/pause';
-    try {
-      final response = await _apiClient.postApi(path);
-
-      if (response != null && response.statusCode == 200) {
-        final data = response.data;
-        if (data is Map<String, dynamic>) {
-          return CounterModel.fromJson(data);
-        }
-      }
-      throw Exception('Failed to pause counter');
-    } catch (e) {
-      rethrow;
+    final response = await _apiClient.postApi(path);
+    if (response == null) return null; // ApiClient already showed the error
+    final data = response.data;
+    if (response.statusCode == 200 && data is Map<String, dynamic>) {
+      return CounterModel.fromJson(data);
     }
+    throw Exception('Failed to pause counter');
   }
 
-  Future<CounterModel> resumeCounter() async {
+  Future<CounterModel?> resumeCounter() async {
     final path =
         '${ApiConstants.counterResume}${SessionManager.getCounter()}/resume';
-    try {
-      final response = await _apiClient.postApi(path);
-
-      if (response != null && response.statusCode == 200) {
-        final data = response.data;
-        if (data is Map<String, dynamic>) {
-          return CounterModel.fromJson(data);
-        }
-      }
-      throw Exception('Failed to resume counter');
-    } catch (e) {
-      rethrow;
+    final response = await _apiClient.postApi(path);
+    if (response == null) return null; // ApiClient already showed the error
+    final data = response.data;
+    if (response.statusCode == 200 && data is Map<String, dynamic>) {
+      return CounterModel.fromJson(data);
     }
+    throw Exception('Failed to resume counter');
   }
 }

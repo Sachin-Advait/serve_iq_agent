@@ -734,8 +734,9 @@ class HomeCubit extends Cubit<HomeState> {
           ? await agentRepository.resumeCounter()
           : await agentRepository.pauseCounter();
 
-      emit(state.copyWith(counter: updatedCounter));
+      if (updatedCounter == null) return;
 
+      emit(state.copyWith(counter: updatedCounter));
       flutterToast(
         message: value ? 'You are now serving' : 'You are now on break',
       );
