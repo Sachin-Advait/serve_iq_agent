@@ -35,6 +35,7 @@ class AuthRepository {
         SessionManager.savebranch(responseData.user.branchId);
         SessionManager.saveCounter(responseData.user.counterId);
         SessionManager.saveUserId(responseData.user.id);
+        ApiClient.sessionEnded = false;
         return responseData.user;
       }
       // ApiClient has already shown the backend's reason.

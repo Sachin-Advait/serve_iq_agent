@@ -6,9 +6,16 @@ import 'package:servelq_agent/common/constants/api_constants.dart';
 import 'package:servelq_agent/common/constants/app_errors.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
+import 'package:servelq_agent/routes/pages.dart';
+import 'package:servelq_agent/services/session_manager.dart';
+import 'package:servelq_agent/services/web_socket_service.dart';
 
 class ApiClient {
   final Dio _dio;
+
+  // Set once a revoked login has sent the agent to the login page, so parallel
+  // failing requests don't redirect and toast repeatedly. Reset on login.
+  static bool sessionEnded = false;
 
   ApiClient({required Dio dio}) : _dio = dio;
 
@@ -73,9 +80,21 @@ class ApiClient {
         //   }
         //   break;
 
-        if (e.response?.statusCode == 403) {
-          // SessionManager.clearSession();
-          // Pages.router.goNamed(Routes.login);
+        if (e.response?.statusCode == 403 ||
+            (e.response?.statusCode == 401 &&
+                e.requestOptions.path != ApiConstants.login)) {
+          // Login revoked (e.g. admin force-released the counter): clear the
+          // session and go to login instead of leaving the agent stuck.
+          if (!sessionEnded) {
+            sessionEnded = true;
+            WebSocketService.disconnect();
+            SessionManager.clearSession();
+            flutterToast(
+              message: 'Your session has ended. Please log in again.',
+              color: AppColors.red,
+            );
+            Pages.router.goNamed(Routes.login);
+          }
         } else if (e.response?.statusCode == 400 ||
             e.response?.statusCode == 409) {
           // 409 is a business rule the backend refused (e.g. a token still
