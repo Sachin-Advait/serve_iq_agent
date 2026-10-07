@@ -238,9 +238,11 @@ class _LoginPageState extends State<LoginPage> {
                             .toList(),
                         items: state.counters.map((c) {
                           final blocked = c.occupied;
+                          // Still selectable: the agent holding it can log
+                          // back in (e.g. after a failed logout); the backend
+                          // rejects anyone else with who holds it.
                           return DropdownMenuItem(
                             value: c,
-                            enabled: !blocked,
                             child: Padding(
                               padding: EdgeInsets.symmetric(
                                 vertical: 6.heightMultiplier,

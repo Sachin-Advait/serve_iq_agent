@@ -750,20 +750,16 @@ class HomeCubit extends Cubit<HomeState> {
 
   /// Logout: closes the counter on the backend, then clears local session.
   /// Returns true on success so the UI can decide whether to navigate.
+  /// If the backend refuses (e.g. a token is still in progress) the session is
+  /// kept: clearing it would leave the counter held by this agent with no way
+  /// back in from the login page.
   Future<bool> logout() async {
-    try {
-      if (state.isNetworkConnected) {
-        await agentRepository.logoutCounter();
-      }
-      return true;
-    } catch (e) {
-      debugPrint('Error during logout: $e');
-      // Still allow local logout even if the server call fails —
-      // don't trap the agent in a session they can't get out of.
-      return true;
-    } finally {
-      SessionManager.clearSession();
+    if (state.isNetworkConnected) {
+      final released = await agentRepository.logoutCounter();
+      if (!released) return false;
     }
+    SessionManager.clearSession();
+    return true;
   }
 
   @override

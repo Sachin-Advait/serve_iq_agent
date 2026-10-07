@@ -57,7 +57,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       );
       emit(state.copyWith(submitting: false, user: user));
     } catch (e) {
-      emit(state.copyWith(submitting: false, errorMessage: e.toString()));
+      emit(
+        state.copyWith(
+          submitting: false,
+          errorMessage: e is LoginErrorShown ? null : e.toString(),
+        ),
+      );
       add(const LoadCounters());
     }
   }

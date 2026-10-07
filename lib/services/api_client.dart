@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:servelq_agent/common/constants/api_constants.dart';
 import 'package:servelq_agent/common/constants/app_errors.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
@@ -75,14 +76,20 @@ class ApiClient {
         if (e.response?.statusCode == 403) {
           // SessionManager.clearSession();
           // Pages.router.goNamed(Routes.login);
-        } else if (e.response?.statusCode == 400) {
-          final message =
-              e.response?.data is Map && e.response?.data['message'] != null
-              ? e.response?.data['message'].toString() ??
-                    AppErrors.unknownErrorDetails
-              : AppErrors.unknownErrorDetails;
-
-          flutterToast(message: message, color: AppColors.red);
+        } else if (e.response?.statusCode == 400 ||
+            e.response?.statusCode == 409) {
+          // 409 is a business rule the backend refused (e.g. a token still
+          // in progress); show its message instead of a generic server error.
+          flutterToast(
+            message: _backendMessage(e.response?.data),
+            color: AppColors.red,
+          );
+        } else if (e.response?.statusCode == 401 &&
+            e.requestOptions.path == ApiConstants.login) {
+          flutterToast(
+            message: 'Invalid email or password',
+            color: AppColors.red,
+          );
         } else if (e.response?.statusCode == 404) {
         } else {
           flutterToast(
@@ -100,5 +107,14 @@ class ApiClient {
         break;
     }
     return null;
+  }
+
+  // The backend sends either an ApiResponseDTO map or a plain string body.
+  String _backendMessage(dynamic data) {
+    if (data is Map && data['message'] != null) {
+      return data['message'].toString();
+    }
+    if (data is String && data.trim().isNotEmpty) return data;
+    return AppErrors.unknownErrorDetails;
   }
 }

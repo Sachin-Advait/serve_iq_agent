@@ -37,9 +37,14 @@ class AuthRepository {
         SessionManager.saveUserId(responseData.user.id);
         return responseData.user;
       }
-      throw Exception('Login failed');
+      // ApiClient has already shown the backend's reason.
+      throw const LoginErrorShown();
     } catch (e) {
       rethrow;
     }
   }
+}
+
+class LoginErrorShown implements Exception {
+  const LoginErrorShown();
 }

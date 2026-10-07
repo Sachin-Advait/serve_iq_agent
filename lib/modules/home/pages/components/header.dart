@@ -324,8 +324,8 @@ class Header extends StatelessWidget {
                     case 'logout':
                       if (state.counter?.status == 'IDLE' ||
                           state.counter?.status == "PAUSED") {
-                        context.read<HomeCubit>().logout().then((_) {
-                          if (context.mounted) {
+                        context.read<HomeCubit>().logout().then((ok) {
+                          if (ok && context.mounted) {
                             context.goNamed(Routes.login);
                           }
                         });

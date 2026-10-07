@@ -197,12 +197,12 @@ class HomeRepository {
     return null;
   }
 
-  Future<void> logoutCounter() async {
-    try {
-      await _apiClient.postApi(ApiConstants.counterLogout);
-    } catch (e) {
-      rethrow;
-    }
+  /// Returns false when the backend did not release the counter (the error
+  /// toast has already been shown by ApiClient).
+  Future<bool> logoutCounter() async {
+    final response = await _apiClient.postApi(ApiConstants.counterLogout);
+    final code = response?.statusCode ?? 0;
+    return code >= 200 && code < 300;
   }
 
   Future<CounterModel> pauseCounter() async {
