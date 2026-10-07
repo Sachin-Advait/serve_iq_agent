@@ -34,7 +34,7 @@ class ApiConstants {
   static const String pauseCounter = 'counters/pause/';
 
   // ---------- AUTH ----------
-  // logout already exists: static const String logout = 'auth/logout';
+  static const String counterLogout = 'agent/counter/logout';
 
   // ---------- AGENT ----------
   static const String queue = 'agent/queue/';
@@ -49,7 +49,6 @@ class ApiConstants {
   static const String callHoldToken = 'agent/call-hold-token/';
   static const String noShow = 'agent/no-show-token/';
 
-  static const String counterLogout = 'agent/counter/logout';
   static const String counterPause = 'agent/counter/';
   static const String counterResume = 'agent/counter/';
 
