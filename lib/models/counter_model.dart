@@ -37,7 +37,7 @@ class CounterModel {
       username: json['username'],
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
-      avgSecond: json['avgSeconds'] ?? 10,
+      avgSecond: (json['avgSeconds'] as num?)?.toDouble() ?? 0,
     );
   }
 

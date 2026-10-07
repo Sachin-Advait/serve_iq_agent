@@ -13,6 +13,18 @@ import 'package:servelq_agent/modules/home/pages/components/widgets.dart';
 class LeftPane extends StatelessWidget {
   const LeftPane({super.key});
 
+  // avgSeconds from the backend is actually minutes (e.g. 4.5 = 4m 30s).
+  String _formatMinutes(double minutes) {
+    final totalSeconds = (minutes * 60).round();
+    if (totalSeconds <= 0) return '0s';
+    final h = totalSeconds ~/ 3600;
+    final m = (totalSeconds % 3600) ~/ 60;
+    final s = totalSeconds % 60;
+    if (h > 0) return '${h}h';
+    if (m > 0) return '${m}m';
+    return '${s}s';
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HomeCubit, HomeState>(
@@ -33,7 +45,7 @@ class LeftPane extends StatelessWidget {
                     const SizedBox(height: 16),
                     QueueCard(
                       label: context.tr(AppStrings.queueAvgWaitTime),
-                      value: (state.counter?.avgSecond ?? 0).toStringAsFixed(1),
+                      value: _formatMinutes(state.counter?.avgSecond ?? 0),
                       icon: AppImages.avgWaitingTime,
                     ),
 
