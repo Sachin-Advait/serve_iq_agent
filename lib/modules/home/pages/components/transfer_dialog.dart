@@ -178,11 +178,13 @@ class _TransferDialogState extends State<TransferDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${counter.name} - ${counter.username}',
-                        style: const TextStyle(
+                        '${counter.name} - ${counter.username ?? 'No agent has picked up this counter yet.'}',
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.almostBlack,
+                          color: counter.username == null
+                              ? AppColors.almostBlack.withValues(alpha: .6)
+                              : AppColors.almostBlack,
                         ),
                       ),
                     ],
