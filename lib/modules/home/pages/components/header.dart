@@ -322,8 +322,13 @@ class Header extends StatelessWidget {
                       // context.goNamed(Routes.login);
                       break;
                     case 'logout':
-                      if (state.counter?.status == 'IDLE' ||
-                          state.counter?.status == "PAUSED") {
+                      // The counter status can read IDLE while a token is
+                      // still on screen, so check the token as well.
+                      final hasActiveToken =
+                          state.currentToken?.id.isNotEmpty ?? false;
+                      if (!hasActiveToken &&
+                          (state.counter?.status == 'IDLE' ||
+                              state.counter?.status == "PAUSED")) {
                         context.read<HomeCubit>().logout().then((ok) {
                           if (ok && context.mounted) {
                             context.goNamed(Routes.login);
