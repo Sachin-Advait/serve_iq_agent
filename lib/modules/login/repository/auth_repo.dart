@@ -1,4 +1,6 @@
 import 'package:servelq_agent/common/constants/api_constants.dart';
+import 'package:servelq_agent/common/widgets/flutter_toast.dart';
+import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/models/counter_option.dart';
 import 'package:servelq_agent/models/user_model.dart';
 import 'package:servelq_agent/services/api_client.dart';
@@ -30,6 +32,13 @@ class AuthRepository {
 
       if (response != null && response.statusCode == 200) {
         final responseData = AuthResponse.fromJson(response.data);
+        if (responseData.user.role != 'USER') {
+          flutterToast(
+            message: 'You are not authorised to login',
+            color: AppColors.red,
+          );
+          throw const LoginErrorShown();
+        }
         SessionManager.saveUsername(responseData.user.name);
         SessionManager.saveToken(responseData.token);
         SessionManager.savebranch(responseData.user.branchId);

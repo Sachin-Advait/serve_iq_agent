@@ -55,6 +55,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         password: event.password,
         counterId: counterId,
       );
+     
       emit(state.copyWith(submitting: false, user: user));
     } catch (e) {
       emit(
