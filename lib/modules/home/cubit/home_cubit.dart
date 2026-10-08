@@ -11,6 +11,7 @@ import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
 import 'package:servelq_agent/models/token_model.dart';
 import 'package:servelq_agent/modules/home/repository/home_repo.dart';
+import 'package:servelq_agent/services/api_client.dart';
 import 'package:servelq_agent/services/session_manager.dart';
 import 'package:servelq_agent/services/web_socket_service.dart';
 
@@ -452,6 +453,8 @@ class HomeCubit extends Cubit<HomeState> {
 
       // Start the timer after calling token
       startCompleteButtonTimer();
+    } on ApiErrorShown {
+      // ApiClient already showed the backend's reason (e.g. a 409).
     } catch (e) {
       flutterToast(
         message: 'Failed to call token. Please try again.',
@@ -522,6 +525,8 @@ class HomeCubit extends Cubit<HomeState> {
       startCompleteButtonTimer();
 
       flutterToast(message: 'Token successfully recalled');
+    } on ApiErrorShown {
+      // ApiClient already showed the backend's reason (e.g. a 409).
     } catch (e) {
       flutterToast(
         message: 'Failed to recall token. Please try again.',
@@ -557,6 +562,8 @@ class HomeCubit extends Cubit<HomeState> {
       );
 
       flutterToast(message: 'Token successfully transferred');
+    } on ApiErrorShown {
+      // ApiClient already showed the backend's reason (e.g. a 409).
     } catch (e) {
       flutterToast(
         message: 'Error while transferring. Please try again',
@@ -591,6 +598,8 @@ class HomeCubit extends Cubit<HomeState> {
           counter: counter,
         ),
       );
+    } on ApiErrorShown {
+      // ApiClient already showed the backend's reason (e.g. a 409).
     } catch (e) {
       flutterToast(
         message: 'Error while holding token. Please try again',
@@ -624,6 +633,8 @@ class HomeCubit extends Cubit<HomeState> {
           counter: await agentRepository.getCounter(),
         ),
       );
+    } on ApiErrorShown {
+      // ApiClient already showed the backend's reason (e.g. a 409).
     } catch (e) {
       flutterToast(
         message: 'Unknown Error. Please try again',

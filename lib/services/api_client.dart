@@ -10,6 +10,13 @@ import 'package:servelq_agent/routes/pages.dart';
 import 'package:servelq_agent/services/session_manager.dart';
 import 'package:servelq_agent/services/web_socket_service.dart';
 
+/// Thrown by repositories when a request failed and ApiClient has already
+/// shown the backend's reason, so callers must not add a generic toast on top.
+class ApiErrorShown implements Exception {
+  @override
+  String toString() => 'API error already shown to the user';
+}
+
 class ApiClient {
   final Dio _dio;
 
@@ -110,6 +117,14 @@ class ApiClient {
             color: AppColors.red,
           );
         } else if (e.response?.statusCode == 404) {
+          // GET lookups 404 quietly; a failed action (e.g. call next with an
+          // empty queue: "No tokens available") shows the backend's reason.
+          if (e.requestOptions.method == 'POST') {
+            flutterToast(
+              message: _backendMessage(e.response?.data),
+              color: AppColors.red,
+            );
+          }
         } else {
           flutterToast(
             message: AppErrors.serverErrorDetails,

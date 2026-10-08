@@ -35,8 +35,9 @@ class HomeRepository {
           : ApiConstants.callNext + SessionManager.getCounter();
 
       final response = await _apiClient.postApi(endpoint);
+      if (response == null) throw ApiErrorShown();
 
-      if (response != null && response.statusCode == 200) {
+      if (response.statusCode == 200) {
         final data = response.data;
 
         if (data is Map<String, dynamic>) {
@@ -64,7 +65,10 @@ class HomeRepository {
       ApiConstants.completeService + tokenId,
     );
 
-    if (response != null && response.statusCode != 200) {}
+    if (response == null) throw ApiErrorShown();
+    if (response.statusCode != 200) {
+      throw Exception('Failed to complete service');
+    }
   }
 
   Future<List<ServiceHistory>> getRecentTokens() async {
@@ -128,8 +132,9 @@ class HomeRepository {
   Future<TokenModel> recallToken(String tokenId) async {
     try {
       final response = await _apiClient.postApi(ApiConstants.recall + tokenId);
+      if (response == null) throw ApiErrorShown();
 
-      if (response != null && response.statusCode == 200) {
+      if (response.statusCode == 200) {
         final data = response.data;
         if (data is Map<String, dynamic>) {
           final token = TokenModel.fromJson(data);
@@ -156,7 +161,8 @@ class HomeRepository {
       body: {"tokenId": tokenId, "toCounterId": counterId},
     );
 
-    if (response == null && response?.statusCode != 200) {
+    if (response == null) throw ApiErrorShown();
+    if (response.statusCode != 200) {
       throw Exception('Failed to complete service');
     }
   }
@@ -164,7 +170,8 @@ class HomeRepository {
   Future<void> holdToken(String tokenId) async {
     final response = await _apiClient.postApi(ApiConstants.hold + tokenId);
 
-    if (response == null && response?.statusCode != 200) {
+    if (response == null) throw ApiErrorShown();
+    if (response.statusCode != 200) {
       throw Exception('Failed to complete service');
     }
   }
@@ -172,7 +179,8 @@ class HomeRepository {
   Future<void> noShow(String tokenId) async {
     final response = await _apiClient.postApi(ApiConstants.noShow + tokenId);
 
-    if (response == null && response?.statusCode != 200) {
+    if (response == null) throw ApiErrorShown();
+    if (response.statusCode != 200) {
       throw Exception('Failed to complete service');
     }
   }
