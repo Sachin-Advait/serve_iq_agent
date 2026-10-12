@@ -20,6 +20,9 @@ class TransferDialog extends StatefulWidget {
 
 class _TransferDialogState extends State<TransferDialog> {
   String? selectedCounterId;
+  String? selectedReason;
+  // 0: pick the counter, 1: pick the reason
+  int step = 0;
   bool isTransferring = false;
   String searchQuery = '';
 
@@ -51,7 +54,10 @@ class _TransferDialogState extends State<TransferDialog> {
           children: [
             _buildHeader(),
             // _buildSearchBar(),
-            Flexible(child: _buildCounterList()),
+            _buildStepTitle(),
+            Flexible(
+              child: step == 0 ? _buildCounterList() : _buildReasonList(),
+            ),
             _buildFooter(context),
           ],
         ),
@@ -114,6 +120,65 @@ class _TransferDialogState extends State<TransferDialog> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildStepTitle() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: Text(
+          context.tr(
+            step == 0
+                ? AppStrings.transferSelectCounter
+                : AppStrings.transferSelectReason,
+          ),
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: AppColors.brownDeep,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReasonList() {
+    return ListView(
+      shrinkWrap: true,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      children: AppStrings.transferReasons.map((code) {
+        final isSelected = selectedReason == code;
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          decoration: BoxDecoration(
+            color: AppColors.beige,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? AppColors.brownDeep : AppColors.beige,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: RadioListTile<String>(
+            value: code,
+            groupValue: selectedReason,
+            onChanged: (value) => setState(() => selectedReason = value),
+            activeColor: AppColors.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            title: Text(
+              context.tr(AppStrings.transferReason(code)),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.almostBlack,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -231,7 +296,9 @@ class _TransferDialogState extends State<TransferDialog> {
             child: OutlinedButton(
               onPressed: isTransferring
                   ? null
-                  : () => Navigator.of(context).pop(),
+                  : step == 0
+                  ? () => Navigator.of(context).pop()
+                  : () => setState(() => step = 0),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 side: const BorderSide(color: AppColors.warmGray),
@@ -240,7 +307,9 @@ class _TransferDialogState extends State<TransferDialog> {
                 ),
               ),
               child: Text(
-                context.tr(AppStrings.transferCancel),
+                context.tr(
+                  step == 0 ? AppStrings.transferCancel : AppStrings.transferBack,
+                ),
                 style: TextStyle(
                   color: AppColors.brownDeep,
                   fontWeight: FontWeight.w600,
@@ -253,9 +322,15 @@ class _TransferDialogState extends State<TransferDialog> {
           Expanded(
             flex: 2,
             child: ElevatedButton(
-              onPressed: (selectedCounterId != null && !isTransferring)
-                  ? () => _handleTransfer(context)
-                  : null,
+              onPressed: isTransferring
+                  ? null
+                  : step == 0
+                  ? (selectedCounterId != null
+                        ? () => setState(() => step = 1)
+                        : null)
+                  : (selectedReason != null
+                        ? () => _handleTransfer(context)
+                        : null),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.brownDark,
                 disabledBackgroundColor: AppColors.beige,
@@ -272,6 +347,15 @@ class _TransferDialogState extends State<TransferDialog> {
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : step == 0
+                  ? Text(
+                      context.tr(AppStrings.transferNext),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        color: AppColors.white,
                       ),
                     )
                   : Row(
@@ -300,7 +384,7 @@ class _TransferDialogState extends State<TransferDialog> {
   }
 
   Future<void> _handleTransfer(BuildContext context) async {
-    if (selectedCounterId == null) return;
+    if (selectedCounterId == null || selectedReason == null) return;
 
     setState(() {
       isTransferring = true;
@@ -308,7 +392,10 @@ class _TransferDialogState extends State<TransferDialog> {
 
     try {
       // Call your transfer method from the cubit
-      await context.read<HomeCubit>().transferToken(selectedCounterId!);
+      await context.read<HomeCubit>().transferToken(
+        selectedCounterId!,
+        selectedReason!,
+      );
 
       if (context.mounted) Navigator.of(context).pop();
     } catch (e) {

@@ -255,6 +255,26 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
+  /// The agent queue carries waiting, hold and no-show tokens; each goes to
+  /// its own list.
+  (List<TokenModel>, List<TokenModel>, List<TokenModel>) _splitQueue(
+    List<TokenModel> queue,
+  ) {
+    final upcoming = <TokenModel>[];
+    final hold = <TokenModel>[];
+    final noShow = <TokenModel>[];
+    for (final element in queue) {
+      if (element.status == "HOLD") {
+        hold.add(element);
+      } else if (element.status == "NO_SHOW") {
+        noShow.add(element);
+      } else {
+        upcoming.add(element);
+      }
+    }
+    return (upcoming, hold, noShow);
+  }
+
   void _handleUpcomingUpdate(List<dynamic> data) {
     debugPrint("Upcoming queue update received");
 
@@ -265,18 +285,15 @@ class HomeCubit extends Cubit<HomeState> {
           )
           .toList();
 
-      List<TokenModel> upcomingToken = [];
-      List<TokenModel> holdToken = [];
+      final (upcomingToken, holdToken, noShowToken) = _splitQueue(queue);
 
-      for (var element in queue) {
-        if (element.status == "HOLD") {
-          holdToken.add(element);
-        } else {
-          upcomingToken.add(element);
-        }
-      }
-
-      emit(state.copyWith(queue: upcomingToken, holdQueue: holdToken));
+      emit(
+        state.copyWith(
+          queue: upcomingToken,
+          holdQueue: holdToken,
+          noShowQueue: noShowToken,
+        ),
+      );
 
       debugPrint("Queue updated with ${queue.length} tokens");
     } catch (e, stackTrace) {
@@ -350,16 +367,7 @@ class HomeCubit extends Cubit<HomeState> {
       SessionManager.saveCounterName(counter.name);
       SessionManager.saveCounterCode(counter.code);
 
-      List<TokenModel> upcomingToken = [];
-      List<TokenModel> holdToken = [];
-
-      for (var element in queue) {
-        if (element.status == "HOLD") {
-          holdToken.add(element);
-        } else {
-          upcomingToken.add(element);
-        }
-      }
+      final (upcomingToken, holdToken, noShowToken) = _splitQueue(queue);
 
       emit(
         HomeState(
@@ -370,6 +378,7 @@ class HomeCubit extends Cubit<HomeState> {
           counter: counter,
           queue: upcomingToken,
           holdQueue: holdToken,
+          noShowQueue: noShowToken,
           recentServices: recentServices,
           currentToken: activeToken,
           allCounter: allCounter,
@@ -415,18 +424,15 @@ class HomeCubit extends Cubit<HomeState> {
 
     try {
       final queue = await agentRepository.getQueue();
-      List<TokenModel> upcomingToken = [];
-      List<TokenModel> holdToken = [];
+      final (upcomingToken, holdToken, noShowToken) = _splitQueue(queue);
 
-      for (var element in queue) {
-        if (element.status == "HOLD") {
-          holdToken.add(element);
-        } else {
-          upcomingToken.add(element);
-        }
-      }
-
-      emit(state.copyWith(queue: upcomingToken, holdQueue: holdToken));
+      emit(
+        state.copyWith(
+          queue: upcomingToken,
+          holdQueue: holdToken,
+          noShowQueue: noShowToken,
+        ),
+      );
     } catch (e) {
       debugPrint('Error fetching queue: $e');
     }
@@ -452,6 +458,38 @@ class HomeCubit extends Cubit<HomeState> {
       );
 
       // Start the timer after calling token
+      startCompleteButtonTimer();
+    } on ApiErrorShown {
+      // ApiClient already showed the backend's reason (e.g. a 409).
+    } catch (e) {
+      flutterToast(
+        message: 'Failed to call token. Please try again.',
+        color: AppColors.darkRed,
+      );
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+  /// Calls back a no-show visitor who has returned.
+  Future<void> callNoShowToken(String tokenId) async {
+    if (!state.isNetworkConnected) {
+      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      return;
+    }
+
+    try {
+      customLoader();
+
+      final token = await agentRepository.callNoShowToken(tokenId);
+      emit(
+        state.copyWith(
+          status: HomeStatus.loaded,
+          currentToken: token,
+          currentTokenStatus: CurrentTokenStatus.loaded,
+        ),
+      );
+
       startCompleteButtonTimer();
     } on ApiErrorShown {
       // ApiClient already showed the backend's reason (e.g. a 409).
@@ -537,7 +575,7 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
-  Future<void> transferToken(String counterId) async {
+  Future<void> transferToken(String counterId, String reason) async {
     // Check network
     if (!state.isNetworkConnected) {
       flutterToast(message: 'No internet connection', color: AppColors.darkRed);
@@ -548,7 +586,7 @@ class HomeCubit extends Cubit<HomeState> {
       customLoader();
 
       final tokenId = state.currentToken!.id;
-      await agentRepository.transferToken(tokenId, counterId);
+      await agentRepository.transferToken(tokenId, counterId, reason);
 
       // Cancel timer and reset state
       cancelCompleteButtonTimer();
@@ -661,21 +699,15 @@ class HomeCubit extends Cubit<HomeState> {
 
       if (state.currentToken?.id != activeToken?.id) {
         final updatedQueue = await agentRepository.getQueue();
-        List<TokenModel> upcomingToken = [];
-        List<TokenModel> holdToken = [];
-
-        for (var element in updatedQueue) {
-          if (element.status == "HOLD") {
-            holdToken.add(element);
-          } else {
-            upcomingToken.add(element);
-          }
-        }
+        final (upcomingToken, holdToken, noShowToken) = _splitQueue(
+          updatedQueue,
+        );
 
         emit(
           state.copyWith(
             queue: upcomingToken,
             holdQueue: holdToken,
+            noShowQueue: noShowToken,
             currentToken: activeToken,
           ),
         );

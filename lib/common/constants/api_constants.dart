@@ -48,6 +48,8 @@ class ApiConstants {
   static const String hold = 'agent/hold-token/';
   static const String callHoldToken = 'agent/call-hold-token/';
   static const String noShow = 'agent/no-show-token/';
+  // + {tokenId}/counter/{counterId}
+  static const String callNoShowToken = 'agent/call-no-show-token/';
 
   static const String counterPause = 'agent/counter/';
   static const String counterResume = 'agent/counter/';

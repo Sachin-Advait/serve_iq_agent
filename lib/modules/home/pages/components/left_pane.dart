@@ -56,6 +56,7 @@ class LeftPane extends StatelessWidget {
                     ],
                     const SizedBox(height: 20),
                     _buildHoldTokens(state, context),
+                    _buildNoShowTokens(state, context),
                     _buildTransferredTokens(state, context),
                     _buildUpcomingTokens(state, context),
                   ],
@@ -196,6 +197,101 @@ class LeftPane extends StatelessWidget {
       );
     }
     return SizedBox();
+  }
+
+  // Visitors marked no-show today. If one comes back, the agent taps the
+  // token to call it to this counter.
+  Widget _buildNoShowTokens(HomeState state, BuildContext context) {
+    if (state.noShowQueue.isEmpty) return const SizedBox();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.warmGray, AppColors.brownDark],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              SvgPicture.asset(
+                AppImages.noShow,
+                color: AppColors.white,
+                height: 28,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                context.tr(AppStrings.queueNoShowTokens),
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AppColors.white,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...state.noShowQueue
+            .take(6)
+            .map(
+              (token) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  onTap: () {
+                    if ((state.currentToken?.id == null ||
+                            state.currentTokenStatus ==
+                                CurrentTokenStatus.initial) &&
+                        state.counter!.status == 'IDLE') {
+                      context.read<HomeCubit>().callNoShowToken(token.id);
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.lightBeige,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.brownDark, width: 1),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          token.token,
+                          style: context.bold.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: AppColors.brownDeep,
+                          ),
+                        ),
+                        const Spacer(),
+                        Flexible(
+                          child: Text(
+                            token.serviceName,
+                            style: context.medium.copyWith(
+                              fontSize: 11,
+                              color: AppColors.brownDark,
+                            ),
+                            textAlign: TextAlign.right,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        const SizedBox(height: 10),
+      ],
+    );
   }
 
   Widget _buildUpcomingTokens(HomeState state, BuildContext context) {
@@ -391,6 +487,22 @@ class LeftPane extends StatelessWidget {
                               textAlign: TextAlign.right,
                               overflow: TextOverflow.ellipsis,
                             ),
+                            if (token.transferReason != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                context.tr(
+                                  AppStrings.transferReason(
+                                    token.transferReason!,
+                                  ),
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: AppColors.brownDeep,
+                                ),
+                                textAlign: TextAlign.right,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ],
                         ),
                       ),

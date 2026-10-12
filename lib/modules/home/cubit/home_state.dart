@@ -15,6 +15,7 @@ class HomeState {
   final CounterModel? counter;
   final List<TokenModel> queue;
   final List<TokenModel> holdQueue;
+  final List<TokenModel> noShowQueue;
   final List<ServiceHistory> recentServices;
   final TokenModel? currentToken;
   final List<CounterModel> allCounter;
@@ -32,6 +33,7 @@ class HomeState {
     this.counter,
     this.queue = const [],
     this.holdQueue = const [],
+    this.noShowQueue = const [],
     this.recentServices = const [],
     this.currentToken,
     this.allCounter = const [],
@@ -50,6 +52,7 @@ class HomeState {
     CounterModel? counter,
     List<TokenModel>? queue,
     List<TokenModel>? holdQueue,
+    List<TokenModel>? noShowQueue,
     List<ServiceHistory>? recentServices,
     TokenModel? currentToken,
     List<CounterModel>? allCounter,
@@ -68,6 +71,7 @@ class HomeState {
       counter: counter ?? this.counter,
       queue: queue ?? this.queue,
       holdQueue: holdQueue ?? this.holdQueue,
+      noShowQueue: noShowQueue ?? this.noShowQueue,
       recentServices: recentServices ?? this.recentServices,
       currentToken: currentToken ?? this.currentToken,
       allCounter: allCounter ?? this.allCounter,

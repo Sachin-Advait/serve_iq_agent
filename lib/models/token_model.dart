@@ -6,6 +6,7 @@ class TokenModel {
   final String mobileNumber;
   final bool isTransfer;
   final String? transferCounterName;
+  final String? transferReason;
 
   TokenModel({
     this.id = '',
@@ -15,6 +16,7 @@ class TokenModel {
     this.mobileNumber = '',
     this.isTransfer = false,
     this.transferCounterName,
+    this.transferReason,
   });
 
   factory TokenModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class TokenModel {
       mobileNumber: json["mobileNumber"] ?? '',
       isTransfer: json["isTransfer"] ?? false,
       transferCounterName: json["transferCounterName"] ?? '',
+      transferReason: json["transferReason"],
     );
   }
 }

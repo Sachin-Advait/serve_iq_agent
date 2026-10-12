@@ -56,6 +56,26 @@ class HomeRepository {
     }
   }
 
+  /// Calls back a visitor who was marked no-show, to this counter.
+  Future<TokenModel> callNoShowToken(String tokenId) async {
+    final response = await _apiClient.postApi(
+      '${ApiConstants.callNoShowToken}$tokenId/counter/${SessionManager.getCounter()}',
+    );
+    if (response == null) throw ApiErrorShown();
+
+    final data = response.data;
+    if (response.statusCode == 200 && data is Map<String, dynamic>) {
+      final token = TokenModel.fromJson(data);
+
+      Future.delayed(const Duration(seconds: 15), () {
+        startServing(token.id);
+      });
+
+      return token;
+    }
+    throw Exception('Failed to call no-show token');
+  }
+
   Future<void> startServing(String tokenId) async {
     await _apiClient.postApi(ApiConstants.startServing + tokenId);
   }
@@ -155,10 +175,14 @@ class HomeRepository {
     }
   }
 
-  Future<void> transferToken(String tokenId, String counterId) async {
+  Future<void> transferToken(
+    String tokenId,
+    String counterId,
+    String reason,
+  ) async {
     final response = await _apiClient.postApi(
       ApiConstants.transfer,
-      body: {"tokenId": tokenId, "toCounterId": counterId},
+      body: {"tokenId": tokenId, "toCounterId": counterId, "reason": reason},
     );
 
     if (response == null) throw ApiErrorShown();

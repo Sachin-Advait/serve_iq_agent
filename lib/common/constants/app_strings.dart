@@ -33,6 +33,26 @@ class AppStrings {
   static const transferCancel = 'transfer_cancel';
   static const transferConfirm = 'transfer_confirm';
   static const transferFailed = 'transfer_failed';
+  static const transferSelectCounter = 'transfer_select_counter';
+  static const transferSelectReason = 'transfer_select_reason';
+  static const transferNext = 'transfer_next';
+  static const transferBack = 'transfer_back';
+  static const transferReasonLabel = 'transfer_reason_label';
+  static const queueNoShowTokens = 'queue_no_show_tokens';
+
+  /// Transfer reason codes the backend accepts (TransferReason enum); each
+  /// has a 'transfer_reason_<CODE>' translation.
+  static const transferReasons = [
+    'WRONG_SERVICE',
+    'NEEDS_SPECIALIST',
+    'MISSING_DOCUMENTS',
+    'OTHER_SECTION',
+    'MISCLASSIFIED',
+    'ALTERNATIVE_CHANNEL',
+    'CROWD_MANAGEMENT',
+    'OTHER',
+  ];
+  static String transferReason(String code) => 'transfer_reason_$code';
   static const notAvailable = 'not_available';
 
   static const visitorWritingFeedback = "visitor_writing_feedback";
