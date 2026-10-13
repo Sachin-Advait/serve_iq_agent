@@ -109,7 +109,7 @@ class MainPanel extends StatelessWidget {
               Expanded(
                 child: InfoField(
                   label: context.tr(AppStrings.mobileNumber),
-                  value: token.mobileNumber,
+                  value: token.mobileNumber.isEmpty ? "-" : token.mobileNumber,
                   icon: AppImages.id,
                 ),
               ),
