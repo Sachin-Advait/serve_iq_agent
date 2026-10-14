@@ -25,13 +25,26 @@ class _TransferDialogState extends State<TransferDialog> {
   int step = 0;
   bool isTransferring = false;
   String searchQuery = '';
+  late List<CounterModel> counters = widget.state.allCounter;
 
-  // Filter counters based on search and exclude current counter
+  @override
+  void initState() {
+    super.initState();
+    // The list loaded with the home screen goes stale as agents log in and
+    // out, so fetch who holds which counter right now.
+    context.read<HomeCubit>().refreshAllCounters().then((fresh) {
+      if (mounted && fresh != null) setState(() => counters = fresh);
+    });
+  }
+
+  // Only counters an agent is logged into can take a transfer; also exclude
+  // the current counter and apply the search.
   List<CounterModel> get filteredCounters {
-    return widget.state.allCounter
+    return counters
         .where(
           (counter) =>
               counter.id != widget.state.counter?.id &&
+              (counter.userId?.isNotEmpty ?? false) &&
               (counter.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
                   counter.code.toLowerCase().contains(
                     searchQuery.toLowerCase(),

@@ -575,6 +575,19 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
+  /// Re-fetches every counter with who is logged into it, for the transfer
+  /// dialog. Returns null (keeping the old list) when the call fails.
+  Future<List<CounterModel>?> refreshAllCounters() async {
+    try {
+      final allCounter = await agentRepository.getAllCounters();
+      if (!isClosed) emit(state.copyWith(allCounter: allCounter));
+      return allCounter;
+    } catch (e) {
+      debugPrint('Error refreshing counters: $e');
+      return null;
+    }
+  }
+
   Future<void> transferToken(String counterId, String reason) async {
     // Check network
     if (!state.isNetworkConnected) {
