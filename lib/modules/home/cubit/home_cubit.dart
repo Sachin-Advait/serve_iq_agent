@@ -194,6 +194,7 @@ class HomeCubit extends Cubit<HomeState> {
 
     try {
       await loadingData();
+      if (ApiClient.sessionEnded) return;
       emit(state.copyWith(webSocketStatus: WebSocketStatus.connecting));
 
       // After counter is loaded → initialize WebSocket
@@ -392,6 +393,14 @@ class HomeCubit extends Cubit<HomeState> {
       );
     } catch (e) {
       debugPrint('Error loading data: $e');
+
+      // The login was rejected (expired, signed out by the daily sign-out, or
+      // replaced by a login elsewhere): ApiClient has already said so and
+      // gone to the login page, so don't add an "An error occurred" toast.
+      if (ApiClient.sessionEnded) {
+        emit(state.copyWith(status: HomeStatus.initial));
+        return;
+      }
 
       // Check if error is network-related
       final isNetworkError =
