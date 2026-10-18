@@ -64,6 +64,11 @@ class ApiClient {
   // 🔹 Error handlers
   String? _showErrorSnackbar(DioException e) {
     debugPrint('API ERROR ===> $e');
+    // The agent was already told their session ended and sent to login; the
+    // other requests still failing from that page must not add more toasts.
+    if (sessionEnded && e.requestOptions.path != ApiConstants.login) {
+      return null;
+    }
     switch (e.type) {
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
