@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:servelq_agent/common/constants/app_errors.dart';
 import 'package:servelq_agent/common/constants/app_strings.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
@@ -62,7 +63,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           child: BlocListener<HomeCubit, HomeState>(
             listener: (context, state) {
               if (state.status == HomeStatus.error) {
-                flutterToast(message: "An error occurred");
+                flutterToast(message: AppErrors.unknownErrorDetails);
               }
               // Handle network connection changes
               if (!state.isNetworkConnected &&

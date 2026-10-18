@@ -6,7 +6,6 @@ import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/common/widgets/primary_button.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
-import 'package:servelq_agent/configs/theme/app_theme.dart';
 import 'package:servelq_agent/models/counter_option.dart';
 import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
 import 'package:servelq_agent/routes/pages.dart';
@@ -38,8 +37,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void _performLogin() {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      flutterToast(message: 'Please fill all fields');
-      return;
+      return flutterToast(message: 'Email and password cannot be empty');
     }
     context.read<LoginBloc>().add(
       AgentLogin(
@@ -97,14 +95,6 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset(AppImages.logo, height: 60.heightMultiplier),
-                      10.horizontalSpace,
-                      Text(
-                        "MSSPF",
-                        style: context.semiBold.copyWith(
-                          color: AppColors.almostBlack,
-                          fontSize: 30.textMultiplier,
-                        ),
-                      ),
                     ],
                   ),
                   50.verticalSpace,
@@ -375,6 +365,7 @@ class _LoginPageState extends State<LoginPage> {
       controller: controller,
       obscureText: obscureText,
       enabled: enabled,
+      cursorColor: AppColors.primary,
       decoration: InputDecoration(
         prefixIcon: Padding(
           padding: EdgeInsets.symmetric(horizontal: 10.widthMultiplier),
