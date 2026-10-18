@@ -169,7 +169,10 @@ class _LoginPageState extends State<LoginPage> {
                           color: AppColors.taupe,
                         ),
                         dropdownColor: AppColors.white,
+                        // This style replaces the theme's for the menu items,
+                        // so name the font or they fall back to Roboto.
                         style: TextStyle(
+                          fontFamily: 'Poppins',
                           color: AppColors.almostBlack,
                           fontSize: 18.textMultiplier,
                         ),
