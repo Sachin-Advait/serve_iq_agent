@@ -322,13 +322,18 @@ class Header extends StatelessWidget {
                       // context.goNamed(Routes.login);
                       break;
                     case 'logout':
-                      // The counter status can read IDLE while a token is
-                      // still on screen, so check the token as well.
+                      // Only a token being called or served blocks logout
+                      // (same rule as the backend). The counter status can
+                      // read IDLE while a token is still on screen, so check
+                      // the token as well. Any other status (CLOSED after a
+                      // login elsewhere, COMPLETE while the visitor rates)
+                      // must not block: the backend decides.
                       final hasActiveToken =
                           state.currentToken?.id.isNotEmpty ?? false;
+                      final status = state.counter?.status;
                       if (!hasActiveToken &&
-                          (state.counter?.status == 'IDLE' ||
-                              state.counter?.status == "PAUSED")) {
+                          status != 'CALLING' &&
+                          status != 'SERVING') {
                         context.read<HomeCubit>().logout().then((ok) {
                           if (ok && context.mounted) {
                             context.goNamed(Routes.login);
