@@ -481,7 +481,13 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   /// Calls back a no-show visitor who has returned.
-  Future<void> callNoShowToken(String tokenId) async {
+  Future<void> callNoShowToken(String tokenId) =>
+      _callSpecificToken(() => agentRepository.callNoShowToken(tokenId));
+
+  Future<void> callTransferredToken(String tokenId) =>
+      _callSpecificToken(() => agentRepository.callTransferredToken(tokenId));
+
+  Future<void> _callSpecificToken(Future<TokenModel> Function() call) async {
     if (!state.isNetworkConnected) {
       flutterToast(message: 'No internet connection', color: AppColors.darkRed);
       return;
@@ -490,7 +496,7 @@ class HomeCubit extends Cubit<HomeState> {
     try {
       customLoader();
 
-      final token = await agentRepository.callNoShowToken(tokenId);
+      final token = await call();
       emit(
         state.copyWith(
           status: HomeStatus.loaded,

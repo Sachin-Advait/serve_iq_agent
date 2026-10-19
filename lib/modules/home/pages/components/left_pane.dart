@@ -146,50 +146,19 @@ class LeftPane extends StatelessWidget {
           ...state.holdQueue
               .take(6)
               .map(
-                (token) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(10),
-                    onTap: () {
-                      if ((state.currentToken?.id == null ||
-                              state.currentTokenStatus ==
-                                  CurrentTokenStatus.initial) &&
-                          state.counter!.status == 'IDLE') {
-                        context.read<HomeCubit>().callToken(tokenId: token.id);
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFE9F6F7),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.darkBlue, width: 1),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            token.token,
-                            style: context.bold.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                              color: AppColors.blue,
-                            ),
-                          ),
-                          Spacer(),
-                          Text(
-                            token.serviceName,
-                            style: context.medium.copyWith(
-                              fontSize: 11,
-                              color: AppColors.blue,
-                            ),
-                            textAlign: TextAlign.right,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                (token) => _tokenTile(
+                  context,
+                  token: token.token,
+                  text: token.serviceName,
+                  background: const Color(0xFFE9F6F7),
+                  border: AppColors.darkBlue,
+                  tokenColor: AppColors.blue,
+                  textColor: AppColors.blue,
+                  onTap: _canCallNow(state)
+                      ? () => context.read<HomeCubit>().callToken(
+                          tokenId: token.id,
+                        )
+                      : null,
                 ),
               ),
           const SizedBox(height: 10),
@@ -241,52 +210,17 @@ class LeftPane extends StatelessWidget {
         ...state.noShowQueue
             .take(6)
             .map(
-              (token) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
-                  onTap: () {
-                    if ((state.currentToken?.id == null ||
-                            state.currentTokenStatus ==
-                                CurrentTokenStatus.initial) &&
-                        state.counter!.status == 'IDLE') {
-                      context.read<HomeCubit>().callNoShowToken(token.id);
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.lightBeige,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.brownDark, width: 1),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          token.token,
-                          style: context.bold.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: AppColors.brownDeep,
-                          ),
-                        ),
-                        const Spacer(),
-                        Flexible(
-                          child: Text(
-                            token.serviceName,
-                            style: context.medium.copyWith(
-                              fontSize: 11,
-                              color: AppColors.brownDark,
-                            ),
-                            textAlign: TextAlign.right,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              (token) => _tokenTile(
+                context,
+                token: token.token,
+                text: token.serviceName,
+                background: AppColors.lightBeige,
+                border: AppColors.brownDark,
+                tokenColor: AppColors.brownDeep,
+                textColor: AppColors.brownDark,
+                onTap: _canCallNow(state)
+                    ? () => context.read<HomeCubit>().callNoShowToken(token.id)
+                    : null,
               ),
             ),
         const SizedBox(height: 10),
@@ -360,38 +294,14 @@ class LeftPane extends StatelessWidget {
           ...upcomingTokens
               .take(6)
               .map(
-                (token) => Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.offWhite,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.beige, width: 1),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        token.token,
-                        style: context.bold.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: AppColors.brownDeep,
-                        ),
-                      ),
-                      Flexible(
-                        child: Text(
-                          token.serviceName,
-                          style: context.medium.copyWith(
-                            fontSize: 11,
-                            color: AppColors.brownDark,
-                          ),
-                          textAlign: TextAlign.right,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
+                (token) => _tokenTile(
+                  context,
+                  token: token.token,
+                  text: token.serviceName,
+                  background: AppColors.offWhite,
+                  border: AppColors.beige,
+                  tokenColor: AppColors.brownDeep,
+                  textColor: AppColors.brownDark,
                 ),
               ),
         const SizedBox(height: 10),
@@ -441,73 +351,36 @@ class LeftPane extends StatelessWidget {
           ...transferredTokens
               .take(6)
               .map(
-                (token) => Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEF2F2),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFFFECACA),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        token.token,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: AppColors.darkRed,
-                        ),
+                (token) => _tokenTile(
+                  context,
+                  token: token.token,
+                  text: token.serviceName,
+                  background: const Color(0xFFFEF2F2),
+                  border: const Color(0xFFFECACA),
+                  tokenColor: AppColors.darkRed,
+                  textColor: AppColors.brownDeep,
+                  onTap: _canCallNow(state)
+                      ? () => context.read<HomeCubit>().callTransferredToken(
+                          token.id,
+                        )
+                      : null,
+                  details: [
+                    if ((token.transferCounterName ?? '').isNotEmpty)
+                      _detailLine(
+                        Icons.swap_horiz_rounded,
+                        '${context.tr(AppStrings.queueFromCounter)} ${token.transferCounterName}',
+                        AppColors.darkRed,
+                        bold: true,
                       ),
-                      Flexible(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              token.serviceName,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: AppColors.brownDeep,
-                              ),
-                              textAlign: TextAlign.right,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${context.tr(AppStrings.queueFromCounter)} ${token.transferCounterName}',
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: AppColors.darkRed,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              textAlign: TextAlign.right,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            if (token.transferReason != null) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                context.tr(
-                                  AppStrings.transferReason(
-                                    token.transferReason!,
-                                  ),
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: AppColors.brownDeep,
-                                ),
-                                textAlign: TextAlign.right,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ],
+                    if (token.transferReason != null)
+                      _detailLine(
+                        Icons.info_outline_rounded,
+                        context.tr(
+                          AppStrings.transferReason(token.transferReason!),
                         ),
+                        AppColors.brownDeep,
                       ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
           const SizedBox(height: 10),
@@ -515,5 +388,103 @@ class LeftPane extends StatelessWidget {
       );
     }
     return SizedBox();
+  }
+
+  // Same rule the hold and no-show lists already used: only call a token
+  // when nothing is on screen and the counter is idle.
+  bool _canCallNow(HomeState state) =>
+      (state.currentToken?.id == null ||
+          state.currentTokenStatus == CurrentTokenStatus.initial) &&
+      state.counter?.status == 'IDLE';
+
+  /// Queue entry: the token number on top, the full service name under it,
+  /// then any extra lines. Tappable entries show a call icon.
+  Widget _tokenTile(
+    BuildContext context, {
+    required String token,
+    required String text,
+    required Color background,
+    required Color border,
+    required Color tokenColor,
+    required Color textColor,
+    VoidCallback? onTap,
+    List<Widget> details = const [],
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: background,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: border, width: 1),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        token,
+                        style: context.bold.copyWith(
+                          fontSize: 20,
+                          color: tokenColor,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    if (onTap != null)
+                      Icon(Icons.campaign_rounded, size: 20, color: tokenColor),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  text,
+                  style: context.medium.copyWith(
+                    fontSize: 12,
+                    height: 1.3,
+                    color: textColor,
+                  ),
+                ),
+                for (final d in details) ...[const SizedBox(height: 6), d],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _detailLine(
+    IconData icon,
+    String text,
+    Color color, {
+    bool bold = false,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 11,
+              height: 1.3,
+              color: color,
+              fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

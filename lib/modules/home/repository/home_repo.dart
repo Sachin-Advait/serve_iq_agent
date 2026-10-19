@@ -57,9 +57,20 @@ class HomeRepository {
   }
 
   /// Calls back a visitor who was marked no-show, to this counter.
-  Future<TokenModel> callNoShowToken(String tokenId) async {
+  Future<TokenModel> callNoShowToken(String tokenId) =>
+      _callTokenAtThisCounter(ApiConstants.callNoShowToken, tokenId);
+
+  /// A token another counter transferred here, called without waiting for
+  /// it to come up in Call next.
+  Future<TokenModel> callTransferredToken(String tokenId) =>
+      _callTokenAtThisCounter(ApiConstants.callTransferredToken, tokenId);
+
+  Future<TokenModel> _callTokenAtThisCounter(
+    String path,
+    String tokenId,
+  ) async {
     final response = await _apiClient.postApi(
-      '${ApiConstants.callNoShowToken}$tokenId/counter/${SessionManager.getCounter()}',
+      '$path$tokenId/counter/${SessionManager.getCounter()}',
     );
     if (response == null) throw ApiErrorShown();
 
@@ -73,7 +84,7 @@ class HomeRepository {
 
       return token;
     }
-    throw Exception('Failed to call no-show token');
+    throw Exception('Failed to call token');
   }
 
   Future<void> startServing(String tokenId) async {

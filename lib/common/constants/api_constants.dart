@@ -50,6 +50,7 @@ class ApiConstants {
   static const String noShow = 'agent/no-show-token/';
   // + {tokenId}/counter/{counterId}
   static const String callNoShowToken = 'agent/call-no-show-token/';
+  static const String callTransferredToken = 'agent/call-transferred-token/';
 
   static const String counterPause = 'agent/counter/';
   static const String counterResume = 'agent/counter/';

@@ -27,330 +27,325 @@ class Header extends StatelessWidget {
       builder: (context, state) {
         final displayText = SessionManager.getCounterName();
 
-        return Container(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Image.asset(AppImages.logo, height: 40),
-              20.horizontalSpace,
-              Text(
-                displayText,
-                style: context.semiBold.copyWith(
-                  color: AppColors.brownDeep,
-                  fontSize: 20,
-                  letterSpacing: 0.5,
+        // The header keeps the English layout in both languages; only the
+        // language icon flips in Arabic.
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Image.asset(AppImages.logo, height: 40),
+                20.horizontalSpace,
+                Text(
+                  displayText,
+                  style: context.semiBold.copyWith(
+                    color: AppColors.brownDeep,
+                    fontSize: 20,
+                    letterSpacing: 0.5,
+                  ),
                 ),
-              ),
-              Spacer(),
+                Spacer(),
 
-              // Home Button - Only visible when NOT on home page
-              if (!isOnHomePage) ...[
+                // Home Button - Only visible when NOT on home page
+                if (!isOnHomePage) ...[
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () {
+                        context.goNamed(Routes.home);
+                      },
+                      child: Image.asset(
+                        AppImages.home,
+                        height: 25,
+                        color: AppColors.brownVeryDark,
+                      ),
+                    ),
+                  ),
+                  20.horizontalSpace,
+                ],
+
+                // Language Toggle
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
-                    onTap: () {
-                      context.goNamed(Routes.home);
-                    },
-                    child: Image.asset(
-                      AppImages.home,
-                      height: 25,
-                      color: AppColors.brownVeryDark,
+                    onTap: () =>
+                        context.read<LocalizationCubit>().toggleLanguage(),
+                    child: BlocBuilder<LocalizationCubit, LocalizationState>(
+                      builder: (context, localizationState) => Transform.flip(
+                        flipX: localizationState.locale.languageCode != 'en',
+                        child: Image.asset(
+                          AppImages.translation,
+                          height: 30,
+                          color: AppColors.brownVeryDark,
+                        ),
+                      ),
                     ),
                   ),
                 ),
                 20.horizontalSpace,
-              ],
 
-              // Language Toggle
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () =>
-                      context.read<LocalizationCubit>().toggleLanguage(),
-                  child: Image.asset(
-                    AppImages.translation,
-                    height: 30,
-                    color: AppColors.brownVeryDark,
-                  ),
-                ),
-              ),
-              20.horizontalSpace,
-
-              // Agent Status
-              // Agent Status
-              BlocBuilder<LocalizationCubit, LocalizationState>(
-                builder: (context, localizationState) {
-                  return Container(
-                    padding: EdgeInsets.only(
-                      left: localizationState.locale.languageCode == "en"
-                          ? 12
-                          : 6,
-                      right: localizationState.locale.languageCode == "en"
-                          ? 0
-                          : 20,
-                    ),
-                    decoration: BoxDecoration(
-                      color: localizationState.locale.languageCode == "en"
-                          ? AppColors.white
-                          : AppColors.primary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '${context.trNoListen(AppStrings.agent)}: ${SessionManager.getUsername()}',
-                          style: context.medium.copyWith(
-                            color: localizationState.locale.languageCode == "en"
-                                ? AppColors.brownDark
-                                : AppColors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                        20.horizontalSpace,
-                        Text(
-                          context.trNoListen(
-                            state.counter?.paused != true
-                                ? AppStrings.serving
-                                : AppStrings.onBreak,
-                          ),
-                          style: context.medium.copyWith(
-                            color: state.counter?.paused != true
-                                ? AppColors.green
-                                : AppColors.red,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Transform.scale(
-                          scale: 0.7,
-                          child: Switch(
-                            value: state.counter?.paused != true,
-                            activeThumbColor: AppColors.white,
-                            inactiveThumbColor: AppColors.white,
-                            activeTrackColor: AppColors.green,
-                            inactiveTrackColor: AppColors.red,
-                            padding: EdgeInsets.zero,
-                            trackOutlineColor: WidgetStatePropertyAll(
-                              AppColors.white,
-                            ),
-                            onChanged: (value) {
-                              if (state.counter?.status == 'IDLE' ||
-                                  state.counter?.status == "PAUSED") {
-                                context.read<HomeCubit>().toggleServingStatus(
-                                  value,
-                                );
-                              } else {
-                                flutterToast(
-                                  message:
-                                      'Finish the current token to set the counter to Break.',
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              10.horizontalSpace,
-              PopupMenuButton<String>(
-                padding: EdgeInsets.zero,
-                offset: const Offset(0, 60),
-                tooltip: '',
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                color: AppColors.offWhite,
-                icon: BlocBuilder<LocalizationCubit, LocalizationState>(
+                // Agent Status
+                // Agent Status
+                BlocBuilder<LocalizationCubit, LocalizationState>(
                   builder: (context, localizationState) {
                     return Container(
-                      padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.only(left: 12),
                       decoration: BoxDecoration(
-                        color: localizationState.locale.languageCode == "en"
-                            ? AppColors.white
-                            : AppColors.primary,
-                        shape: BoxShape.circle,
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Icon(
-                        Icons.menu,
-                        color: localizationState.locale.languageCode == "en"
-                            ? AppColors.brownDark
-                            : AppColors.white,
-                        size: 24,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${context.trNoListen(AppStrings.agent)}: ${SessionManager.getUsername()}',
+                            style: context.medium.copyWith(
+                              color: AppColors.brownDark,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          20.horizontalSpace,
+                          Text(
+                            context.trNoListen(
+                              state.counter?.paused != true
+                                  ? AppStrings.serving
+                                  : AppStrings.onBreak,
+                            ),
+                            style: context.medium.copyWith(
+                              color: state.counter?.paused != true
+                                  ? AppColors.green
+                                  : AppColors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Transform.scale(
+                            scale: 0.7,
+                            child: Switch(
+                              value: state.counter?.paused != true,
+                              activeThumbColor: AppColors.white,
+                              inactiveThumbColor: AppColors.white,
+                              activeTrackColor: AppColors.green,
+                              inactiveTrackColor: AppColors.red,
+                              padding: EdgeInsets.zero,
+                              trackOutlineColor: WidgetStatePropertyAll(
+                                AppColors.white,
+                              ),
+                              onChanged: (value) {
+                                if (state.counter?.status == 'IDLE' ||
+                                    state.counter?.status == "PAUSED") {
+                                  context.read<HomeCubit>().toggleServingStatus(
+                                    value,
+                                  );
+                                } else {
+                                  flutterToast(
+                                    message:
+                                        'Finish the current token to set the counter to Break.',
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },
                 ),
-                itemBuilder: (BuildContext context) => [
-                  // PopupMenuItem<String>(
-                  //   value: 'notification',
-                  //   child: Row(
-                  //     children: [
-                  //       Icon(
-                  //         Icons.notifications_outlined,
-                  //         color: AppColors.brownDeep,
-                  //         size: 20,
-                  //       ),
-                  //       12.horizontalSpace,
-                  //       Text(
-                  //         context.trNoListen(AppStrings.notifications),
-                  //         style: context.medium.copyWith(
-                  //           color: AppColors.brownDarker,
-                  //           fontSize: 14,
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // PopupMenuItem<String>(
-                  //   value: 'quiz',
-                  //   enabled: !_isOnRoute(currentRoute, Routes.quiz),
-                  //   child: Row(
-                  //     children: [
-                  //       Icon(
-                  //         Icons.quiz_outlined,
-                  //         color: _isOnRoute(currentRoute, Routes.quiz)
-                  //             ? AppColors.taupe
-                  //             : AppColors.brownDeep,
-                  //         size: 20,
-                  //       ),
-                  //       12.horizontalSpace,
-                  //       Text(
-                  //         context.trNoListen(AppStrings.quiz),
-                  //         style: context.medium.copyWith(
-                  //           color: _isOnRoute(currentRoute, Routes.quiz)
-                  //               ? AppColors.taupe
-                  //               : AppColors.brownDarker,
-                  //           fontSize: 14,
-                  //         ),
-                  //       ),
-                  //       if (_isOnRoute(currentRoute, Routes.quiz)) ...[
-                  //         4.horizontalSpace,
-                  //         Icon(
-                  //           Icons.check_circle,
-                  //           color: AppColors.green,
-                  //           size: 16,
-                  //         ),
-                  //       ],
-                  //     ],
-                  //   ),
-                  // ),
-                  // PopupMenuItem<String>(
-                  //   value: 'training',
-                  //   enabled: !_isOnRoute(currentRoute, Routes.training),
-                  //   child: Row(
-                  //     children: [
-                  //       Icon(
-                  //         Icons.school_outlined,
-                  //         color: _isOnRoute(currentRoute, Routes.training)
-                  //             ? AppColors.taupe
-                  //             : AppColors.brownDeep,
-                  //         size: 20,
-                  //       ),
-                  //       12.horizontalSpace,
-                  //       Text(
-                  //         context.trNoListen(AppStrings.training),
-                  //         style: context.medium.copyWith(
-                  //           color: _isOnRoute(currentRoute, Routes.training)
-                  //               ? AppColors.taupe
-                  //               : AppColors.brownDarker,
-                  //           fontSize: 14,
-                  //         ),
-                  //       ),
-                  //       if (_isOnRoute(currentRoute, Routes.training)) ...[
-                  //         4.horizontalSpace,
-                  //         Icon(
-                  //           Icons.check_circle,
-                  //           color: AppColors.green,
-                  //           size: 16,
-                  //         ),
-                  //       ],
-                  //     ],
-                  //   ),
-                  // ),
-                  // PopupMenuItem<String>(
-                  //   height: 1,
-                  //   enabled: false,
-                  //   child: Divider(color: AppColors.lightBeige, thickness: 1),
-                  // ),
-                  PopupMenuItem<String>(
-                    value: 'logout',
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          AppImages.logout,
-                          color: AppColors.red,
-                          height: 20,
-                        ),
-                        12.horizontalSpace,
-                        Text(
-                          context.trNoListen(AppStrings.logout),
-                          style: context.medium.copyWith(
-                            color: AppColors.red,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
+                10.horizontalSpace,
+                PopupMenuButton<String>(
+                  padding: EdgeInsets.zero,
+                  offset: const Offset(0, 60),
+                  tooltip: '',
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ],
-                onSelected: (String value) {
-                  switch (value) {
-                    // case 'notification':
-                    //   // Handle notification action
-                    //   // context.pushNamed('/notifications');
-                    //   break;
-                    // case 'quiz':
-                    //   // Only navigate if not already on quiz page
-                    //   if (!_isOnRoute(currentRoute, Routes.quiz)) {
-                    //     context.pushNamed(Routes.quiz);
-                    //   }
-                    //   break;
-                    // case 'training':
-                    //   // Only navigate if not already on training page
-                    //   if (!_isOnRoute(currentRoute, Routes.training)) {
-                    //     context.pushNamed(Routes.training);
-                    //   }
-                    // break;
-                    case 'Break':
-                      // SessionManager.clearSession();
-                      // context.goNamed(Routes.login);
-                      break;
-                    case 'logout':
-                      // Only a token being called or served blocks logout
-                      // (same rule as the backend). The counter status can
-                      // read IDLE while a token is still on screen, so check
-                      // the token as well. Any other status (CLOSED after a
-                      // login elsewhere, COMPLETE while the visitor rates)
-                      // must not block: the backend decides.
-                      final hasActiveToken =
-                          state.currentToken?.id.isNotEmpty ?? false;
-                      final status = state.counter?.status;
-                      if (!hasActiveToken &&
-                          status != 'CALLING' &&
-                          status != 'SERVING') {
-                        context.read<HomeCubit>().logout().then((ok) {
-                          if (ok && context.mounted) {
-                            context.goNamed(Routes.login);
-                          }
-                        });
-                      } else {
-                        flutterToast(
-                          message: 'Finish the current token to logout.',
-                        );
-                      }
+                  color: AppColors.offWhite,
+                  icon: BlocBuilder<LocalizationCubit, LocalizationState>(
+                    builder: (context, localizationState) {
+                      return Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.menu,
+                          color: AppColors.brownDark,
+                          size: 24,
+                        ),
+                      );
+                    },
+                  ),
+                  itemBuilder: (BuildContext context) => [
+                    // PopupMenuItem<String>(
+                    //   value: 'notification',
+                    //   child: Row(
+                    //     children: [
+                    //       Icon(
+                    //         Icons.notifications_outlined,
+                    //         color: AppColors.brownDeep,
+                    //         size: 20,
+                    //       ),
+                    //       12.horizontalSpace,
+                    //       Text(
+                    //         context.trNoListen(AppStrings.notifications),
+                    //         style: context.medium.copyWith(
+                    //           color: AppColors.brownDarker,
+                    //           fontSize: 14,
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    // PopupMenuItem<String>(
+                    //   value: 'quiz',
+                    //   enabled: !_isOnRoute(currentRoute, Routes.quiz),
+                    //   child: Row(
+                    //     children: [
+                    //       Icon(
+                    //         Icons.quiz_outlined,
+                    //         color: _isOnRoute(currentRoute, Routes.quiz)
+                    //             ? AppColors.taupe
+                    //             : AppColors.brownDeep,
+                    //         size: 20,
+                    //       ),
+                    //       12.horizontalSpace,
+                    //       Text(
+                    //         context.trNoListen(AppStrings.quiz),
+                    //         style: context.medium.copyWith(
+                    //           color: _isOnRoute(currentRoute, Routes.quiz)
+                    //               ? AppColors.taupe
+                    //               : AppColors.brownDarker,
+                    //           fontSize: 14,
+                    //         ),
+                    //       ),
+                    //       if (_isOnRoute(currentRoute, Routes.quiz)) ...[
+                    //         4.horizontalSpace,
+                    //         Icon(
+                    //           Icons.check_circle,
+                    //           color: AppColors.green,
+                    //           size: 16,
+                    //         ),
+                    //       ],
+                    //     ],
+                    //   ),
+                    // ),
+                    // PopupMenuItem<String>(
+                    //   value: 'training',
+                    //   enabled: !_isOnRoute(currentRoute, Routes.training),
+                    //   child: Row(
+                    //     children: [
+                    //       Icon(
+                    //         Icons.school_outlined,
+                    //         color: _isOnRoute(currentRoute, Routes.training)
+                    //             ? AppColors.taupe
+                    //             : AppColors.brownDeep,
+                    //         size: 20,
+                    //       ),
+                    //       12.horizontalSpace,
+                    //       Text(
+                    //         context.trNoListen(AppStrings.training),
+                    //         style: context.medium.copyWith(
+                    //           color: _isOnRoute(currentRoute, Routes.training)
+                    //               ? AppColors.taupe
+                    //               : AppColors.brownDarker,
+                    //           fontSize: 14,
+                    //         ),
+                    //       ),
+                    //       if (_isOnRoute(currentRoute, Routes.training)) ...[
+                    //         4.horizontalSpace,
+                    //         Icon(
+                    //           Icons.check_circle,
+                    //           color: AppColors.green,
+                    //           size: 16,
+                    //         ),
+                    //       ],
+                    //     ],
+                    //   ),
+                    // ),
+                    // PopupMenuItem<String>(
+                    //   height: 1,
+                    //   enabled: false,
+                    //   child: Divider(color: AppColors.lightBeige, thickness: 1),
+                    // ),
+                    PopupMenuItem<String>(
+                      value: 'logout',
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            AppImages.logout,
+                            color: AppColors.red,
+                            height: 20,
+                          ),
+                          12.horizontalSpace,
+                          Text(
+                            context.trNoListen(AppStrings.logout),
+                            style: context.medium.copyWith(
+                              color: AppColors.red,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onSelected: (String value) {
+                    switch (value) {
+                      // case 'notification':
+                      //   // Handle notification action
+                      //   // context.pushNamed('/notifications');
+                      //   break;
+                      // case 'quiz':
+                      //   // Only navigate if not already on quiz page
+                      //   if (!_isOnRoute(currentRoute, Routes.quiz)) {
+                      //     context.pushNamed(Routes.quiz);
+                      //   }
+                      //   break;
+                      // case 'training':
+                      //   // Only navigate if not already on training page
+                      //   if (!_isOnRoute(currentRoute, Routes.training)) {
+                      //     context.pushNamed(Routes.training);
+                      //   }
+                      // break;
+                      case 'Break':
+                        // SessionManager.clearSession();
+                        // context.goNamed(Routes.login);
+                        break;
+                      case 'logout':
+                        // Only a token being called or served blocks logout
+                        // (same rule as the backend). The counter status can
+                        // read IDLE while a token is still on screen, so check
+                        // the token as well. Any other status (CLOSED after a
+                        // login elsewhere, COMPLETE while the visitor rates)
+                        // must not block: the backend decides.
+                        final hasActiveToken =
+                            state.currentToken?.id.isNotEmpty ?? false;
+                        final status = state.counter?.status;
+                        if (!hasActiveToken &&
+                            status != 'CALLING' &&
+                            status != 'SERVING') {
+                          context.read<HomeCubit>().logout().then((ok) {
+                            if (ok && context.mounted) {
+                              context.goNamed(Routes.login);
+                            }
+                          });
+                        } else {
+                          flutterToast(
+                            message: 'Finish the current token to logout.',
+                          );
+                        }
 
-                      break;
-                  }
-                },
-              ),
-              10.horizontalSpace,
-            ],
+                        break;
+                    }
+                  },
+                ),
+                10.horizontalSpace,
+              ],
+            ),
           ),
         );
       },
