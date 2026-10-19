@@ -267,76 +267,138 @@ class MainPanel extends StatelessWidget {
   // Token on top, full service name below, minutes on the side.
   Widget _historyTile(BuildContext context, ServiceHistory item) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    item.token,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.white,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                if (item.civilId.trim().isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    item.civilId,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: AppColors.brownVeryDark,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 6),
-                Text(
-                  item.service,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.brownDark,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.green.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              '${item.time} ${context.tr(AppStrings.mins)}',
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.green,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.lightBeige.withValues(alpha: 0.6)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.brownDeep.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(width: 5, color: AppColors.primary),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 16, 14),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  item.token,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.white,
+                                    fontSize: 15,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(
+                                Icons.check_circle_rounded,
+                                size: 18,
+                                color: AppColors.green,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          _historyLine(
+                            Icons.room_service_outlined,
+                            item.service,
+                            const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.brownDeep,
+                            ),
+                          ),
+                          if (item.civilId.trim().isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            _historyLine(
+                              Icons.badge_outlined,
+                              item.civilId,
+                              const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.taupe,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.green.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.timer_outlined,
+                            size: 15,
+                            color: AppColors.green,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            '${item.time} ${context.tr(AppStrings.mins)}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.green,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _historyLine(IconData icon, String text, TextStyle style) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Icon(icon, size: 16, color: AppColors.taupe),
+        ),
+        const SizedBox(width: 6),
+        Expanded(child: Text(text, style: style)),
+      ],
     );
   }
 }
