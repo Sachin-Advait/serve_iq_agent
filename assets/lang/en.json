@@ -26,7 +26,7 @@
   "queue_upcoming_tokens": "Upcoming Tokens",
   "queue_no_upcoming_tokens": "No upcoming tokens",
   "queue_transferred_tokens": "Transferred Tokens",
-  "queue_from_counter": "From: Counter",
+  "queue_from_counter": "From:",
 
   "transfer_title": "Transfer Visitor",
   "transfer_token_label": "Token",

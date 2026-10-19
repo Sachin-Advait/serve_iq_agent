@@ -102,6 +102,12 @@ class Header extends StatelessWidget {
                         children: [
                           Text(
                             '${context.trNoListen(AppStrings.agent)}: ${SessionManager.getUsername()}',
+                            // The header is laid out LTR; keep the Arabic
+                            // label right to left so the colon lands right.
+                            textDirection:
+                                localizationState.locale.languageCode == 'en'
+                                ? TextDirection.ltr
+                                : TextDirection.rtl,
                             style: context.medium.copyWith(
                               color: AppColors.brownDark,
                               fontWeight: FontWeight.w600,
