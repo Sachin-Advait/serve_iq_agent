@@ -27,10 +27,12 @@ class Header extends StatelessWidget {
       builder: (context, state) {
         final displayText = SessionManager.getCounterName();
 
-        // The header keeps the English layout in both languages; only the
-        // language icon flips in Arabic.
+        // The header follows the language: right to left in Arabic.
+        final isEnglish =
+            context.watch<LocalizationCubit>().state.locale.languageCode ==
+            'en';
         return Directionality(
-          textDirection: TextDirection.ltr,
+          textDirection: isEnglish ? TextDirection.ltr : TextDirection.rtl,
           child: Container(
             padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
             child: Row(
@@ -91,7 +93,7 @@ class Header extends StatelessWidget {
                 BlocBuilder<LocalizationCubit, LocalizationState>(
                   builder: (context, localizationState) {
                     return Container(
-                      padding: const EdgeInsets.only(left: 12),
+                      padding: const EdgeInsetsDirectional.only(start: 12),
                       decoration: BoxDecoration(
                         color: AppColors.white,
                         borderRadius: BorderRadius.circular(20),
@@ -102,12 +104,6 @@ class Header extends StatelessWidget {
                         children: [
                           Text(
                             '${context.trNoListen(AppStrings.agent)}: ${SessionManager.getUsername()}',
-                            // The header is laid out LTR; keep the Arabic
-                            // label right to left so the colon lands right.
-                            textDirection:
-                                localizationState.locale.languageCode == 'en'
-                                ? TextDirection.ltr
-                                : TextDirection.rtl,
                             style: context.medium.copyWith(
                               color: AppColors.brownDark,
                               fontWeight: FontWeight.w600,
