@@ -33,6 +33,7 @@ class _QuizPageState extends State<QuizPage> {
           image: DecorationImage(
             image: AssetImage(AppImages.bg),
             fit: BoxFit.cover,
+            matchTextDirection: true,
           ),
         ),
         child: Column(

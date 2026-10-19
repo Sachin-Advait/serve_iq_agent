@@ -58,6 +58,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             image: DecorationImage(
               image: AssetImage(AppImages.bg),
               fit: BoxFit.cover,
+              matchTextDirection: true,
             ),
           ),
           child: BlocListener<HomeCubit, HomeState>(

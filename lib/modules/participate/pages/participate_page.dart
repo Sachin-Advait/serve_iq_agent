@@ -77,6 +77,7 @@ class _ParticipatePageState extends State<ParticipatePage> {
           image: DecorationImage(
             image: AssetImage(AppImages.bg),
             fit: BoxFit.cover,
+            matchTextDirection: true,
           ),
         ),
         child: Column(

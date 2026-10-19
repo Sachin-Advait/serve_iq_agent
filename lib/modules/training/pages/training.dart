@@ -71,6 +71,7 @@ class _TrainingState extends State<Training> {
           image: DecorationImage(
             image: AssetImage(AppImages.bg),
             fit: BoxFit.cover,
+            matchTextDirection: true,
           ),
         ),
         child: Column(

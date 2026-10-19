@@ -64,6 +64,7 @@ class _LoginPageState extends State<LoginPage> {
             image: DecorationImage(
               image: AssetImage(AppImages.bg),
               fit: BoxFit.cover,
+              matchTextDirection: true,
             ),
           ),
           child: Center(
