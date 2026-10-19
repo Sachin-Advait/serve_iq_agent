@@ -20,11 +20,40 @@ part 'home_state.dart';
 class HomeCubit extends Cubit<HomeState> {
   final HomeRepository agentRepository;
   Timer? _completeButtonTimer;
+  Timer? _feedbackWatchTimer;
+  bool _socketConnectedOnce = false;
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
   final Connectivity _connectivity = Connectivity();
 
   HomeCubit(this.agentRepository) : super(const HomeState()) {
     _initializeConnectivityListener();
+    _startFeedbackWatch();
+  }
+
+  /// While the counter waits for the visitor's rating, re-read it every few
+  /// seconds. The server frees it after its feedback timeout and pushes that
+  /// over the socket, but a push sent while the socket was reconnecting is
+  /// lost, which left the "visitor is writing feedback" screen up until a
+  /// page refresh.
+  void _startFeedbackWatch() {
+    _feedbackWatchTimer?.cancel();
+    _feedbackWatchTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      if (state.counter?.status != 'COMPLETE' || !state.isNetworkConnected) {
+        return;
+      }
+      try {
+        final counter = await agentRepository.getCounter();
+        if (isClosed || counter.status == state.counter?.status) return;
+        emit(
+          state.copyWith(
+            counter: counter,
+            recentServices: await agentRepository.getRecentTokens(),
+          ),
+        );
+      } catch (e) {
+        debugPrint('Feedback watch failed: $e');
+      }
+    });
   }
 
   void _initializeConnectivityListener() {
@@ -245,6 +274,14 @@ class HomeCubit extends Cubit<HomeState> {
         );
       }
     } else {
+      // Updates pushed while the socket was down are lost, so reload once
+      // it's back (the first connect already has fresh data).
+      final isReconnect = _socketConnectedOnce;
+      _socketConnectedOnce = true;
+      if (isReconnect && state.status == HomeStatus.loaded) {
+        loadingData();
+      }
+
       // Emit connected state
       emit(
         state.copyWith(
@@ -837,6 +874,7 @@ class HomeCubit extends Cubit<HomeState> {
   @override
   Future<void> close() {
     _completeButtonTimer?.cancel();
+    _feedbackWatchTimer?.cancel();
     _connectivitySubscription.cancel();
     WebSocketService.disconnect();
     return super.close();
