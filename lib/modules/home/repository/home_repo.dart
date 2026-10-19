@@ -91,9 +91,10 @@ class HomeRepository {
     await _apiClient.postApi(ApiConstants.startServing + tokenId);
   }
 
-  Future<void> completeToken(String tokenId) async {
+  Future<void> completeToken(String tokenId, {String? note}) async {
     final response = await _apiClient.postApi(
       ApiConstants.completeService + tokenId,
+      body: {'note': note},
     );
 
     if (response == null) throw ApiErrorShown();

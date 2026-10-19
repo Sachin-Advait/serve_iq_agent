@@ -68,6 +68,7 @@ class AppStrings {
   static const recentServicesWillAppearHere =
       "recent_services_will_appear_here";
   static const mins = "mins";
+  static const secs = "secs";
 
   static const agent = 'agent';
   static const serving = 'serving';

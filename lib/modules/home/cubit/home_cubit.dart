@@ -21,6 +21,16 @@ class HomeCubit extends Cubit<HomeState> {
   final HomeRepository agentRepository;
   Timer? _completeButtonTimer;
   Timer? _feedbackWatchTimer;
+
+  // The agent's note for the token being served; sent when it's completed.
+  String _note = '';
+  String? _noteTokenId;
+
+  void updateNote(String tokenId, String note) {
+    _noteTokenId = tokenId;
+    _note = note;
+  }
+
   bool _socketConnectedOnce = false;
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
   final Connectivity _connectivity = Connectivity();
@@ -567,7 +577,13 @@ class HomeCubit extends Cubit<HomeState> {
       final tokenId = state.currentToken!.id;
 
       // Complete the current service
-      await agentRepository.completeToken(tokenId);
+      final note = _noteTokenId == tokenId ? _note.trim() : '';
+      await agentRepository.completeToken(
+        tokenId,
+        note: note.isEmpty ? null : note,
+      );
+      _note = '';
+      _noteTokenId = null;
       final counter = await agentRepository.getCounter();
 
       // Cancel timer and reset state

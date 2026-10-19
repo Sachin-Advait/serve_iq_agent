@@ -1,5 +1,6 @@
 // components/main_panel.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servelq_agent/common/constants/app_strings.dart';
 import 'package:servelq_agent/common/utils/app_screen_util.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
@@ -134,9 +135,15 @@ class MainPanel extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           TextField(
+            // A fresh field for each visitor
+            key: ValueKey('note-${token.id}'),
             maxLines: 3,
+            maxLength: 1000,
             textInputAction: TextInputAction.done,
+            onChanged: (value) =>
+                context.read<HomeCubit>().updateNote(token.id, value),
             decoration: InputDecoration(
+              counterText: '',
               hintText: context.tr(AppStrings.addNotesOrAttachDocuments),
               hintStyle: const TextStyle(color: AppColors.taupe),
               filled: true,
@@ -223,8 +230,7 @@ class MainPanel extends StatelessWidget {
                       ],
                     ),
                   )
-                : state.recentServices.length > 3
-                ? ListView.builder(
+                : ListView.builder(
                     // Two per row; each row grows to fit the longest text.
                     itemCount: (state.recentServices.length + 1) ~/ 2,
                     itemBuilder: (context, row) {
@@ -250,13 +256,6 @@ class MainPanel extends StatelessWidget {
                         ),
                       );
                     },
-                  )
-                : ListView.builder(
-                    itemCount: state.recentServices.length,
-                    itemBuilder: (context, index) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _historyTile(context, state.recentServices[index]),
-                    ),
                   ),
           ),
         ],
@@ -293,7 +292,7 @@ class MainPanel extends StatelessWidget {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Row(
                             children: [
@@ -345,6 +344,18 @@ class MainPanel extends StatelessWidget {
                               ),
                             ),
                           ],
+                          if (item.note.trim().isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            _historyLine(
+                              Icons.sticky_note_2_outlined,
+                              item.note,
+                              const TextStyle(
+                                fontSize: 13,
+                                fontStyle: FontStyle.italic,
+                                color: AppColors.brownDark,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -368,7 +379,9 @@ class MainPanel extends StatelessWidget {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            '${item.time} ${context.tr(AppStrings.mins)}',
+                            item.time > 0
+                                ? '${item.time} ${context.tr(AppStrings.mins)}'
+                                : '${item.seconds} ${context.tr(AppStrings.secs)}',
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.green,
