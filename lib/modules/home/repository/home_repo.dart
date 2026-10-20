@@ -2,6 +2,7 @@ import 'package:servelq_agent/common/constants/api_constants.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
 import 'package:servelq_agent/models/token_model.dart';
+import 'package:servelq_agent/models/transfer_reason_model.dart';
 import 'package:servelq_agent/services/api_client.dart';
 import 'package:servelq_agent/services/session_manager.dart';
 
@@ -139,6 +140,19 @@ class HomeRepository {
     } catch (e) {
       rethrow;
     }
+  }
+
+  /// The active transfer reasons, in the admin's order.
+  Future<List<TransferReasonModel>> getTransferReasons() async {
+    final response = await _apiClient.getApi(ApiConstants.transferReasons);
+    final data = response?.data;
+    if (response?.statusCode == 200 && data is List) {
+      return data
+          .map((item) => TransferReasonModel.fromJson(item))
+          .where((reason) => reason.code.isNotEmpty)
+          .toList();
+    }
+    throw Exception('Failed to load transfer reasons');
   }
 
   Future<List<CounterModel>> getAllCounters() async {

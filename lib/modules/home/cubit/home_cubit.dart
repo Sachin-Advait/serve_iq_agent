@@ -10,6 +10,7 @@ import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
 import 'package:servelq_agent/models/token_model.dart';
+import 'package:servelq_agent/models/transfer_reason_model.dart';
 import 'package:servelq_agent/modules/home/repository/home_repo.dart';
 import 'package:servelq_agent/services/api_client.dart';
 import 'package:servelq_agent/services/session_manager.dart';
@@ -430,6 +431,7 @@ class HomeCubit extends Cubit<HomeState> {
           recentServices: recentServices,
           currentToken: activeToken,
           allCounter: allCounter,
+          transferReasons: state.transferReasons,
           isNetworkConnected: state.isNetworkConnected,
           connectivityStatus: state.connectivityStatus,
           webSocketStatus: WebSocketService.isConnected
@@ -438,6 +440,7 @@ class HomeCubit extends Cubit<HomeState> {
           webSocketErrorMessage: state.webSocketErrorMessage,
         ),
       );
+      refreshTransferReasons();
     } catch (e) {
       debugPrint('Error loading data: $e');
 
@@ -640,6 +643,19 @@ class HomeCubit extends Cubit<HomeState> {
       );
     } finally {
       EasyLoading.dismiss();
+    }
+  }
+
+  /// Loads the transfer reasons the admin set up. Returns null (keeping the
+  /// old list) when the call fails, e.g. on a backend without the endpoint.
+  Future<List<TransferReasonModel>?> refreshTransferReasons() async {
+    try {
+      final reasons = await agentRepository.getTransferReasons();
+      if (!isClosed) emit(state.copyWith(transferReasons: reasons));
+      return reasons;
+    } catch (e) {
+      debugPrint('Error loading transfer reasons: $e');
+      return null;
     }
   }
 

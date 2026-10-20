@@ -7,6 +7,7 @@ import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/configs/theme/app_theme.dart';
+import 'package:servelq_agent/models/transfer_reason_model.dart';
 import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
 import 'package:servelq_agent/modules/home/pages/components/widgets.dart';
 
@@ -375,8 +376,10 @@ class LeftPane extends StatelessWidget {
                     if (token.transferReason != null)
                       _detailLine(
                         Icons.info_outline_rounded,
-                        context.tr(
-                          AppStrings.transferReason(token.transferReason!),
+                        transferReasonTitle(
+                          context,
+                          token.transferReason!,
+                          state.transferReasons,
                         ),
                         AppColors.brownDeep,
                       ),

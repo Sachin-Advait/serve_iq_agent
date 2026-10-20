@@ -7,6 +7,7 @@ import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/models/counter_model.dart';
+import 'package:servelq_agent/models/transfer_reason_model.dart';
 import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
 
 class TransferDialog extends StatefulWidget {
@@ -26,6 +27,7 @@ class _TransferDialogState extends State<TransferDialog> {
   bool isTransferring = false;
   String searchQuery = '';
   late List<CounterModel> counters = widget.state.allCounter;
+  late List<TransferReasonModel> reasons = widget.state.transferReasons;
 
   @override
   void initState() {
@@ -34,6 +36,10 @@ class _TransferDialogState extends State<TransferDialog> {
     // out, so fetch who holds which counter right now.
     context.read<HomeCubit>().refreshAllCounters().then((fresh) {
       if (mounted && fresh != null) setState(() => counters = fresh);
+    });
+    // The admin may have changed the reasons since the home screen loaded.
+    context.read<HomeCubit>().refreshTransferReasons().then((fresh) {
+      if (mounted && fresh != null) setState(() => reasons = fresh);
     });
   }
 
@@ -157,11 +163,16 @@ class _TransferDialogState extends State<TransferDialog> {
     );
   }
 
+  // The admin's list, or the original codes if it couldn't be loaded.
+  List<String> get reasonCodes => reasons.isNotEmpty
+      ? reasons.map((reason) => reason.code).toList()
+      : AppStrings.transferReasons;
+
   Widget _buildReasonList() {
     return ListView(
       shrinkWrap: true,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      children: AppStrings.transferReasons.map((code) {
+      children: reasonCodes.map((code) {
         final isSelected = selectedReason == code;
         return Container(
           margin: const EdgeInsets.only(bottom: 8),
@@ -182,7 +193,7 @@ class _TransferDialogState extends State<TransferDialog> {
               borderRadius: BorderRadius.circular(12),
             ),
             title: Text(
-              context.tr(AppStrings.transferReason(code)),
+              transferReasonTitle(context, code, reasons),
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,

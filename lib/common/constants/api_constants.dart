@@ -57,6 +57,7 @@ class ApiConstants {
 
   // ---------- COUNTERS ----------
   static const String counters = 'counters';
+  static const String transferReasons = 'transfer-reasons';
   static const String singleCounter = 'counters/';
   static const String authCounters = 'auth/counters';
 

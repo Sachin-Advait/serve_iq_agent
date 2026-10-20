@@ -40,8 +40,9 @@ class AppStrings {
   static const transferReasonLabel = 'transfer_reason_label';
   static const queueNoShowTokens = 'queue_no_show_tokens';
 
-  /// Transfer reason codes the backend accepts (TransferReason enum); each
-  /// has a 'transfer_reason_<CODE>' translation.
+  /// The original transfer reason codes, each with a 'transfer_reason_<CODE>'
+  /// translation. The admin now manages the list on the server; these are
+  /// only used when it can't be loaded.
   static const transferReasons = [
     'WRONG_SERVICE',
     'NEEDS_SPECIALIST',

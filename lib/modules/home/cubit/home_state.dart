@@ -19,6 +19,7 @@ class HomeState {
   final List<ServiceHistory> recentServices;
   final TokenModel? currentToken;
   final List<CounterModel> allCounter;
+  final List<TransferReasonModel> transferReasons;
   final int completeButtonRemainingSeconds;
   final bool isCompleteButtonDisabled;
   final bool isNetworkConnected;
@@ -37,6 +38,7 @@ class HomeState {
     this.recentServices = const [],
     this.currentToken,
     this.allCounter = const [],
+    this.transferReasons = const [],
     this.completeButtonRemainingSeconds = 0,
     this.isCompleteButtonDisabled = false,
     this.isNetworkConnected = true,
@@ -56,6 +58,7 @@ class HomeState {
     List<ServiceHistory>? recentServices,
     TokenModel? currentToken,
     List<CounterModel>? allCounter,
+    List<TransferReasonModel>? transferReasons,
     int? completeButtonRemainingSeconds,
     bool? isCompleteButtonDisabled,
     bool? isNetworkConnected,
@@ -75,6 +78,7 @@ class HomeState {
       recentServices: recentServices ?? this.recentServices,
       currentToken: currentToken ?? this.currentToken,
       allCounter: allCounter ?? this.allCounter,
+      transferReasons: transferReasons ?? this.transferReasons,
       completeButtonRemainingSeconds:
           completeButtonRemainingSeconds ?? this.completeButtonRemainingSeconds,
       isCompleteButtonDisabled:
