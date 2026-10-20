@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servelq_agent/common/constants/app_strings.dart';
 import 'package:servelq_agent/common/utils/app_screen_util.dart';
+import 'package:servelq_agent/common/widgets/app_logo.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/lang/localization_cubit.dart';
@@ -38,11 +39,7 @@ class Header extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Image.asset(
-                  AppImages.logo,
-                  height: 40,
-                  filterQuality: FilterQuality.high,
-                ),
+                AppLogo(height: 40),
                 20.horizontalSpace,
                 Text(
                   displayText,

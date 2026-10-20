@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servelq_agent/common/constants/app_strings.dart';
 import 'package:servelq_agent/common/utils/app_screen_util.dart';
+import 'package:servelq_agent/common/widgets/app_logo.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/common/widgets/primary_button.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
@@ -102,13 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        AppImages.logo,
-                        height: 60.heightMultiplier,
-                        filterQuality: FilterQuality.high,
-                      ),
-                    ],
+                    children: [AppLogo(height: 60.heightMultiplier)],
                   ),
                   40.verticalSpace,
                   BlocBuilder<LoginBloc, LoginState>(
