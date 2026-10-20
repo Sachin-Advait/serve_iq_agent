@@ -39,7 +39,7 @@ class Header extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                AppLogo(height: 40),
+                AppLogo(height: 50),
                 20.horizontalSpace,
                 Text(
                   displayText,

@@ -103,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [AppLogo(height: 60.heightMultiplier)],
+                    children: [AppLogo(height: 80.heightMultiplier)],
                   ),
                   40.verticalSpace,
                   BlocBuilder<LoginBloc, LoginState>(
