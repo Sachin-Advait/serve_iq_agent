@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:servelq_agent/common/constants/app_strings.dart';
 import 'package:servelq_agent/common/utils/app_screen_util.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
 import 'package:servelq_agent/common/widgets/primary_button.dart';
 import 'package:servelq_agent/configs/assets/app_images.dart';
+import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/models/counter_option.dart';
 import 'package:servelq_agent/modules/login/bloc/login_bloc.dart';
@@ -37,7 +39,9 @@ class _LoginPageState extends State<LoginPage> {
 
   void _performLogin() {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      return flutterToast(message: 'Email and password cannot be empty');
+      return flutterToast(
+        message: context.trNoListen(AppStrings.emailPasswordRequired),
+      );
     }
     context.read<LoginBloc>().add(
       AgentLogin(
@@ -92,6 +96,10 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  const Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: _LanguagePicker(),
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -102,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ],
                   ),
-                  50.verticalSpace,
+                  40.verticalSpace,
                   BlocBuilder<LoginBloc, LoginState>(
                     buildWhen: (prev, curr) =>
                         prev.counters != curr.counters ||
@@ -146,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                               color: AppColors.primary,
                             ),
                             label: Text(
-                              'No counters — tap to retry',
+                              context.tr(AppStrings.noCountersRetry),
                               style: TextStyle(
                                 color: AppColors.brownDarker,
                                 fontSize: 16.textMultiplier,
@@ -182,7 +190,7 @@ class _LoginPageState extends State<LoginPage> {
                               size: 28.widthMultiplier,
                             ),
                           ),
-                          labelText: 'Counter',
+                          labelText: context.tr(AppStrings.counter),
                           labelStyle: TextStyle(
                             color: AppColors.brownDarker,
                             fontSize: 18.textMultiplier,
@@ -222,7 +230,7 @@ class _LoginPageState extends State<LoginPage> {
                         selectedItemBuilder: (context) => state.counters
                             .map(
                               (c) => Align(
-                                alignment: Alignment.centerLeft,
+                                alignment: AlignmentDirectional.centerStart,
                                 child: Text(
                                   c.name,
                                   overflow: TextOverflow.ellipsis,
@@ -276,7 +284,7 @@ class _LoginPageState extends State<LoginPage> {
                                         ),
                                         if (blocked)
                                           Text(
-                                            'In use by ${c.occupiedByName ?? 'another agent'}',
+                                            '${context.tr(AppStrings.inUseBy)} ${c.occupiedByName ?? context.tr(AppStrings.anotherAgent)}',
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                               color: AppColors.beige,
@@ -299,7 +307,7 @@ class _LoginPageState extends State<LoginPage> {
                                     )
                                   : null,
                         hint: Text(
-                          'Select a counter',
+                          context.tr(AppStrings.selectCounter),
                           style: TextStyle(
                             color: AppColors.warmGray,
                             fontSize: 18.textMultiplier,
@@ -316,14 +324,14 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         _buildTextField(
                           controller: _emailController,
-                          label: 'Email Address',
+                          label: context.tr(AppStrings.emailAddress),
                           icon: Icons.email_outlined,
                           enabled: !state.submitting,
                         ),
                         24.verticalSpace,
                         _buildTextField(
                           controller: _passwordController,
-                          label: 'Password',
+                          label: context.tr(AppStrings.password),
                           icon: Icons.lock_outline,
                           obscureText: _obscurePassword,
                           enabled: !state.submitting,
@@ -341,7 +349,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         40.verticalSpace,
                         PrimaryButton(
-                          label: 'Login',
+                          label: context.tr(AppStrings.login),
                           color: AppColors.primary,
                           isLoading: state.submitting,
                           onPressed: _performLogin,
@@ -402,6 +410,64 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
       style: TextStyle(fontSize: 18.textMultiplier),
+    );
+  }
+}
+
+/// English / Arabic switch on the login card; the choice is remembered.
+class _LanguagePicker extends StatelessWidget {
+  const _LanguagePicker();
+
+  @override
+  Widget build(BuildContext context) {
+    final current = context.currentLocale.languageCode;
+    return Container(
+      padding: EdgeInsets.all(4.widthMultiplier),
+      decoration: BoxDecoration(
+        color: AppColors.offWhite,
+        borderRadius: BorderRadius.circular(20.radiusMultipier),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _option(context, LocalizationCubit.arabic, 'العربية', current),
+          _option(context, LocalizationCubit.english, 'English', current),
+        ],
+      ),
+    );
+  }
+
+  Widget _option(
+    BuildContext context,
+    Locale locale,
+    String label,
+    String current,
+  ) {
+    final selected = locale.languageCode == current;
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => context.read<LocalizationCubit>().setLocale(locale),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: EdgeInsets.symmetric(
+            horizontal: 14.widthMultiplier,
+            vertical: 6.heightMultiplier,
+          ),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(16.radiusMultipier),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected ? AppColors.white : AppColors.brownDarker,
+              fontSize: 14.textMultiplier,
+              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

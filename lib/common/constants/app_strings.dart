@@ -78,4 +78,14 @@ class AppStrings {
   static const quiz = 'quiz';
   static const training = 'training';
   static const logout = 'logout';
+
+  static const login = 'login';
+  static const emailAddress = 'email_address';
+  static const password = 'password';
+  static const counter = 'counter';
+  static const selectCounter = 'select_counter';
+  static const noCountersRetry = 'no_counters_retry';
+  static const inUseBy = 'in_use_by';
+  static const anotherAgent = 'another_agent';
+  static const emailPasswordRequired = 'email_password_required';
 }

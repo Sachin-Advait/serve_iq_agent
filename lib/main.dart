@@ -21,7 +21,8 @@ Future<void> main() async {
 
   setUrlStrategy(PathUrlStrategy());
   GoRouter.optionURLReflectsImperativeAPIs = true;
-  GetStorage.init();
+  await GetStorage.init();
+  await GetStorage.init(LocalizationCubit.storageBox);
   getItSetup();
 
   // Adding Firebase configuration utils

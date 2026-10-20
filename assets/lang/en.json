@@ -69,5 +69,14 @@
   "notifications": "Notifications",
   "quiz": "Quiz",
   "training": "Training",
-  "logout": "Logout"
+  "logout": "Logout",
+  "login": "Login",
+  "email_address": "Email Address",
+  "password": "Password",
+  "counter": "Counter",
+  "select_counter": "Select a counter",
+  "no_counters_retry": "No counters — tap to retry",
+  "in_use_by": "In use by",
+  "another_agent": "another agent",
+  "email_password_required": "Email and password cannot be empty"
 }

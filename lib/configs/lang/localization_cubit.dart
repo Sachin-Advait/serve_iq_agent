@@ -4,12 +4,27 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_storage/get_storage.dart';
 
 part 'localization_state.dart';
 
 class LocalizationCubit extends Cubit<LocalizationState> {
+  // Kept in its own box so logging out (which erases the session box) does
+  // not reset the language.
+  static const storageBox = 'settings';
+  static const _langKey = 'Language';
+  static final _storage = GetStorage(storageBox);
+
+  static const english = Locale('en', 'US');
+  static const arabic = Locale('ar', 'SA');
+
+  // Arabic unless the user already picked a language on this device.
   LocalizationCubit()
-    : super(LocalizationState(locale: const Locale('en', 'US')));
+    : super(
+        LocalizationState(
+          locale: _storage.read<String?>(_langKey) == 'en' ? english : arabic,
+        ),
+      );
 
   Map<String, String> _localizedStrings = {};
 
@@ -26,12 +41,13 @@ class LocalizationCubit extends Cubit<LocalizationState> {
     emit(state.copyWith());
   }
 
-  void toggleLanguage() {
-    final newLocale = state.locale.languageCode == 'en'
-        ? const Locale('ar', 'SA')
-        : const Locale('en', 'US');
+  void toggleLanguage() =>
+      setLocale(state.locale.languageCode == 'en' ? arabic : english);
 
-    emit(state.copyWith(locale: newLocale));
+  void setLocale(Locale locale) {
+    if (locale.languageCode == state.locale.languageCode) return;
+    _storage.write(_langKey, locale.languageCode);
+    emit(state.copyWith(locale: locale));
     load();
   }
 

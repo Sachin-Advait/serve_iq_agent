@@ -68,5 +68,14 @@
   "notifications": "الإشعارات",
   "quiz": "اختبار",
   "training": "التدريب",
-  "logout": "تسجيل الخروج"
+  "logout": "تسجيل الخروج",
+  "login": "تسجيل الدخول",
+  "email_address": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "counter": "الكاونتر",
+  "select_counter": "اختر الكاونتر",
+  "no_counters_retry": "لا توجد كاونترات — اضغط لإعادة المحاولة",
+  "in_use_by": "مستخدم بواسطة",
+  "another_agent": "موظف آخر",
+  "email_password_required": "البريد الإلكتروني وكلمة المرور مطلوبان"
 }
