@@ -95,7 +95,11 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset(AppImages.logo, height: 60.heightMultiplier),
+                      Image.asset(
+                        AppImages.logo,
+                        height: 60.heightMultiplier,
+                        filterQuality: FilterQuality.high,
+                      ),
                     ],
                   ),
                   50.verticalSpace,

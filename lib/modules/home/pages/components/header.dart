@@ -38,7 +38,11 @@ class Header extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Image.asset(AppImages.logo, height: 40),
+                Image.asset(
+                  AppImages.logo,
+                  height: 40,
+                  filterQuality: FilterQuality.high,
+                ),
                 20.horizontalSpace,
                 Text(
                   displayText,
