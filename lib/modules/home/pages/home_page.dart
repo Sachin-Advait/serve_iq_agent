@@ -265,7 +265,7 @@ class WebSocketStatusBanner extends StatelessWidget {
                       if (state.webSocketErrorMessage != null) ...[
                         const SizedBox(height: 4),
                         Text(
-                          state.webSocketErrorMessage!,
+                          context.tr(state.webSocketErrorMessage!),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,

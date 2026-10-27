@@ -267,7 +267,7 @@ class _TransferDialogState extends State<TransferDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${counter.name} - ${counter.username ?? 'No agent has picked up this counter yet.'}',
+                        '${counter.name} - ${counter.username ?? context.tr('no_agent_on_counter')}',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -332,7 +332,9 @@ class _TransferDialogState extends State<TransferDialog> {
               ),
               child: Text(
                 context.tr(
-                  step == 0 ? AppStrings.transferCancel : AppStrings.transferBack,
+                  step == 0
+                      ? AppStrings.transferCancel
+                      : AppStrings.transferBack,
                 ),
                 style: TextStyle(
                   color: AppColors.brownDeep,

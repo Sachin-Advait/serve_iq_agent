@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:servelq_agent/common/constants/api_constants.dart';
+import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/services/session_manager.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 
@@ -172,7 +173,7 @@ class WebSocketService {
           );
 
           // Notify user of successful connection
-          _onConnectionStatus?.call('Connected to server', false);
+          _onConnectionStatus?.call('ws_connected', false);
 
           // Subscribe to upcoming queue updates
           _stompClient?.subscribe(
@@ -326,8 +327,9 @@ class WebSocketService {
       // Notify user once
       if (!_hasNotifiedUser) {
         _onConnectionStatus?.call(
-          'Unable to connect to server after $MAX_RECONNECT_ATTEMPTS attempts. '
-          'Please check your connection and tap retry.',
+          LocalizationCubit.translateKey(
+            'ws_unable_to_connect',
+          ).replaceAll('{n}', '$MAX_RECONNECT_ATTEMPTS'),
           true, // isError = true
         );
         _hasNotifiedUser = true;
@@ -339,7 +341,7 @@ class WebSocketService {
     // Notify user after 3 failed attempts
     if (_reconnectAttempts == 3 && !_hasNotifiedUser) {
       _onConnectionStatus?.call(
-        'Having trouble connecting to the server. Retrying...',
+        'ws_trouble_connecting',
         true, // isError = true
       );
       _hasNotifiedUser = true;

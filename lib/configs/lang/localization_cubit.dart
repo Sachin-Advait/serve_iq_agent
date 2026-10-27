@@ -24,7 +24,15 @@ class LocalizationCubit extends Cubit<LocalizationState> {
         LocalizationState(
           locale: _storage.read<String?>(_langKey) == 'en' ? english : arabic,
         ),
-      );
+      ) {
+    _instance = this;
+  }
+
+  static LocalizationCubit? _instance;
+
+  /// For code with no BuildContext (cubits, services, toasts): the current
+  /// language's text for [key], or [key] itself when there is none.
+  static String translateKey(String key) => _instance?.translate(key) ?? key;
 
   Map<String, String> _localizedStrings = {};
 

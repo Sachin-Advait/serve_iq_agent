@@ -45,7 +45,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   Future<void> _onAgentLogin(AgentLogin event, Emitter<LoginState> emit) async {
     final counterId = state.selectedCounterId;
     if (counterId == null) {
-      emit(state.copyWith(errorMessage: 'Please select a counter'));
+      emit(state.copyWith(errorMessage: 'please_select_counter'));
       return;
     }
     emit(state.copyWith(submitting: true, clearError: true));
@@ -55,7 +55,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         password: event.password,
         counterId: counterId,
       );
-     
+
       emit(state.copyWith(submitting: false, user: user));
     } catch (e) {
       emit(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/common/utils/global_keys.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
@@ -9,7 +10,9 @@ import 'package:top_snackbar_flutter/top_snack_bar.dart';
 String? _lastMessage;
 DateTime _lastShownAt = DateTime.fromMillisecondsSinceEpoch(0);
 
+/// [message] may be a translation key; it is shown in the current language.
 void flutterToast({required String message, Color? color}) {
+  message = LocalizationCubit.translateKey(message);
   final now = DateTime.now();
   if (message == _lastMessage &&
       now.difference(_lastShownAt) < const Duration(seconds: 3)) {

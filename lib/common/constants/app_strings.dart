@@ -73,7 +73,7 @@ class AppStrings {
 
   static const agent = 'agent';
   static const serving = 'serving';
-  static const onBreak = 'On Break';
+  static const onBreak = 'on_break';
   static const notifications = 'notifications';
   static const quiz = 'quiz';
   static const training = 'training';

@@ -101,10 +101,7 @@ class ApiClient {
             sessionEnded = true;
             WebSocketService.disconnect();
             SessionManager.clearSession();
-            flutterToast(
-              message: 'Your session has ended. Please log in again.',
-              color: AppColors.red,
-            );
+            flutterToast(message: 'session_ended', color: AppColors.red);
             Pages.router.goNamed(Routes.login);
           }
         } else if (e.response?.statusCode == 400 ||
@@ -117,10 +114,7 @@ class ApiClient {
           );
         } else if (e.response?.statusCode == 401 &&
             e.requestOptions.path == ApiConstants.login) {
-          flutterToast(
-            message: 'Invalid email or password',
-            color: AppColors.red,
-          );
+          flutterToast(message: 'invalid_email_password', color: AppColors.red);
         } else if (e.response?.statusCode == 404) {
           // GET lookups 404 quietly; a failed action (e.g. call next with an
           // empty queue: "No tokens available") shows the backend's reason.

@@ -150,7 +150,7 @@ class LeftPane extends StatelessWidget {
                 (token) => _tokenTile(
                   context,
                   token: token.token,
-                  text: token.serviceName,
+                  text: token.serviceNameIn(context.currentLocale.languageCode),
                   background: const Color(0xFFE9F6F7),
                   border: AppColors.darkBlue,
                   tokenColor: AppColors.blue,
@@ -214,7 +214,7 @@ class LeftPane extends StatelessWidget {
               (token) => _tokenTile(
                 context,
                 token: token.token,
-                text: token.serviceName,
+                text: token.serviceNameIn(context.currentLocale.languageCode),
                 background: AppColors.lightBeige,
                 border: AppColors.brownDark,
                 tokenColor: AppColors.brownDeep,
@@ -298,7 +298,7 @@ class LeftPane extends StatelessWidget {
                 (token) => _tokenTile(
                   context,
                   token: token.token,
-                  text: token.serviceName,
+                  text: token.serviceNameIn(context.currentLocale.languageCode),
                   background: AppColors.offWhite,
                   border: AppColors.beige,
                   tokenColor: AppColors.brownDeep,
@@ -355,7 +355,7 @@ class LeftPane extends StatelessWidget {
                 (token) => _tokenTile(
                   context,
                   token: token.token,
-                  text: token.serviceName,
+                  text: token.serviceNameIn(context.currentLocale.languageCode),
                   background: const Color(0xFFFEF2F2),
                   border: const Color(0xFFFECACA),
                   tokenColor: AppColors.darkRed,

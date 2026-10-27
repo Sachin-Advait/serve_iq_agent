@@ -33,10 +33,7 @@ class AuthRepository {
       if (response != null && response.statusCode == 200) {
         final responseData = AuthResponse.fromJson(response.data);
         if (responseData.user.role != 'USER') {
-          flutterToast(
-            message: 'You are not authorised to login',
-            color: AppColors.red,
-          );
+          flutterToast(message: 'not_authorised_login', color: AppColors.red);
           throw const LoginErrorShown();
         }
         SessionManager.saveUsername(responseData.user.name);

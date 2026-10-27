@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:servelq_agent/common/widgets/custom_loader.dart';
 import 'package:servelq_agent/common/widgets/flutter_toast.dart';
+import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/models/counter_model.dart';
 import 'package:servelq_agent/models/service_history.dart';
@@ -132,14 +133,14 @@ class HomeCubit extends Cubit<HomeState> {
         state.copyWith(
           wasNetworkRestored: false,
           webSocketStatus: WebSocketStatus.error,
-          webSocketErrorMessage: 'No internet connection',
+          webSocketErrorMessage: 'no_internet_connection',
         ),
       );
 
       // Show toast notification
       if (state.status == HomeStatus.loaded) {
         flutterToast(
-          message: 'No internet connection',
+          message: 'no_internet_connection',
           color: AppColors.darkRed,
         );
       }
@@ -154,7 +155,7 @@ class HomeCubit extends Cubit<HomeState> {
       // Refresh only if we're in loaded state
       if (state.status == HomeStatus.loaded) {
         await loadingData();
-        flutterToast(message: 'Connection restored');
+        flutterToast(message: 'connection_restored');
       }
     } catch (e) {
       debugPrint('Error refreshing data after network restore: $e');
@@ -219,12 +220,12 @@ class HomeCubit extends Cubit<HomeState> {
         state.copyWith(
           status: HomeStatus.loaded,
           webSocketStatus: WebSocketStatus.error,
-          webSocketErrorMessage: 'No internet connection',
+          webSocketErrorMessage: 'no_internet_connection',
         ),
       );
 
       flutterToast(
-        message: 'No internet connection. Please check your network.',
+        message: 'no_internet_check_network',
         color: AppColors.darkRed,
       );
       return;
@@ -255,7 +256,7 @@ class HomeCubit extends Cubit<HomeState> {
           state.copyWith(
             status: HomeStatus.loaded,
             webSocketStatus: WebSocketStatus.error,
-            webSocketErrorMessage: 'No internet connection',
+            webSocketErrorMessage: 'no_internet_connection',
           ),
         );
       } else {
@@ -273,7 +274,7 @@ class HomeCubit extends Cubit<HomeState> {
         emit(
           state.copyWith(
             webSocketStatus: WebSocketStatus.error,
-            webSocketErrorMessage: 'No internet connection',
+            webSocketErrorMessage: 'no_internet_connection',
           ),
         );
       } else {
@@ -386,7 +387,7 @@ class HomeCubit extends Cubit<HomeState> {
         state.copyWith(
           status: HomeStatus.loaded,
           webSocketStatus: WebSocketStatus.error,
-          webSocketErrorMessage: 'No internet connection',
+          webSocketErrorMessage: 'no_internet_connection',
         ),
       );
       return;
@@ -463,7 +464,7 @@ class HomeCubit extends Cubit<HomeState> {
           state.copyWith(
             status: HomeStatus.loaded,
             webSocketStatus: WebSocketStatus.error,
-            webSocketErrorMessage: 'Network connection issue',
+            webSocketErrorMessage: 'network_connection_issue',
           ),
         );
       } else {
@@ -477,7 +478,7 @@ class HomeCubit extends Cubit<HomeState> {
 
     // Check network
     if (!state.isNetworkConnected) {
-      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      flutterToast(message: 'no_internet_connection', color: AppColors.darkRed);
       return;
     }
 
@@ -500,7 +501,7 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> callToken({String? tokenId}) async {
     // Check network
     if (!state.isNetworkConnected) {
-      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      flutterToast(message: 'no_internet_connection', color: AppColors.darkRed);
       return;
     }
 
@@ -521,10 +522,7 @@ class HomeCubit extends Cubit<HomeState> {
     } on ApiErrorShown {
       // ApiClient already showed the backend's reason (e.g. a 409).
     } catch (e) {
-      flutterToast(
-        message: 'Failed to call token. Please try again.',
-        color: AppColors.darkRed,
-      );
+      flutterToast(message: 'call_token_failed', color: AppColors.darkRed);
     } finally {
       EasyLoading.dismiss();
     }
@@ -539,7 +537,7 @@ class HomeCubit extends Cubit<HomeState> {
 
   Future<void> _callSpecificToken(Future<TokenModel> Function() call) async {
     if (!state.isNetworkConnected) {
-      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      flutterToast(message: 'no_internet_connection', color: AppColors.darkRed);
       return;
     }
 
@@ -559,10 +557,7 @@ class HomeCubit extends Cubit<HomeState> {
     } on ApiErrorShown {
       // ApiClient already showed the backend's reason (e.g. a 409).
     } catch (e) {
-      flutterToast(
-        message: 'Failed to call token. Please try again.',
-        color: AppColors.darkRed,
-      );
+      flutterToast(message: 'call_token_failed', color: AppColors.darkRed);
     } finally {
       EasyLoading.dismiss();
     }
@@ -571,7 +566,7 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> completeToken() async {
     // Check network
     if (!state.isNetworkConnected) {
-      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      flutterToast(message: 'no_internet_connection', color: AppColors.darkRed);
       return;
     }
 
@@ -604,7 +599,7 @@ class HomeCubit extends Cubit<HomeState> {
 
       if (!state.isNetworkConnected) {
         flutterToast(
-          message: 'Operation failed due to network issue',
+          message: 'operation_failed_network',
           color: AppColors.darkRed,
         );
       }
@@ -618,7 +613,7 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> recallToken() async {
     // Check network
     if (!state.isNetworkConnected) {
-      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      flutterToast(message: 'no_internet_connection', color: AppColors.darkRed);
       return;
     }
 
@@ -633,14 +628,11 @@ class HomeCubit extends Cubit<HomeState> {
       // Restart the timer after recall
       startCompleteButtonTimer();
 
-      flutterToast(message: 'Token successfully recalled');
+      flutterToast(message: 'token_recalled');
     } on ApiErrorShown {
       // ApiClient already showed the backend's reason (e.g. a 409).
     } catch (e) {
-      flutterToast(
-        message: 'Failed to recall token. Please try again.',
-        color: AppColors.darkRed,
-      );
+      flutterToast(message: 'recall_token_failed', color: AppColors.darkRed);
     } finally {
       EasyLoading.dismiss();
     }
@@ -675,7 +667,7 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> transferToken(String counterId, String reason) async {
     // Check network
     if (!state.isNetworkConnected) {
-      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      flutterToast(message: 'no_internet_connection', color: AppColors.darkRed);
       return;
     }
 
@@ -696,14 +688,11 @@ class HomeCubit extends Cubit<HomeState> {
         ),
       );
 
-      flutterToast(message: 'Token successfully transferred');
+      flutterToast(message: 'token_transferred');
     } on ApiErrorShown {
       // ApiClient already showed the backend's reason (e.g. a 409).
     } catch (e) {
-      flutterToast(
-        message: 'Error while transferring. Please try again',
-        color: AppColors.darkRed,
-      );
+      flutterToast(message: 'transfer_error', color: AppColors.darkRed);
     } finally {
       EasyLoading.dismiss();
     }
@@ -712,7 +701,7 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> holdToken() async {
     // Check network
     if (!state.isNetworkConnected) {
-      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      flutterToast(message: 'no_internet_connection', color: AppColors.darkRed);
       return;
     }
 
@@ -736,10 +725,7 @@ class HomeCubit extends Cubit<HomeState> {
     } on ApiErrorShown {
       // ApiClient already showed the backend's reason (e.g. a 409).
     } catch (e) {
-      flutterToast(
-        message: 'Error while holding token. Please try again',
-        color: AppColors.darkRed,
-      );
+      flutterToast(message: 'hold_token_error', color: AppColors.darkRed);
     } finally {
       EasyLoading.dismiss();
     }
@@ -748,7 +734,7 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> noShow() async {
     // Check network
     if (!state.isNetworkConnected) {
-      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      flutterToast(message: 'no_internet_connection', color: AppColors.darkRed);
       return;
     }
 
@@ -772,7 +758,7 @@ class HomeCubit extends Cubit<HomeState> {
       // ApiClient already showed the backend's reason (e.g. a 409).
     } catch (e) {
       flutterToast(
-        message: 'Unknown Error. Please try again',
+        message: 'unknown_error_try_again',
         color: AppColors.darkRed,
       );
     } finally {
@@ -783,7 +769,7 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> checkActiveToken() async {
     // Check network
     if (!state.isNetworkConnected) {
-      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      flutterToast(message: 'no_internet_connection', color: AppColors.darkRed);
       return;
     }
 
@@ -810,7 +796,10 @@ class HomeCubit extends Cubit<HomeState> {
         );
 
         if (activeToken != null) {
-          flutterToast(message: 'Active token loaded: ${activeToken.token}');
+          flutterToast(
+            message:
+                '${LocalizationCubit.translateKey('active_token_loaded')} ${activeToken.token}',
+          );
         }
       }
     } finally {
@@ -833,12 +822,12 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> retryWebSocketConnection() async {
     // Check network first
     if (!state.isNetworkConnected) {
-      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      flutterToast(message: 'no_internet_connection', color: AppColors.darkRed);
 
       emit(
         state.copyWith(
           webSocketStatus: WebSocketStatus.error,
-          webSocketErrorMessage: 'No internet connection',
+          webSocketErrorMessage: 'no_internet_connection',
         ),
       );
       return;
@@ -865,7 +854,7 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> toggleServingStatus(bool value) async {
     // Check network
     if (!state.isNetworkConnected) {
-      flutterToast(message: 'No internet connection', color: AppColors.darkRed);
+      flutterToast(message: 'no_internet_connection', color: AppColors.darkRed);
       return;
     }
 
@@ -877,15 +866,10 @@ class HomeCubit extends Cubit<HomeState> {
       if (updatedCounter == null) return;
 
       emit(state.copyWith(counter: updatedCounter));
-      flutterToast(
-        message: value ? 'You are now serving' : 'You are now on break',
-      );
+      flutterToast(message: value ? 'now_serving' : 'now_on_break');
     } catch (e) {
       debugPrint('Error updating serving status: $e');
-      flutterToast(
-        message: 'Failed to update status. Please try again.',
-        color: AppColors.darkRed,
-      );
+      flutterToast(message: 'update_status_failed', color: AppColors.darkRed);
     }
   }
 

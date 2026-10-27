@@ -145,8 +145,7 @@ class Header extends StatelessWidget {
                                   );
                                 } else {
                                   flutterToast(
-                                    message:
-                                        'Finish the current token to set the counter to Break.',
+                                    message: 'finish_token_before_break',
                                   );
                                 }
                               },
@@ -337,9 +336,7 @@ class Header extends StatelessWidget {
                             }
                           });
                         } else {
-                          flutterToast(
-                            message: 'Finish the current token to logout.',
-                          );
+                          flutterToast(message: 'finish_token_before_logout');
                         }
 
                         break;

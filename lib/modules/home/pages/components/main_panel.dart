@@ -119,7 +119,9 @@ class MainPanel extends StatelessWidget {
               Expanded(
                 child: InfoField(
                   label: context.tr(AppStrings.serviceType),
-                  value: token.serviceName,
+                  value: token.serviceNameIn(
+                    context.currentLocale.languageCode,
+                  ),
                   icon: AppImages.serviceType,
                 ),
               ),
