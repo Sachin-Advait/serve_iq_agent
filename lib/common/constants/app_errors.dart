@@ -3,7 +3,7 @@ class AppErrors {
   static const String staffIdErrorText = 'Please enter correct Staff Id!';
   static const String passwordErrorText = 'Password must have 8 Character!.';
   static const String fieldIsRequired = 'This field is required!';
-  static const String emailErrorText = 'Please enter valid email address!';
+  static const String emailErrorText = 'Please enter valid user id!';
   static const String errorOccurred = 'Error Occurred.';
 
   static const String unknownError = 'Unknown Error Occured!';
