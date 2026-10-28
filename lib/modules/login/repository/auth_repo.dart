@@ -32,7 +32,13 @@ class AuthRepository {
 
       if (response != null && response.statusCode == 200) {
         final responseData = AuthResponse.fromJson(response.data);
-        if (responseData.user.role != 'USER') {
+        // Only AGENT accounts may use the agent app
+        if (responseData.user.role != 'AGENT') {
+          // The server has already signed this account in (and may have given
+          // it the counter); sign it straight out again so nothing is left held.
+          await SessionManager.saveToken(responseData.token);
+          await _apiClient.postApi(ApiConstants.logout);
+          await SessionManager.saveToken('');
           flutterToast(message: 'not_authorised_login', color: AppColors.red);
           throw const LoginErrorShown();
         }
