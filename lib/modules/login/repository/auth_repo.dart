@@ -27,7 +27,12 @@ class AuthRepository {
     try {
       final response = await _apiClient.postApi(
         ApiConstants.login,
-        body: {'email': username, 'password': password, 'counterId': counterId},
+        body: {
+          'email': username,
+          'password': password,
+          'counterId': counterId,
+          'app': 'AGENT',
+        },
       );
 
       if (response != null && response.statusCode == 200) {
