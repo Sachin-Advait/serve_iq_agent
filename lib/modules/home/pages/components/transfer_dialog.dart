@@ -267,7 +267,7 @@ class _TransferDialogState extends State<TransferDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${counter.name} - ${counter.username ?? context.tr('no_agent_on_counter')}',
+                        '${counterDisplayName(context, counter.name)} - ${counter.username ?? context.tr('no_agent_on_counter')}',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,

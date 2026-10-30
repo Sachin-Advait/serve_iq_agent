@@ -369,7 +369,7 @@ class LeftPane extends StatelessWidget {
                     if ((token.transferCounterName ?? '').isNotEmpty)
                       _detailLine(
                         Icons.swap_horiz_rounded,
-                        '${context.tr(AppStrings.queueFromCounter)} ${token.transferCounterName}',
+                        '${context.tr(AppStrings.queueFromCounter)} ${counterDisplayName(context, token.transferCounterName!)}',
                         AppColors.darkRed,
                         bold: true,
                       ),

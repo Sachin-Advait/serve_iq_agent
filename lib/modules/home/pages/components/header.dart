@@ -26,7 +26,10 @@ class Header extends StatelessWidget {
 
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
-        final displayText = SessionManager.getCounterName();
+        final displayText = counterDisplayName(
+          context,
+          SessionManager.getCounterName(),
+        );
 
         // The header follows the language: right to left in Arabic.
         final isEnglish =
