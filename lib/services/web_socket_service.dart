@@ -21,6 +21,7 @@ class WebSocketService {
   static Function(List<dynamic> data)? _onUpcomingUpdate;
   static Function(Map<String, dynamic> counter)? _onCounterUpdate;
   static Function(String message, bool isError)? _onConnectionStatus;
+  static Function()? _onMissedUpdate;
 
   static int _reconnectAttempts = 0;
   static bool _isWebSocketConnected = false;
@@ -47,11 +48,13 @@ class WebSocketService {
     required Function(List<dynamic>) onUpcomingUpdate,
     required Function(Map<String, dynamic>) onCounterUpdate,
     Function(String message, bool isError)? onConnectionStatus,
+    Function()? onMissedUpdate,
   }) async {
     _currentCounterId = counterId;
     _onUpcomingUpdate = onUpcomingUpdate;
     _onCounterUpdate = onCounterUpdate;
     _onConnectionStatus = onConnectionStatus;
+    _onMissedUpdate = onMissedUpdate;
     _shouldReconnect = true;
     _hasNotifiedUser = false;
 
@@ -163,6 +166,10 @@ class WebSocketService {
           _lastHeartbeatReceived = DateTime.now();
           _reconnectAttempts = 0;
           _hasNotifiedUser = false;
+          _resetVersions([
+            '/topic/agent-upcoming/$_currentCounterId',
+            '/topic/counter/$_currentCounterId',
+          ]);
 
           debugPrint(
             '[WS] ${DateTime.now()} [SUCCESS] ✅ WebSocket connected for counter: $_currentCounterId',
@@ -176,6 +183,7 @@ class WebSocketService {
             destination: '/topic/agent-upcoming/$_currentCounterId',
             headers: {"Authorization": SessionManager.getToken()},
             callback: (StompFrame frame) {
+              _notePushVersion(frame);
               _lastMessageReceived = DateTime.now();
               _reconnectAttempts = 0;
 
@@ -202,6 +210,7 @@ class WebSocketService {
           _stompClient?.subscribe(
             destination: '/topic/counter/$_currentCounterId',
             callback: (StompFrame frame) {
+              _notePushVersion(frame);
               _lastMessageReceived = DateTime.now();
               _reconnectAttempts = 0;
 
@@ -229,7 +238,7 @@ class WebSocketService {
             destination: '/topic/heartbeat',
             callback: (StompFrame frame) {
               _lastHeartbeatReceived = DateTime.now();
-              debugPrint('[WS] ${DateTime.now()} [INFO] 💓 Heartbeat received');
+              _checkVersions(frame.body);
             },
           );
 
@@ -448,6 +457,50 @@ class WebSocketService {
     }
   }
 
+  // Each push carries a "version" header and the heartbeat lists the latest
+  // version per topic. A heartbeat ahead of the last push we got means a
+  // push was lost, so the cubit reloads over the API.
+  static final Map<String, int> _seenVersions = {};
+  static Set<String> _versionedTopics = {};
+  static bool _versionsBaselined = false;
+
+  static void _resetVersions(List<String> topics) {
+    _versionedTopics = topics.toSet();
+    _seenVersions.clear();
+    _versionsBaselined = false;
+  }
+
+  static void _notePushVersion(StompFrame frame) {
+    final dest = frame.headers['destination'];
+    final v = int.tryParse(frame.headers['version'] ?? '');
+    if (dest == null || v == null) return;
+    if (v > (_seenVersions[dest] ?? 0)) _seenVersions[dest] = v;
+  }
+
+  static void _checkVersions(String? body) {
+    Map? versions;
+    try {
+      versions = (json.decode(body ?? '') as Map)['versions'] as Map?;
+    } catch (_) {
+      return; // an older server sends a plain "PING"
+    }
+    if (versions == null) return;
+    var behind = false;
+    for (final dest in _versionedTopics) {
+      final v = versions[dest];
+      if (v is! int || v <= (_seenVersions[dest] ?? 0)) continue;
+      _seenVersions[dest] = v;
+      // The first heartbeat after connecting only sets the baseline: the
+      // reload on connect already fetched the latest data.
+      if (_versionsBaselined) behind = true;
+    }
+    _versionsBaselined = true;
+    if (behind) {
+      debugPrint('[WS] ${DateTime.now()} [WARN] 🧩 Missed a push, reloading');
+      _onMissedUpdate?.call();
+    }
+  }
+
   /// Disconnect and cleanup
   static void disconnect() {
     debugPrint(
@@ -471,6 +524,7 @@ class WebSocketService {
     _onUpcomingUpdate = null;
     _onCounterUpdate = null;
     _onConnectionStatus = null;
+    _onMissedUpdate = null;
     _reconnectAttempts = 0;
     _hasNotifiedUser = false;
 

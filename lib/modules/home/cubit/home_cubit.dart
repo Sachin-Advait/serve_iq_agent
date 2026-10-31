@@ -245,6 +245,9 @@ class HomeCubit extends Cubit<HomeState> {
           onUpcomingUpdate: _handleUpcomingUpdate,
           onCounterUpdate: _handleCounterUpdate,
           onConnectionStatus: _handleConnectionStatus,
+          onMissedUpdate: () {
+            if (state.status == HomeStatus.loaded) loadingData();
+          },
         );
       }
     } catch (e) {
