@@ -30,8 +30,10 @@ class WebSocketService {
 
   // Configuration
   static const int MAX_RECONNECT_ATTEMPTS = 10;
-  static const Duration HEALTH_CHECK_INTERVAL = Duration(minutes: 1);
-  static const Duration HEARTBEAT_TIMEOUT = Duration(minutes: 3);
+  // The server sends /topic/heartbeat every 10s, so 25s without one means
+  // the socket died without closing and we reconnect.
+  static const Duration HEALTH_CHECK_INTERVAL = Duration(seconds: 5);
+  static const Duration HEARTBEAT_TIMEOUT = Duration(seconds: 25);
   static const Duration MESSAGE_TIMEOUT = Duration(minutes: 10);
   static const Duration CONNECTION_TIMEOUT = Duration(seconds: 10);
 
@@ -86,12 +88,6 @@ class WebSocketService {
         _lastHeartbeatReceived ?? now,
       );
       final timeSinceLastMessage = now.difference(_lastMessageReceived ?? now);
-
-      debugPrint(
-        '[WS] ${DateTime.now()} [INFO] Health check - Connected: $_isWebSocketConnected, '
-        'Last heartbeat: ${timeSinceLastHeartbeat.inSeconds}s ago, '
-        'Last message: ${timeSinceLastMessage.inSeconds}s ago',
-      );
 
       // Check heartbeat first (most reliable indicator)
       if (timeSinceLastHeartbeat > HEARTBEAT_TIMEOUT) {
