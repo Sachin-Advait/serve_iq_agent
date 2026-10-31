@@ -38,6 +38,8 @@ class WebSocketService {
   static const Duration CONNECTION_TIMEOUT = Duration(seconds: 10);
 
   static bool get isConnected => _isWebSocketConnected;
+  /// True once connect() has run for a counter (and until disconnect()).
+  static bool get isStarted => _currentCounterId != null;
   static DateTime? get lastMessageReceived => _lastMessageReceived;
   static int get reconnectAttempts => _reconnectAttempts;
 

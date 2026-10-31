@@ -54,9 +54,12 @@ class HomeCubit extends Cubit<HomeState> {
     _recoveryTimer = Timer.periodic(const Duration(seconds: 15), (_) async {
       if (isClosed || _recovering || ApiClient.sessionEnded) return;
       if (!state.isNetworkConnected) return;
+      // Also when the counter loaded but the live connection was never
+      // started (Wi-Fi was off at start and came back).
       final needsReload =
           state.status == HomeStatus.error ||
-          (state.status == HomeStatus.loaded && state.counter == null);
+          (state.status == HomeStatus.loaded && state.counter == null) ||
+          (state.status == HomeStatus.loaded && !WebSocketService.isStarted);
       if (!needsReload) return;
       _recovering = true;
       try {
