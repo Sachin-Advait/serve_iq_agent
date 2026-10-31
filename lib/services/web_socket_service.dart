@@ -5,7 +5,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:servelq_agent/common/constants/api_constants.dart';
-import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/services/session_manager.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 
@@ -68,21 +67,15 @@ class WebSocketService {
     _lastHeartbeatReceived = DateTime.now();
 
     _healthCheckTimer = Timer.periodic(HEALTH_CHECK_INTERVAL, (timer) {
-      // Don't run health checks if we've exceeded max reconnect attempts
-      if (_reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-        debugPrint(
-          '[WS] ${DateTime.now()} [WARN] Max reconnect attempts reached - stopping health checks',
-        );
-        _healthCheckTimer?.cancel();
-        _healthCheckTimer = null;
-        return;
-      }
-
       // Only run health checks if we think we're connected
       if (!_isWebSocketConnected) {
-        debugPrint(
-          '[WS] ${DateTime.now()} [DEBUG] Not connected - skipping health check',
-        );
+        // Safety net: if no reconnect is pending (a callback was missed),
+        // start one so the socket never stays down for good.
+        if (_shouldReconnect &&
+            !_isConnecting &&
+            !(_reconnectionTimer?.isActive ?? false)) {
+          _scheduleReconnection();
+        }
         return;
       }
 
@@ -320,28 +313,8 @@ class WebSocketService {
     // Cancel any existing reconnection timer
     _reconnectionTimer?.cancel();
 
-    if (_reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-      debugPrint(
-        '[WS] ${DateTime.now()} [ERROR] ⛔ MAX reconnection attempts ($MAX_RECONNECT_ATTEMPTS) reached',
-      );
-
-      // Stop health check timer
-      _healthCheckTimer?.cancel();
-      _healthCheckTimer = null;
-
-      // Notify user once
-      if (!_hasNotifiedUser) {
-        _onConnectionStatus?.call(
-          LocalizationCubit.translateKey(
-            'ws_unable_to_connect',
-          ).replaceAll('{n}', '$MAX_RECONNECT_ATTEMPTS'),
-          true, // isError = true
-        );
-        _hasNotifiedUser = true;
-      }
-
-      return;
-    }
+    // No give-up: while the server is down we keep trying every 30s, so
+    // the counter comes back by itself once the server is up again.
 
     // Notify user after 3 failed attempts
     if (_reconnectAttempts == 3 && !_hasNotifiedUser) {

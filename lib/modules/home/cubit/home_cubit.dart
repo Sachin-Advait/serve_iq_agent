@@ -23,6 +23,8 @@ class HomeCubit extends Cubit<HomeState> {
   final HomeRepository agentRepository;
   Timer? _completeButtonTimer;
   Timer? _feedbackWatchTimer;
+  Timer? _recoveryTimer;
+  bool _recovering = false;
 
   // The agent's note for the token being served; sent when it's completed.
   String _note = '';
@@ -40,6 +42,29 @@ class HomeCubit extends Cubit<HomeState> {
   HomeCubit(this.agentRepository) : super(const HomeState()) {
     _initializeConnectivityListener();
     _startFeedbackWatch();
+    _startRecoveryWatch();
+  }
+
+  /// When the server was down at start (error screen, or a dashboard with no
+  /// counter) or a reload failed mid-session, try again every 15s so the
+  /// counter comes back on its own once the server is up. The Retry button
+  /// still works for an immediate try.
+  void _startRecoveryWatch() {
+    _recoveryTimer?.cancel();
+    _recoveryTimer = Timer.periodic(const Duration(seconds: 15), (_) async {
+      if (isClosed || _recovering || ApiClient.sessionEnded) return;
+      if (!state.isNetworkConnected) return;
+      final needsReload =
+          state.status == HomeStatus.error ||
+          (state.status == HomeStatus.loaded && state.counter == null);
+      if (!needsReload) return;
+      _recovering = true;
+      try {
+        await loadInitialData(quiet: true);
+      } finally {
+        _recovering = false;
+      }
+    });
   }
 
   /// While the counter waits for the visitor's rating, re-read it every few
@@ -213,7 +238,8 @@ class HomeCubit extends Cubit<HomeState> {
     );
   }
 
-  Future<void> loadInitialData() async {
+  /// [quiet] skips the loading screen, for the automatic retries.
+  Future<void> loadInitialData({bool quiet = false}) async {
     // Check network connectivity first
     if (!state.isNetworkConnected) {
       emit(
@@ -231,7 +257,7 @@ class HomeCubit extends Cubit<HomeState> {
       return;
     }
 
-    emit(state.copyWith(status: HomeStatus.loading));
+    if (!quiet) emit(state.copyWith(status: HomeStatus.loading));
 
     try {
       await loadingData();
@@ -894,6 +920,7 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> close() {
     _completeButtonTimer?.cancel();
     _feedbackWatchTimer?.cancel();
+    _recoveryTimer?.cancel();
     _connectivitySubscription.cancel();
     WebSocketService.disconnect();
     return super.close();

@@ -62,6 +62,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ),
           ),
           child: BlocListener<HomeCubit, HomeState>(
+            // Only on a change, so the automatic retries every 15s while the
+            // server is down don't repeat the same toast.
+            listenWhen: (previous, current) =>
+                previous.status != current.status ||
+                previous.isNetworkConnected != current.isNetworkConnected,
             listener: (context, state) {
               if (state.status == HomeStatus.error) {
                 flutterToast(message: AppErrors.unknownErrorDetails);
