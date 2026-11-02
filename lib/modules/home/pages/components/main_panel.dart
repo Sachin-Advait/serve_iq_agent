@@ -308,7 +308,10 @@ class MainPanel extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  item.token,
+                                  item.tokenIn(
+                                    context.currentLocale.languageCode,
+                                  ),
+                                  textDirection: TextDirection.ltr,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.white,

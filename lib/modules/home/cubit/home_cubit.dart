@@ -830,7 +830,8 @@ class HomeCubit extends Cubit<HomeState> {
         if (activeToken != null) {
           flutterToast(
             message:
-                '${LocalizationCubit.translateKey('active_token_loaded')} ${activeToken.token}',
+                '${LocalizationCubit.translateKey('active_token_loaded')} '
+                '\u2066${activeToken.tokenIn(LocalizationCubit.currentLanguageCode)}\u2069',
           );
         }
       }

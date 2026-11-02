@@ -34,6 +34,10 @@ class LocalizationCubit extends Cubit<LocalizationState> {
   /// language's text for [key], or [key] itself when there is none.
   static String translateKey(String key) => _instance?.translate(key) ?? key;
 
+  /// The app's current language code ('en' before the cubit exists)
+  static String get currentLanguageCode =>
+      _instance?.state.locale.languageCode ?? 'en';
+
   Map<String, String> _localizedStrings = {};
 
   Future<void> load() async {

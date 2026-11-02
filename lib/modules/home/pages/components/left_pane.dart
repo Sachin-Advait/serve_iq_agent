@@ -95,7 +95,9 @@ class LeftPane extends StatelessWidget {
           20.verticalSpace,
           // Safe access
           Text(
-            state.currentToken?.token ?? '--',
+            state.currentToken?.tokenIn(context.currentLocale.languageCode) ??
+                '--',
+            textDirection: TextDirection.ltr,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 30,
@@ -149,7 +151,7 @@ class LeftPane extends StatelessWidget {
               .map(
                 (token) => _tokenTile(
                   context,
-                  token: token.token,
+                  token: token.tokenIn(context.currentLocale.languageCode),
                   text: token.serviceNameIn(context.currentLocale.languageCode),
                   background: const Color(0xFFE9F6F7),
                   border: AppColors.darkBlue,
@@ -213,7 +215,7 @@ class LeftPane extends StatelessWidget {
             .map(
               (token) => _tokenTile(
                 context,
-                token: token.token,
+                token: token.tokenIn(context.currentLocale.languageCode),
                 text: token.serviceNameIn(context.currentLocale.languageCode),
                 background: AppColors.lightBeige,
                 border: AppColors.brownDark,
@@ -297,7 +299,7 @@ class LeftPane extends StatelessWidget {
               .map(
                 (token) => _tokenTile(
                   context,
-                  token: token.token,
+                  token: token.tokenIn(context.currentLocale.languageCode),
                   text: token.serviceNameIn(context.currentLocale.languageCode),
                   background: AppColors.offWhite,
                   border: AppColors.beige,
@@ -354,7 +356,7 @@ class LeftPane extends StatelessWidget {
               .map(
                 (token) => _tokenTile(
                   context,
-                  token: token.token,
+                  token: token.tokenIn(context.currentLocale.languageCode),
                   text: token.serviceNameIn(context.currentLocale.languageCode),
                   background: const Color(0xFFFEF2F2),
                   border: const Color(0xFFFECACA),
@@ -436,6 +438,7 @@ class LeftPane extends StatelessWidget {
                     Expanded(
                       child: Text(
                         token,
+                        textDirection: TextDirection.ltr,
                         style: context.bold.copyWith(
                           fontSize: 20,
                           color: tokenColor,

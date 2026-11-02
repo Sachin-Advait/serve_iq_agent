@@ -124,7 +124,8 @@ class _TransferDialogState extends State<TransferDialog> {
                 const SizedBox(height: 4),
                 Text(
                   '${context.tr(AppStrings.transferTokenLabel)}: '
-                  '${widget.state.currentToken?.token ?? context.tr(AppStrings.notAvailable)}',
+                  // Isolated left to right so 001أ keeps its number first
+                  '${widget.state.currentToken != null ? '\u2066${widget.state.currentToken!.tokenIn(context.currentLocale.languageCode)}\u2069' : context.tr(AppStrings.notAvailable)}',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 14,

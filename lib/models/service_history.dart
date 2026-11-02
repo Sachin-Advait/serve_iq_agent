@@ -1,5 +1,8 @@
 class ServiceHistory {
   final String token;
+
+  /// Arabic form of [token] (001أ)
+  final String arabicToken;
   final String civilId;
   final String service;
   final int time;
@@ -8,6 +11,7 @@ class ServiceHistory {
 
   ServiceHistory({
     required this.token,
+    this.arabicToken = '',
     required this.civilId,
     required this.service,
     required this.time,
@@ -19,6 +23,7 @@ class ServiceHistory {
     final minutes = (json['timeTakenInMinutes'] as num?)?.toInt() ?? 0;
     return ServiceHistory(
       token: json['token'] ?? '',
+      arabicToken: json['arabicToken'] ?? '',
       civilId: json['civilId'] ?? '',
       service: json['serviceName'] ?? '',
       time: minutes,
@@ -26,4 +31,8 @@ class ServiceHistory {
       note: json['note'] ?? '',
     );
   }
+
+  /// The ticket number in the app's language (001أ in Arabic)
+  String tokenIn(String languageCode) =>
+      languageCode == 'ar' && arabicToken.isNotEmpty ? arabicToken : token;
 }
