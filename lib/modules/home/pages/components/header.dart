@@ -124,7 +124,7 @@ class Header extends StatelessWidget {
                             style: context.medium.copyWith(
                               color: state.counter?.paused != true
                                   ? AppColors.green
-                                  : AppColors.red,
+                                  : AppColors.statusBlue,
                               fontSize: 12,
                             ),
                           ),
@@ -135,7 +135,7 @@ class Header extends StatelessWidget {
                               activeThumbColor: AppColors.white,
                               inactiveThumbColor: AppColors.white,
                               activeTrackColor: AppColors.green,
-                              inactiveTrackColor: AppColors.red,
+                              inactiveTrackColor: AppColors.statusBlue,
                               padding: EdgeInsets.zero,
                               trackOutlineColor: WidgetStatePropertyAll(
                                 AppColors.white,

@@ -32,7 +32,6 @@ class ServiceHistory {
     );
   }
 
-  /// The ticket number in the app's language (001أ in Arabic)
-  String tokenIn(String languageCode) =>
-      languageCode == 'ar' && arabicToken.isNotEmpty ? arabicToken : token;
+  /// The ticket number to show: the English one (A001) in both languages.
+  String tokenIn(String languageCode) => token;
 }

@@ -83,18 +83,9 @@ extension LocalizationExtension on BuildContext {
   Locale get currentLocale => watch<LocalizationCubit>().state.locale;
 }
 
-/// Western digits in [text] written as Arabic digits (١٢٣) when [arabic].
-String localizedDigits(String text, {required bool arabic}) {
-  if (!arabic) return text;
-  const digits = '٠١٢٣٤٥٦٧٨٩';
-  return text.replaceAllMapped(
-    RegExp(r'[0-9]'),
-    (m) => digits[m[0]!.codeUnitAt(0) - 48],
-  );
-}
-
 /// A counter's name for display: leading zeros dropped ("Counter 01" ->
-/// "Counter 1") and, in Arabic, "Counter" translated with Arabic digits.
+/// "Counter 1") and, in Arabic, "Counter" translated. The number stays in
+/// English digits in both languages.
 String counterDisplayName(BuildContext context, String name) {
   final arabic = context.currentLocale.languageCode == 'ar';
   final unpadded = name.trim().replaceAllMapped(
@@ -109,5 +100,5 @@ String counterDisplayName(BuildContext context, String name) {
   final label = match == null
       ? unpadded
       : '${context.tr('counter')} ${match.group(1)}';
-  return localizedDigits(label, arabic: true);
+  return label;
 }

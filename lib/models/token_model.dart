@@ -40,10 +40,8 @@ class TokenModel {
     );
   }
 
-  /// The ticket number in the app's language: 001أ in Arabic when the
-  /// server sent one. Show it left to right so the number stays first.
-  String tokenIn(String languageCode) =>
-      languageCode == 'ar' && arabicToken.isNotEmpty ? arabicToken : token;
+  /// The ticket number to show: the English one (A001) in both languages.
+  String tokenIn(String languageCode) => token;
 
   /// The service name in the app's language; English when there is no
   /// Arabic name (older tokens, or a service without one).
