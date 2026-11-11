@@ -24,6 +24,7 @@ class HomeCubit extends Cubit<HomeState> {
   Timer? _completeButtonTimer;
   Timer? _feedbackWatchTimer;
   Timer? _recoveryTimer;
+  int _queueTicks = 0;
   bool _recovering = false;
 
   // The agent's note for the token being served; sent when it's completed.
@@ -60,7 +61,17 @@ class HomeCubit extends Cubit<HomeState> {
           state.status == HomeStatus.error ||
           (state.status == HomeStatus.loaded && state.counter == null) ||
           (state.status == HomeStatus.loaded && !WebSocketService.isStarted);
-      if (!needsReload) return;
+      if (!needsReload) {
+        // Safety net under the socket: re-read the queue every 30s, so a
+        // ticket another counter took never stays in this list (a lost push
+        // once left one showing for over an hour).
+        if (state.status == HomeStatus.loaded &&
+            WebSocketService.isConnected &&
+            ++_queueTicks % 2 == 0) {
+          await queueAPI();
+        }
+        return;
+      }
       _recovering = true;
       try {
         await loadInitialData(quiet: true);
