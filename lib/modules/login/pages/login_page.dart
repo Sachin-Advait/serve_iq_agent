@@ -39,6 +39,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _performLogin() {
+    // Enter on the keyboard can arrive while a login is already running.
+    if (context.read<LoginBloc>().state.submitting) return;
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       return flutterToast(
         message: context.trNoListen(AppStrings.emailPasswordRequired),
@@ -373,6 +375,9 @@ class _LoginPageState extends State<LoginPage> {
       controller: controller,
       obscureText: obscureText,
       enabled: enabled,
+      // Enter on a physical keyboard logs in, like pressing the button.
+      textInputAction: TextInputAction.done,
+      onSubmitted: (_) => _performLogin(),
       cursorColor: AppColors.primary,
       decoration: InputDecoration(
         prefixIcon: Padding(
