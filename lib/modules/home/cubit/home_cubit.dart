@@ -553,8 +553,12 @@ class HomeCubit extends Cubit<HomeState> {
       startCompleteButtonTimer();
     } on ApiErrorShown {
       // ApiClient already showed the backend's reason (e.g. a 409).
+      // The list may be out of date (e.g. another counter took the
+      // token), so reload it instead of showing a ticket we can't call.
+      unawaited(queueAPI());
     } catch (e) {
       flutterToast(message: 'call_token_failed', color: AppColors.darkRed);
+      unawaited(queueAPI());
     } finally {
       EasyLoading.dismiss();
     }
@@ -588,8 +592,12 @@ class HomeCubit extends Cubit<HomeState> {
       startCompleteButtonTimer();
     } on ApiErrorShown {
       // ApiClient already showed the backend's reason (e.g. a 409).
+      // The list may be out of date (e.g. another counter took the
+      // token), so reload it instead of showing a ticket we can't call.
+      unawaited(queueAPI());
     } catch (e) {
       flutterToast(message: 'call_token_failed', color: AppColors.darkRed);
+      unawaited(queueAPI());
     } finally {
       EasyLoading.dismiss();
     }
