@@ -142,7 +142,7 @@ class ActionButtons extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         disabledBackgroundColor: AppColors.lightBeige,
-        padding: const EdgeInsets.symmetric(vertical: 25),
+        padding: const EdgeInsets.symmetric(vertical: 30),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
         shadowColor: Colors.transparent,
@@ -152,7 +152,7 @@ class ActionButtons extends StatelessWidget {
         children: [
           SvgPicture.asset(
             icon,
-            height: 28,
+            height: 20,
             color: enabled ? Colors.white : AppColors.brownDark,
           ),
           const SizedBox(width: 5),
