@@ -331,7 +331,7 @@ class MainPanel extends StatelessWidget {
                           const SizedBox(height: 10),
                           _historyLine(
                             Icons.room_service_outlined,
-                            item.service,
+                            item.serviceIn(context.currentLocale.languageCode),
                             const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
