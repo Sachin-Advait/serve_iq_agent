@@ -51,11 +51,16 @@ class ActionButtons extends StatelessWidget {
         Expanded(
           child: _buildActionButton(
             context,
-            context.tr(AppStrings.actionRecall),
+            // Locked with the other buttons for the countdown after a call or
+            // recall, so the agent can't fire repeated recalls.
+            state.isCompleteButtonDisabled
+                ? '${context.tr(AppStrings.actionRecall)} (${state.completeButtonRemainingSeconds})'
+                : context.tr(AppStrings.actionRecall),
             AppImages.recall,
             AppColors.brownDark,
             () => context.read<HomeCubit>().recallToken(),
             enabled:
+                !state.isCompleteButtonDisabled &&
                 state.currentToken?.id != null &&
                 state.currentTokenStatus == CurrentTokenStatus.loaded,
           ),

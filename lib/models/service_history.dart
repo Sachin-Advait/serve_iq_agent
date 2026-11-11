@@ -12,6 +12,10 @@ class ServiceHistory {
   final int seconds;
   final String note;
 
+  /// Visitor feedback: HAPPY, NEUTRAL or SAD, empty when none was given.
+  final String feedbackRating;
+  final String feedbackReview;
+
   ServiceHistory({
     required this.token,
     this.arabicToken = '',
@@ -21,6 +25,8 @@ class ServiceHistory {
     required this.time,
     this.seconds = 0,
     this.note = '',
+    this.feedbackRating = '',
+    this.feedbackReview = '',
   });
 
   factory ServiceHistory.fromJson(Map<String, dynamic> json) {
@@ -34,6 +40,8 @@ class ServiceHistory {
       time: minutes,
       seconds: (json['timeTakenInSeconds'] as num?)?.toInt() ?? minutes * 60,
       note: json['note'] ?? '',
+      feedbackRating: json['feedbackRating'] ?? '',
+      feedbackReview: json['feedbackReview'] ?? '',
     );
   }
 

@@ -109,5 +109,9 @@
   "error_no_internet_details": "Please check your Internet connectivity and try again.",
   "error_server_details": "Server is not responding. Please try again later.",
   "error_server_timeout": "Server timeout. Please try again later.",
-  "on_break": "On Break"
+  "on_break": "On Break",
+  "feedback_happy": "Satisfied",
+  "feedback_neutral": "Neutral",
+  "feedback_sad": "Not satisfied",
+  "feedback_none": "No feedback"
 }

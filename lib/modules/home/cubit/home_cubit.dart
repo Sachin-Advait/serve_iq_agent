@@ -715,7 +715,13 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
-  Future<void> transferToken(String counterId, String reason) async {
+  /// Transfers the token being served, or with [queuedTokenId] a token from
+  /// the Hold or No-Show list (the current token is then left as it is).
+  Future<void> transferToken(
+    String counterId,
+    String reason, {
+    String? queuedTokenId,
+  }) async {
     // Check network
     if (!state.isNetworkConnected) {
       flutterToast(message: 'no_internet_connection', color: AppColors.darkRed);
@@ -724,6 +730,13 @@ class HomeCubit extends Cubit<HomeState> {
 
     try {
       customLoader();
+
+      if (queuedTokenId != null) {
+        await agentRepository.transferToken(queuedTokenId, counterId, reason);
+        flutterToast(message: 'token_transferred');
+        unawaited(queueAPI());
+        return;
+      }
 
       final tokenId = state.currentToken!.id;
       await agentRepository.transferToken(tokenId, counterId, reason);
@@ -807,6 +820,30 @@ class HomeCubit extends Cubit<HomeState> {
       );
     } on ApiErrorShown {
       // ApiClient already showed the backend's reason (e.g. a 409).
+    } catch (e) {
+      flutterToast(
+        message: 'unknown_error_try_again',
+        color: AppColors.darkRed,
+      );
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+  /// Marks a held token (from the Hold list) as no-show.
+  Future<void> noShowHeldToken(String tokenId) async {
+    if (!state.isNetworkConnected) {
+      flutterToast(message: 'no_internet_connection', color: AppColors.darkRed);
+      return;
+    }
+
+    try {
+      customLoader();
+      await agentRepository.noShow(tokenId);
+      unawaited(queueAPI());
+    } on ApiErrorShown {
+      // ApiClient already showed the backend's reason (e.g. a 409).
+      unawaited(queueAPI());
     } catch (e) {
       flutterToast(
         message: 'unknown_error_try_again',

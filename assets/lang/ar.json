@@ -108,5 +108,9 @@
   "error_no_internet_details": "تأكد التحقق من الاتصال بالإنترنت، ثم المحاولة مرة أخرى.",
   "error_server_details": "المزوّد لا يستجيب حاليًا. حاول لاحقًا.",
   "error_server_timeout": "انتهت مهلة الاتصال بالمزود، يرجى المحاولة لاحقًا",
-  "on_break": "في استراحة"
+  "on_break": "في استراحة",
+  "feedback_happy": "راضٍ",
+  "feedback_neutral": "محايد",
+  "feedback_sad": "غير راضٍ",
+  "feedback_none": "لا يوجد تقييم"
 }

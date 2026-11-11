@@ -22,7 +22,5 @@ class AppColors {
   static const Color darkRed = Color(0xFF991B1B);
   static const Color blue = Color(0xFF2FA4A9);
   static const Color darkBlue = Color(0xFF5A7D9A);
-
-  /// On break, in every app.
-  static const Color statusBlue = Color(0xFF1663CF);
+  static const Color amber = Color(0xFFD97706);
 }

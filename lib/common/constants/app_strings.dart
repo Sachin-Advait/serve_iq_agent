@@ -88,4 +88,8 @@ class AppStrings {
   static const inUseBy = 'in_use_by';
   static const anotherAgent = 'another_agent';
   static const emailPasswordRequired = 'email_password_required';
+  static const feedbackHappy = 'feedback_happy';
+  static const feedbackNeutral = 'feedback_neutral';
+  static const feedbackSad = 'feedback_sad';
+  static const feedbackNone = 'feedback_none';
 }

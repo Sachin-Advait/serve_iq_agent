@@ -349,6 +349,8 @@ class MainPanel extends StatelessWidget {
                               ),
                             ),
                           ],
+                          const SizedBox(height: 6),
+                          _feedbackLine(context, item),
                           if (item.note.trim().isNotEmpty) ...[
                             const SizedBox(height: 6),
                             _historyLine(
@@ -403,6 +405,52 @@ class MainPanel extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// Whether the visitor left feedback, the rating, and their comment.
+  Widget _feedbackLine(BuildContext context, ServiceHistory item) {
+    final (
+      IconData icon,
+      Color color,
+      String label,
+    ) = switch (item.feedbackRating) {
+      'HAPPY' => (
+        Icons.sentiment_very_satisfied,
+        AppColors.green,
+        AppStrings.feedbackHappy,
+      ),
+      'NEUTRAL' => (
+        Icons.sentiment_neutral,
+        AppColors.amber,
+        AppStrings.feedbackNeutral,
+      ),
+      'SAD' => (
+        Icons.sentiment_very_dissatisfied,
+        AppColors.red,
+        AppStrings.feedbackSad,
+      ),
+      _ => (Icons.feedback_outlined, AppColors.taupe, AppStrings.feedbackNone),
+    };
+    final review = item.feedbackReview.trim();
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            review.isEmpty
+                ? context.tr(label)
+                : '${context.tr(label)}: $review',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

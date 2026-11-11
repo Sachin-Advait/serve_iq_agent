@@ -7,13 +7,17 @@ import 'package:servelq_agent/configs/assets/app_images.dart';
 import 'package:servelq_agent/configs/lang/localization_cubit.dart';
 import 'package:servelq_agent/configs/theme/app_colors.dart';
 import 'package:servelq_agent/models/counter_model.dart';
+import 'package:servelq_agent/models/token_model.dart';
 import 'package:servelq_agent/models/transfer_reason_model.dart';
 import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
 
 class TransferDialog extends StatefulWidget {
   final HomeState state;
 
-  const TransferDialog({super.key, required this.state});
+  /// A token from the Hold or No-Show list; null transfers the current token.
+  final TokenModel? queuedToken;
+
+  const TransferDialog({super.key, required this.state, this.queuedToken});
 
   @override
   State<TransferDialog> createState() => _TransferDialogState();
@@ -125,7 +129,7 @@ class _TransferDialogState extends State<TransferDialog> {
                 Text(
                   '${context.tr(AppStrings.transferTokenLabel)}: '
                   // Isolated left to right so 001أ keeps its number first
-                  '${widget.state.currentToken != null ? '\u2066${widget.state.currentToken!.tokenIn(context.currentLocale.languageCode)}\u2069' : context.tr(AppStrings.notAvailable)}',
+                  '${_token != null ? '\u2066${_token!.tokenIn(context.currentLocale.languageCode)}\u2069' : context.tr(AppStrings.notAvailable)}',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 14,
@@ -410,6 +414,8 @@ class _TransferDialogState extends State<TransferDialog> {
     );
   }
 
+  TokenModel? get _token => widget.queuedToken ?? widget.state.currentToken;
+
   Future<void> _handleTransfer(BuildContext context) async {
     if (selectedCounterId == null || selectedReason == null) return;
 
@@ -422,6 +428,7 @@ class _TransferDialogState extends State<TransferDialog> {
       await context.read<HomeCubit>().transferToken(
         selectedCounterId!,
         selectedReason!,
+        queuedTokenId: widget.queuedToken?.id,
       );
 
       if (context.mounted) Navigator.of(context).pop();
