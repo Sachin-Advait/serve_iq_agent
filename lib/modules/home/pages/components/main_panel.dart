@@ -408,44 +408,44 @@ class MainPanel extends StatelessWidget {
     );
   }
 
-  /// Whether the visitor left feedback, the rating, and their comment.
+  /// Whether the visitor left feedback: the rating face from the feedback
+  /// tablet with its name and the comment, or "No feedback".
   Widget _feedbackLine(BuildContext context, ServiceHistory item) {
     final (
-      IconData icon,
+      String? face,
       Color color,
       String label,
     ) = switch (item.feedbackRating) {
       'HAPPY' => (
-        Icons.sentiment_very_satisfied,
+        AppImages.feedbackHappy,
         AppColors.green,
         AppStrings.feedbackHappy,
       ),
       'NEUTRAL' => (
-        Icons.sentiment_neutral,
+        AppImages.feedbackNeutral,
         AppColors.amber,
         AppStrings.feedbackNeutral,
       ),
-      'SAD' => (
-        Icons.sentiment_very_dissatisfied,
-        AppColors.red,
-        AppStrings.feedbackSad,
-      ),
-      _ => (Icons.feedback_outlined, AppColors.taupe, AppStrings.feedbackNone),
+      'SAD' => (AppImages.feedbackSad, AppColors.red, AppStrings.feedbackSad),
+      _ => (null, AppColors.warmGray, AppStrings.feedbackNone),
     };
     final review = item.feedbackReview.trim();
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon, size: 18, color: color),
-        const SizedBox(width: 6),
-        Expanded(
+        if (face != null) ...[
+          Image.asset(face, width: 30, height: 30),
+          const SizedBox(width: 8),
+        ],
+        Flexible(
           child: Text(
             review.isEmpty
                 ? context.tr(label)
                 : '${context.tr(label)}: $review',
             style: TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
+              fontWeight: face != null ? FontWeight.w600 : FontWeight.w400,
+              fontStyle: face != null ? FontStyle.normal : FontStyle.italic,
               color: color,
             ),
           ),

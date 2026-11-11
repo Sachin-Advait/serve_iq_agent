@@ -10,6 +10,7 @@ import 'package:servelq_agent/configs/theme/app_theme.dart';
 import 'package:servelq_agent/models/token_model.dart';
 import 'package:servelq_agent/models/transfer_reason_model.dart';
 import 'package:servelq_agent/modules/home/cubit/home_cubit.dart';
+import 'package:servelq_agent/modules/home/pages/components/queued_token_actions_dialog.dart';
 import 'package:servelq_agent/modules/home/pages/components/transfer_dialog.dart';
 import 'package:servelq_agent/modules/home/pages/components/widgets.dart';
 
@@ -163,6 +164,7 @@ class LeftPane extends StatelessWidget {
                     context,
                     state,
                     token,
+                    headerIcon: AppImages.hold,
                     onRecall: () =>
                         context.read<HomeCubit>().callToken(tokenId: token.id),
                     onNoShow: () =>
@@ -231,6 +233,7 @@ class LeftPane extends StatelessWidget {
                   context,
                   state,
                   token,
+                  headerIcon: AppImages.noShow,
                   onRecall: () =>
                       context.read<HomeCubit>().callNoShowToken(token.id),
                 ),
@@ -405,8 +408,6 @@ class LeftPane extends StatelessWidget {
     return SizedBox();
   }
 
-  // Same rule the hold and no-show lists already used: only call a token
-  // when nothing is on screen and the counter is idle.
   /// Actions for a token in the Hold list (recall, transfer, no-show) or the
   /// No-Show list (recall, transfer; [onNoShow] is null). Recall needs a free
   /// counter, like Call next; transfer and no-show do not.
@@ -414,128 +415,34 @@ class LeftPane extends StatelessWidget {
     BuildContext context,
     HomeState state,
     TokenModel token, {
+    required String headerIcon,
     required VoidCallback onRecall,
     VoidCallback? onNoShow,
   }) {
     final cubit = context.read<HomeCubit>();
     final canRecall = _canCallNow(state) && !state.isCompleteButtonDisabled;
-    final lang = context.currentLocale.languageCode;
-
-    Widget action(
-      BuildContext dialogContext,
-      String label,
-      String icon,
-      Color color,
-      VoidCallback? onPressed,
-    ) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: onPressed == null
-                ? null
-                : () {
-                    Navigator.of(dialogContext).pop();
-                    onPressed();
-                  },
-            icon: SvgPicture.asset(
-              icon,
-              height: 22,
-              colorFilter: const ColorFilter.mode(
-                AppColors.white,
-                BlendMode.srcIn,
-              ),
-            ),
-            label: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppColors.white,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: color,
-              disabledBackgroundColor: AppColors.lightBeige,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
 
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Column(
-          children: [
-            Text(
-              token.tokenIn(lang),
-              textDirection: TextDirection.ltr,
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              token.serviceNameIn(lang),
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 15),
-            ),
-          ],
-        ),
-        content: SizedBox(
-          width: 360,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              action(
-                dialogContext,
-                context.tr(AppStrings.actionRecall),
-                AppImages.recall,
-                AppColors.green,
-                canRecall ? onRecall : null,
-              ),
-              action(
-                dialogContext,
-                context.tr(AppStrings.actionTransfer),
-                AppImages.transferred,
-                AppColors.red,
-                () => showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (_) => BlocProvider.value(
-                    value: cubit,
-                    child: TransferDialog(
-                      state: cubit.state,
-                      queuedToken: token,
-                    ),
-                  ),
-                ),
-              ),
-              if (onNoShow != null)
-                action(
-                  dialogContext,
-                  context.tr(AppStrings.actionNoShow),
-                  AppImages.noShow,
-                  AppColors.brownVeryDark,
-                  onNoShow,
-                ),
-            ],
+      builder: (_) => QueuedTokenActionsDialog(
+        token: token,
+        headerIcon: headerIcon,
+        onRecall: canRecall ? onRecall : null,
+        onNoShow: onNoShow,
+        onTransfer: () => showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => BlocProvider.value(
+            value: cubit,
+            child: TransferDialog(state: cubit.state, queuedToken: token),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(context.tr(AppStrings.transferCancel)),
-          ),
-        ],
       ),
     );
   }
 
+  // Same rule the hold and no-show lists already used: only call a token
+  // when nothing is on screen and the counter is idle.
   bool _canCallNow(HomeState state) =>
       (state.currentToken?.id == null ||
           state.currentTokenStatus == CurrentTokenStatus.initial) &&

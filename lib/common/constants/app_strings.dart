@@ -92,4 +92,8 @@ class AppStrings {
   static const feedbackNeutral = 'feedback_neutral';
   static const feedbackSad = 'feedback_sad';
   static const feedbackNone = 'feedback_none';
+  static const queuedRecallHint = 'queued_recall_hint';
+  static const queuedRecallBusy = 'queued_recall_busy';
+  static const queuedTransferHint = 'queued_transfer_hint';
+  static const queuedNoShowHint = 'queued_no_show_hint';
 }

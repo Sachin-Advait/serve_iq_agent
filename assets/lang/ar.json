@@ -112,5 +112,9 @@
   "feedback_happy": "راضٍ",
   "feedback_neutral": "محايد",
   "feedback_sad": "غير راضٍ",
-  "feedback_none": "لا يوجد تقييم"
+  "feedback_none": "لا يوجد تقييم",
+  "queued_recall_hint": "استدعاء المراجع إلى مكتبك مرة أخرى",
+  "queued_recall_busy": "أنهِ خدمة المراجع الحالي أولاً",
+  "queued_transfer_hint": "تحويل المراجع إلى مكتب خدمة آخر",
+  "queued_no_show_hint": "لم يعد المراجع بعد النداء"
 }

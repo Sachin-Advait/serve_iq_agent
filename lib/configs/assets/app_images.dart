@@ -32,4 +32,9 @@ class AppImages {
   static const String translation = 'assets/images/translation.png';
   static const String home = 'assets/images/home.png';
   static const String search = 'assets/images/search.png';
+
+  // Rating faces, the same images as the feedback tablet.
+  static const String feedbackHappy = 'assets/images/feedback_happy.png';
+  static const String feedbackNeutral = 'assets/images/feedback_normal.png';
+  static const String feedbackSad = 'assets/images/feedback_unhappy.png';
 }

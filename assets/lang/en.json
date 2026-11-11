@@ -113,5 +113,9 @@
   "feedback_happy": "Satisfied",
   "feedback_neutral": "Neutral",
   "feedback_sad": "Not satisfied",
-  "feedback_none": "No feedback"
+  "feedback_none": "No feedback",
+  "queued_recall_hint": "Call this visitor to your counter again",
+  "queued_recall_busy": "Finish the current visitor first",
+  "queued_transfer_hint": "Send this visitor to another counter",
+  "queued_no_show_hint": "The visitor did not come back"
 }
