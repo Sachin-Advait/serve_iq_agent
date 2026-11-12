@@ -117,5 +117,7 @@
   "queued_recall_hint": "Call this visitor to your counter again",
   "queued_recall_busy": "Finish the current visitor first",
   "queued_transfer_hint": "Send this visitor to another counter",
-  "queued_no_show_hint": "The visitor did not come back"
+  "queued_no_show_hint": "The visitor did not come back",
+  "transfer_no_active_counter": "No other counter is active",
+  "transfer_no_active_counter_hint": "A counter needs a logged-in agent to receive a transfer."
 }

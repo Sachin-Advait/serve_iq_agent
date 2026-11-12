@@ -830,7 +830,7 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
-  /// Marks a held token (from the Hold list) as no-show.
+  /// Marks a token from the Hold or Transferred list as no-show.
   Future<void> noShowHeldToken(String tokenId) async {
     if (!state.isNetworkConnected) {
       flutterToast(message: 'no_internet_connection', color: AppColors.darkRed);

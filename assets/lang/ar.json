@@ -116,5 +116,7 @@
   "queued_recall_hint": "استدعاء المراجع إلى مكتبك مرة أخرى",
   "queued_recall_busy": "أنهِ خدمة المراجع الحالي أولاً",
   "queued_transfer_hint": "تحويل المراجع إلى مكتب خدمة آخر",
-  "queued_no_show_hint": "لم يعد المراجع بعد النداء"
+  "queued_no_show_hint": "لم يعد المراجع بعد النداء",
+  "transfer_no_active_counter": "لا يوجد مكتب خدمة آخر نشط",
+  "transfer_no_active_counter_hint": "يجب أن يكون الموظف مسجلاً الدخول في المكتب لاستقبال التحويل."
 }

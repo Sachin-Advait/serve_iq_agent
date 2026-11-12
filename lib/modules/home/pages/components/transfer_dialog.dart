@@ -79,7 +79,11 @@ class _TransferDialogState extends State<TransferDialog> {
             // _buildSearchBar(),
             _buildStepTitle(),
             Flexible(
-              child: step == 0 ? _buildCounterList() : _buildReasonList(),
+              child: step == 0
+                  ? (filteredCounters.isEmpty
+                        ? _buildNoActiveCounter()
+                        : _buildCounterList())
+                  : _buildReasonList(),
             ),
             _buildFooter(context),
           ],
@@ -208,6 +212,55 @@ class _TransferDialogState extends State<TransferDialog> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  /// No other counter has an agent logged in, so nothing can take it.
+  Widget _buildNoActiveCounter() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.lightBeige),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.red.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.desktop_access_disabled_outlined,
+                color: AppColors.red,
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              context.tr(AppStrings.transferNoActiveCounter),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: AppColors.brownVeryDark,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              context.tr(AppStrings.transferNoActiveCounterHint),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 14, color: AppColors.taupe),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

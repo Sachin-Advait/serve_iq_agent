@@ -96,4 +96,6 @@ class AppStrings {
   static const queuedRecallBusy = 'queued_recall_busy';
   static const queuedTransferHint = 'queued_transfer_hint';
   static const queuedNoShowHint = 'queued_no_show_hint';
+  static const transferNoActiveCounter = 'transfer_no_active_counter';
+  static const transferNoActiveCounterHint = 'transfer_no_active_counter_hint';
 }

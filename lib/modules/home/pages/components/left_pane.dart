@@ -375,11 +375,17 @@ class LeftPane extends StatelessWidget {
                   border: const Color(0xFFFECACA),
                   tokenColor: AppColors.darkRed,
                   textColor: AppColors.brownDeep,
-                  onTap: _canCallNow(state)
-                      ? () => context.read<HomeCubit>().callTransferredToken(
-                          token.id,
-                        )
-                      : null,
+                  onTap: () => _showQueuedTokenActions(
+                    context,
+                    state,
+                    token,
+                    headerIcon: AppImages.transferred,
+                    onRecall: () => context
+                        .read<HomeCubit>()
+                        .callTransferredToken(token.id),
+                    onNoShow: () =>
+                        context.read<HomeCubit>().noShowHeldToken(token.id),
+                  ),
                   details: [
                     if ((token.transferCounterName ?? '').isNotEmpty)
                       _detailLine(
@@ -408,8 +414,8 @@ class LeftPane extends StatelessWidget {
     return SizedBox();
   }
 
-  /// Actions for a token in the Hold list (recall, transfer, no-show) or the
-  /// No-Show list (recall, transfer; [onNoShow] is null). Recall needs a free
+  /// Actions for a token in the Hold or Transferred list (recall, transfer,
+  /// no-show) or the No-Show list (recall, transfer; [onNoShow] is null). Recall needs a free
   /// counter, like Call next; transfer and no-show do not.
   void _showQueuedTokenActions(
     BuildContext context,
