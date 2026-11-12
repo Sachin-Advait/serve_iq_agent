@@ -1,6 +1,8 @@
 // lib/bloc/localization/localization_cubit.dart
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,15 +44,41 @@ class LocalizationCubit extends Cubit<LocalizationState> {
 
   Future<void> load() async {
     final langCode = state.locale.languageCode;
-    final jsonString = await rootBundle.loadString(
-      'assets/lang/$langCode.json',
-    );
+    final jsonString = await _loadLanguageFile(langCode);
     final Map<String, dynamic> jsonMap = json.decode(jsonString);
 
     _localizedStrings = jsonMap.map(
       (key, value) => MapEntry(key, value.toString()),
     );
     emit(state.copyWith());
+  }
+
+  /// On the web the browser keeps serving an old copy of the language file
+  /// after a deploy, so new texts showed as their keys (feedback_none). Fetch
+  /// it fresh there, falling back to the bundled copy.
+  static Future<String> _loadLanguageFile(String langCode) async {
+    final asset = 'assets/lang/$langCode.json';
+    if (kIsWeb) {
+      try {
+        // Relative, so the browser resolves it against <base href> like
+        // Flutter's own asset requests; the query skips its cache.
+        final response = await Dio().get<String>(
+          'assets/$asset?v=${DateTime.now().millisecondsSinceEpoch}',
+          options: Options(
+            responseType: ResponseType.plain,
+            headers: {'Cache-Control': 'no-cache'},
+          ),
+        );
+        final body = response.data;
+        if (response.statusCode == 200 && body != null && body.isNotEmpty) {
+          json.decode(body); // only use it if it parses
+          return body;
+        }
+      } catch (e) {
+        debugPrint('Fresh $asset failed, using the bundled one: $e');
+      }
+    }
+    return rootBundle.loadString(asset, cache: false);
   }
 
   void toggleLanguage() =>
